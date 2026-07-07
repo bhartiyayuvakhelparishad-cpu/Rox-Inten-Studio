@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Video - ROX</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+
+    <div class="mobile-frame">
+        <div class="notch"></div>
+
+        <div class="app-content">
+            <div class="header">
+                <a href="index.html" class="back-link"><i class="fa-solid fa-arrow-left"></i> Back</a>
+                <h2>Upload Video</h2>
+                <p style="color: #666; font-size: 13px;">Select a video file to start editing</p>
+            </div>
+
+            <div class="upload-box" id="dropZone">
+                <i class="fa-solid fa-cloud-arrow-up cloud-icon"></i>
+                <h3>Choose Video File</h3>
+                <p>MP4, MOV or MKV up to 500MB</p>
+                <input type="file" id="videoInput" accept="video/*" style="display: none;">
+                <button class="neon-btn" onclick="document.getElementById('videoInput').click()">Browse File</button>
+            </div>
+
+            <div id="fileInfo" class="file-info-box" style="display: none;">
+                <i class="fa-solid fa-file-video" style="color: #00ffff;"></i>
+                <span id="fileNameDisplay" style="margin-left: 10px; font-size: 14px;">video.mp4</span>
+            </div>
+
+            <div class="unlock-area">
+                <a href="index.html" class="pro-btn" style="text-decoration: none;">
+                    <i class="fa-solid fa-house"></i> Wapas Home Par Jayein
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const videoInput = document.getElementById('videoInput');
+        const fileInfo = document.getElementById('fileInfo');
+        const fileNameDisplay = document.getElementById('fileNameDisplay');
+
+        // जब यूजर फाइल सेलेक्ट करेगा
+        videoInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                fileNameDisplay.innerText = file.name + " (" + (file.size / (1024 * 1024)).toFixed(2) + " MB)";
+                fileInfo.style.display = "flex"; // बॉक्स को स्क्रीन पर दिखाना
+                alert("🎉 " + file.name + " सफलतापूर्वक सेलेक्ट हो गई है!");
+            }
+        });
+    </script>
+</body>
+</html>

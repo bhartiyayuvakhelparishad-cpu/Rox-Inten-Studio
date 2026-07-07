@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - ROX</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+
+    <div class="mobile-frame">
+        <div class="notch"></div>
+        <div class="app-content">
+            
+            <!-- ऊपर का हेडर -->
+            <div class="header">
+                <a href="index.html" class="back-link"><i class="fa-solid fa-arrow-left"></i> Home</a>
+                <h2 style="margin-top: 10px;"><i class="fa-solid fa-gear" style="color: #ff007f;"></i> Settings</h2>
+                <p style="color: #666; font-size: 13px;">Manage your app configuration</p>
+            </div>
+
+            <!-- सेटिंग्स ऑप्शन्स की लिस्ट -->
+            <div class="settings-list">
+                
+                <!-- ऑप्शन 1: डार्क मोड (Toggle इफ़ेक्ट के साथ) -->
+                <div class="setting-item" onclick="toggleDarkMode()">
+                    <div class="setting-info">
+                        <i class="fa-solid fa-moon" style="color: #ff007f;"></i>
+                        <span>Dark Mode</span>
+                    </div>
+                    <div class="toggle-switch" id="modeToggle">
+                        <div class="toggle-circle"></div>
+                    </div>
+                </div>
+
+                <!-- ऑप्शन 2: नोटिफिकेशन -->
+                <div class="setting-item" onclick="alert('Notification settings updated!')">
+                    <div class="setting-info">
+                        <i class="fa-solid fa-bell" style="color: #00ffff;"></i>
+                        <span>Push Notifications</span>
+                    </div>
+                    <i class="fa-solid fa-chevron-right" style="color: #444; font-size: 12px;"></i>
+                </div>
+
+                <!-- ऑप्शन 3: ऐप का वर्ज़न -->
+                <div class="setting-item">
+                    <div class="setting-info">
+                        <i class="fa-solid fa-circle-info" style="color: #ff9800;"></i>
+                        <span>App Version</span>
+                    </div>
+                    <span style="color: #555; font-size: 13px; font-weight: bold;">v1.0.2</span>
+                </div>
+
+            </div>
+
+            <!-- नीचे वापस जाने का बटन -->
+            <div class="unlock-area">
+                <a href="index.html" class="pro-btn" style="text-decoration: none;">
+                    <i class="fa-solid fa-house"></i> Wapas Home Par Jayein
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- छोटा सा लॉजिक स्विच को ऑन/ऑफ दिखाने के लिए -->
+    <script>
+        function toggleDarkMode() {
+            const toggle = document.getElementById('modeToggle');
+            toggle.classList.toggle('active');
+            
+            if(toggle.classList.contains('active')) {
+                alert("Dark Mode Enabled! (Your premium theme is already optimized)");
+            } else {
+                alert("Dark Mode Disabled!");
+            }
+        }
+    </script>
+</body>
+</html>

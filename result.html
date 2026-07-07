@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="style.css">
+    <title>Result - Rox Inten Studio</title>
+</head>
+<body>
+    <div class="container">
+        <h2>Aapka Content Tayar Hai!</h2>
+        
+        <div id="outputContainer" style="margin: 20px 0;">
+            <!-- Yahan aapki photo ya video dikhegi -->
+            <div style="background: #ddd; height: 200px; display: flex; align-items: center; justify-content: center; border-radius: 10px;">
+                Content Preview
+            </div>
+        </div>
+
+        <div class="action-buttons">
+            <!-- Download Button -->
+            <a href="#" download>
+                <button style="background: #28a745; margin-bottom: 10px;">Download Content</button>
+            </a>
+            
+            <!-- Social Share Buttons -->
+            <div class="social-share" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
+                <button onclick="shareSocial('fb')" style="background: #4267B2;">FB</button>
+                <button onclick="shareSocial('insta')" style="background: #E1306C;">Insta</button>
+                <button onclick="shareSocial('yt')" style="background: #FF0000;">YT</button>
+            </div>
+            
+            <br>
+            <a href="index.html" style="color: #6200ea; text-decoration: none;">← Home Page</a>
+        </div>
+    </div>
+
+    <script>
+        function shareSocial(platform) {
+            let url = window.location.href;
+            if(platform === 'fb') {
+                window.open('https://www.facebook.com/sharer/sharer.php?u=' + url);
+            } else if(platform === 'insta') {
+                alert("Instagram par share karne ke liye photo/video pehle Download karein, phir manual upload karein!");
+            } else if(platform === 'yt') {
+                alert("YouTube par share karne ke liye video pehle Download karein, phir manual upload karein!");
+            }
+        }
+    </script>
+</body>
+</html>

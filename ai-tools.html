@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Magic Tools</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- आइकॉन के लिए Font-Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+
+    <!-- मुख्य 3D मोबाइल फ्रेम -->
+    <div class="mobile-frame">
+        <div class="notch"></div>
+        
+        <div class="app-content">
+            <!-- ऊपर का हेडर एरिया -->
+            <div class="header">
+                <a href="index.html" class="back-link"><i class="fa-solid fa-arrow-left"></i> Home</a>
+                <h2 style="margin-top: 10px;">AI Magic</h2>
+                <p style="color: #00ffff; font-size: 13px;">Select an AI tool to process your video</p>
+            </div>
+
+            <!-- AI टूल्स का शानदार ग्रिड (4 बटन्स) -->
+            <div class="menu-grid">
+                <button class="ai-card" onclick="runAI('Color Grade')">
+                    <i class="fa-solid fa-palette"></i>
+                    <span>Color Grade</span>
+                </button>
+                <button class="ai-card" onclick="runAI('Blur Background')">
+                    <i class="fa-solid fa-droplet-slash"></i>
+                    <span>Blur BG</span>
+                </button>
+                <button class="ai-card" onclick="runAI('Slow-Mo')">
+                    <i class="fa-solid fa-gauge-simple-low"></i>
+                    <span>Slow-Mo</span>
+                </button>
+                <button class="ai-card" onclick="runAI('AI Upscale')">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i>
+                    <span>Upscale 4K</span>
+                </button>
+            </div>
+
+            <!-- प्रोसेसिंग स्टेटस दिखाने के लिए बॉक्स -->
+            <div id="aiStatus" class="file-info-box" style="display: none; margin-top: 20px;">
+                <i class="fa-solid fa-robot" style="color: #00ffff; animation: blink 1s infinite;"></i>
+                <span id="statusText" style="margin-left: 10px; font-size: 14px;"></span>
+            </div>
+
+            <!-- नीचे वापस होम पर जाने का बटन -->
+            <div class="unlock-area">
+                <a href="index.html" class="pro-btn" style="text-decoration: none;">
+                    <i class="fa-solid fa-house"></i> Wapas Home Par Jayein
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- बटन क्लिक होने पर काम करने वाला जावास्क्रिप्ट लॉजिक -->
+    <script>
+        function runAI(toolName) {
+            const statusBox = document.getElementById('aiStatus');
+            const statusText = document.getElementById('statusText');
+            
+            // स्टेटस बॉक्स को स्क्रीन पर दिखाना
+            statusBox.style.display = "flex";
+            statusText.innerText = "Processing " + toolName + "...";
+            
+            // 2 सेकंड का टाइमर (नकली प्रोसेसिंग इफ़ेक्ट के लिए)
+            setTimeout(() => {
+                alert("✨ " + toolName + " सफलतापूर्वक अप्लाई हो गया है!");
+                statusText.innerText = toolName + " Applied Successfully!";
+            }, 2000);
+        }
+    </script>
+</body>
+</html>

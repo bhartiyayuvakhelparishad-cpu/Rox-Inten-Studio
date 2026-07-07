@@ -1,0 +1,380 @@
+/* पूरे ब्राउज़र बैकग्राउंड को सेट करना */
+body {
+    margin: 0;
+    padding: 0;
+    background-color: #12141c;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* 3D मोबाइल का ढांचा */
+.mobile-frame {
+    width: 375px;
+    height: 760px;
+    background: linear-gradient(145deg, #151821, #0b0c10);
+    border-radius: 40px;
+    border: 7px solid #2d3139;
+    position: relative;
+    box-shadow: 0px 25px 60px rgba(0, 0, 0, 0.8), inset 0 0 15px rgba(255,255,255,0.02);
+    overflow: hidden;
+}
+
+/* मोबाइल का कैमरा नॉच */
+.notch {
+    width: 110px;
+    height: 24px;
+    background-color: #2d3139;
+    border-bottom-left-radius: 15px;
+    border-bottom-right-radius: 15px;
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
+}
+
+/* ऐप का अंदरूनी लेआउट */
+.app-content {
+    padding: 35px 18px 20px 18px;
+    color: white;
+    height: calc(100% - 55px);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+/* हेडर और चमकता हुआ कैमरा लोगो */
+.header {
+    text-align: center;
+    margin-top: 10px;
+}
+.camera-icon-glow {
+    font-size: 32px;
+    background: linear-gradient(45deg, #ff007f, #00ffff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 0 8px #ff007f);
+}
+.header h1 {
+    margin: 2px 0 0 0;
+    font-size: 28px;
+    letter-spacing: 2px;
+}
+.header h5 {
+    margin: 0;
+    color: #666;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+}
+
+/* बटन्स का ग्रिड लेआउट (2 कॉलम में सेट करना) */
+.menu-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin-top: 15px;
+}
+
+/* कॉमन बटन स्टाइल (लिंक्स को बटन जैसा दिखाना) */
+.menu-grid a {
+    text-decoration: none;
+    padding: 14px;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: all 0.2s ease;
+}
+.menu-grid a i {
+    font-size: 16px;
+}
+
+/* डार्क बटन्स स्टाइल (जैसे Upload, Setting आदि) */
+.dark-btn {
+    background: #191c24;
+    border: 1px solid #282c37;
+    color: #b3b9c9;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+}
+.dark-btn:active {
+    transform: scale(0.95);
+    background: #14161d;
+}
+
+/* चमकीला AI Magic बटन */
+.neon-btn {
+    background: linear-gradient(135deg, #ff007f, #7f00ff);
+    color: white;
+    box-shadow: 0 0 15px rgba(255, 0, 127, 0.4);
+    font-weight: bold;
+}
+.neon-btn:active {
+    transform: scale(0.95);
+    box-shadow: 0 0 5px rgba(255, 0, 127, 0.4);
+}
+
+/* नीचे का प्रो अनलॉक एरिया और बटन */
+.unlock-area {
+    margin-top: auto;
+    padding-bottom: 5px;
+}
+.pro-btn {
+    width: 100%;
+    background: linear-gradient(135deg, #ff9800, #ff5722);
+    border: none;
+    color: white;
+    padding: 15px;
+    border-radius: 14px;
+    font-size: 15px;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 5px 15px rgba(255, 152, 0, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.2s;
+}
+.pro-btn:active {
+    transform: scale(0.97);
+}
+/* टाइमलाइन बॉक्स का बाहरी हिस्सा */
+.timeline-box {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 20px;
+    padding: 15px;
+    margin: 15px 0;
+    box-shadow: inset 0 0 15px rgba(0,0,0,0.5);
+}
+
+.section-title {
+    font-size: 12px;
+    color: #555;
+    display: block;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* वेवफॉर्म कंटेनर (जहाँ लाइन्स दिखेंगी) */
+.waveform-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    height: 70px;
+    background: rgba(0,0,0,0.4);
+    padding: 10px;
+    border-radius: 12px;
+}
+
+/* छोटी-बड़ी चमकती हुई नियॉन लाइन्स */
+.bar {
+    width: 6px;
+    background: linear-gradient(to top, #ff007f, #00ffff);
+    border-radius: 3px;
+    box-shadow: 0 0 8px #00ffff;
+}
+/* अपलोड पेज के लिए विशेष डिज़ाइन */
+.back-link {
+    color: #ff007f;
+    text-decoration: none;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-bottom: 10px;
+}
+
+/* 3D अपलोड बॉक्स */
+.upload-box {
+    background: rgba(255, 255, 255, 0.02);
+    border: 2px dashed #282c37;
+    border-radius: 20px;
+    padding: 30px 20px;
+    text-align: center;
+    margin: 40px 0;
+    box-shadow: inset 0 0 20px rgba(0,0,0,0.6);
+}
+
+.cloud-icon {
+    font-size: 50px;
+    background: linear-gradient(45deg, #ff007f, #00ffff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 15px;
+}
+
+.upload-box h3 {
+    margin: 5px 0;
+    font-size: 18px;
+}
+
+.upload-box p {
+    color: #555;
+    font-size: 12px;
+    margin-bottom: 20px;
+}
+
+/* सेलेक्टेड फाइल इनफार्मेशन बॉक्स */
+.file-info-box {
+    background: #191c24;
+    border: 1px solid #78ffd6;
+    padding: 12px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+    box-shadow: 0 0 10px rgba(120, 255, 214, 0.2);
+}
+/* AI Magic Cards Style */
+.ai-card {
+    background: #191c24;
+    border: 1px solid #333;
+    color: #fff;
+    padding: 20px;
+    border-radius: 15px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    transition: 0.3s;
+    font-size: 13px;
+    font-weight: bold;
+}
+
+.ai-card:hover {
+    border: 1px solid #00ffff;
+    box-shadow: 0 0 15px rgba(0, 255, 255, 0.2);
+}
+
+.ai-card i {
+    font-size: 24px;
+    color: #00ffff;
+}
+/* Register Page Styles */
+.register-form {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid #282c37;
+    border-radius: 20px;
+    padding: 25px 20px;
+    margin: 40px 0;
+    box-shadow: inset 0 0 20px rgba(0,0,0,0.6);
+}
+
+.input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    text-align: left;
+}
+
+.input-group label {
+    font-size: 14px;
+    color: #b3b9c9;
+    font-weight: 500;
+}
+
+.input-group label i {
+    color: #00ffff;
+    margin-right: 5px;
+}
+
+/* शानदार चमकता हुआ इनपुट बॉक्स */
+.input-group input {
+    background: #14161d;
+    border: 1px solid #282c37;
+    border-radius: 10px;
+    padding: 14px;
+    color: white;
+    font-size: 15px;
+    outline: none;
+    transition: all 0.3s ease;
+}
+
+.input-group input:focus {
+    border-color: #ff007f;
+    box-shadow: 0 0 10px rgba(255, 0, 127, 0.2);
+}
+/* Settings Page Styles */
+.settings-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin: 30px 0;
+}
+
+.setting-item {
+    background: #191c24;
+    border: 1px solid #282c37;
+    padding: 16px;
+    border-radius: 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.setting-item:active {
+    transform: scale(0.98);
+    background: #14161d;
+}
+
+.setting-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.setting-info i {
+    font-size: 18px;
+}
+
+.setting-info span {
+    font-size: 15px;
+    color: #b3b9c9;
+    font-weight: 500;
+}
+
+/* सुंदर टॉगल स्विच (Toggle Switch) डिज़ाइन */
+.toggle-switch {
+    width: 44px;
+    height: 24px;
+    background: #2d3139;
+    border-radius: 12px;
+    position: relative;
+    transition: background 0.3s;
+}
+
+.toggle-circle {
+    width: 18px;
+    height: 18px;
+    background: white;
+    border-radius: 50%;
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    transition: left 0.3s;
+}
+
+/* जब टॉगल एक्टिव (On) होगा तब का स्टाइल */
+.toggle-switch.active {
+    background: #ff007f;
+}
+
+.toggle-switch.active .toggle-circle {
+    left: 23px;
+}
+/* लिस्ट और ग्रिड स्टाइल */
+.list-container { display: flex; flex-direction: column; gap: 15px; margin-top: 20px; }
+.item-card { background: #191c24; padding: 15px; border-radius: 12px; display: flex; align-items: center; gap: 15px; border: 1px solid #282c37; }
+.grid-container { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
+.explore-box { background: #191c24; padding: 30px 10px; border-radius: 15px; text-align: center; border: 1px solid #282c37; }

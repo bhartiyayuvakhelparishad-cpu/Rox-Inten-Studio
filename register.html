@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - ROX</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+
+    <div class="mobile-frame">
+        <div class="notch"></div>
+        <div class="app-content">
+            
+            <!-- ऊपर का हेडर -->
+            <div class="header">
+                <a href="index.html" class="back-link"><i class="fa-solid fa-arrow-left"></i> Home</a>
+                <h2 style="margin-top: 10px;"><i class="fa-solid fa-user-plus" style="color: #00ffff;"></i> Register</h2>
+                <p style="color: #666; font-size: 13px;">Create your profile to personalize the app</p>
+            </div>
+
+            <!-- रजिस्ट्रेशन फॉर्म बॉक्स -->
+            <div class="register-form">
+                <div class="input-group">
+                    <label for="userNameInput"><i class="fa-solid fa-user"></i> Apna Naam Dalein:</label>
+                    <input type="text" id="userNameInput" placeholder="Yahan naam likhein..." autocomplete="off">
+                </div>
+                
+                <button class="neon-btn" onclick="saveUserProfile()" style="width: 100%; margin-top: 20px; padding: 15px;">
+                    <i class="fa-solid fa-circle-check"></i> Profile Save Karein
+                </button>
+            </div>
+
+            <!-- नीचे वापस जाने का बटन -->
+            <div class="unlock-area">
+                <a href="index.html" class="pro-btn" style="text-decoration: none;">
+                    <i class="fa-solid fa-house"></i> Wapas Home Par Jayein
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- लोकल स्टोरेज में नाम सेव करने का लॉजिक -->
+    <script>
+        // अगर पहले से कोई नाम सेव है, तो उसे इनपुट बॉक्स में दिखाओ
+        window.onload = function() {
+            let existingName = localStorage.getItem("user_name");
+            if (existingName) {
+                document.getElementById("userNameInput").value = existingName;
+            }
+        }
+
+        function saveUserProfile() {
+            const nameInput = document.getElementById('userNameInput').value.trim();
+            
+            if (nameInput === "") {
+                alert("❌ कृपया पहले अपना नाम टाइप करें!");
+                return;
+            }
+
+            // localStorage में नाम सेव करना
+            localStorage.setItem("user_name", nameInput);
+            
+            alert("🎉 बधाई हो! आपका नाम '" + nameInput + "' सेव हो गया है।");
+            
+            // नाम सेव होते ही सीधे होम पेज पर भेजें
+            window.location.href = "index.html";
+        }
+    </script>
+</body>
+</html>

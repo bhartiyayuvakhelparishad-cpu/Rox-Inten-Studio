@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rox Inten Studio</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- आइकॉन के लिए Font-Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+
+    <!-- मुख्य 3D मोबाइल फ्रेम -->
+    <div class="mobile-frame">
+        <div class="notch"></div>
+
+        <div class="app-content">
+            <!-- टॉप हेडर -->
+            <div class="header">
+                <div class="camera-icon-glow">
+                    <i class="fa-solid fa-camera-retro"></i>
+                </div>
+                <h1>Rox</h1>
+                <h5>INTEN STUDIO</h5>
+                <h3 id="welcomeMsg" style="color: #78ffd6; margin-top: 5px; font-size: 16px;"></h3>
+                <h4 id="statusMsg" style="color: #ff4757; margin-top: 5px;">Status: Locked</h4>
+            </div>
+	 <div class="timeline-box">
+   	 <span class="section-title">Project Timeline</span>
+         <div class="waveform-container">
+        <div class="bar" style="height: 30px;"></div>
+        <div class="bar" style="height: 50px;"></div>
+        <div class="bar" style="height: 40px;"></div>
+        <div class="bar" style="height: 60px;"></div>
+        <div class="bar" style="height: 25px;"></div>
+        <div class="bar" style="height: 45px;"></div>
+        <div class="bar" style="height: 35px;"></div>
+    </div>
+</div>
+
+            <!-- मेन मेनू ग्रिड (बटन्स एरिया) -->
+            <div class="menu-grid">
+                <a href="upload.html" class="dark-btn"><i class="fa-solid fa-upload"></i> Upload</a>
+                <a href="ai-tools.html" class="neon-btn"><i class="fa-solid fa-wand-magic-sparkles"></i> AI Magic</a>
+                <a href="projects.html" class="dark-btn"><i class="fa-solid fa-folder"></i> Projects</a>
+                <a href="explore.html" class="dark-btn"><i class="fa-solid fa-magnifying-glass"></i> Explore</a>
+                <a href="register.html" class="dark-btn"><i class="fa-solid fa-user-plus"></i> Register</a>
+                <a href="setting.html" class="dark-btn"><i class="fa-solid fa-gear"></i> Setting</a>
+                <a href="support.html" class="dark-btn"><i class="fa-solid fa-headset"></i> Support</a>
+                <a href="result.html" class="dark-btn"><i class="fa-solid fa-square-poll-vertical"></i> Result</a>
+            </div>
+
+            <!-- प्रो अनलॉक बटन एरिया -->
+            <div class="unlock-area">
+                <button onclick="checkAds()" class="pro-btn">
+                    <i class="fa-solid fa-crown"></i> Unlock Pro (watch 3 Ads)
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- 1. Welcome Message Logic ---
+        let savedName = localStorage.getItem("user_name");
+        if (savedName) {
+            document.getElementById("welcomeMsg").innerText = "Welcome, " + savedName + "!";
+        }
+
+        // --- 2. Unlock Pro Logic ---
+        let adCount = localStorage.getItem("ad_count") || 0;
+        let unlockTime = localStorage.getItem("unlock_time");
+        let statusMsg = document.getElementById("statusMsg");
+
+        // Agar time khatam ho gaya hai toh status reset karein
+        if (unlockTime && new Date().getTime() > unlockTime) {
+            localStorage.removeItem("unlock_time");
+            localStorage.setItem("ad_count", 0);
+        }
+
+        // Agar abhi bhi valid time hai toh status green dikhayein
+        if (localStorage.getItem("unlock_time") && new Date().getTime() < localStorage.getItem("unlock_time")) {
+            statusMsg.innerText = "Status: Pro Access Active!";
+            statusMsg.style.color = "#78ffd6";
+            statusMsg.style.textShadow = "0 0 10px #78ffd6";
+        }
+
+        function checkAds() {
+            adCount = parseInt(adCount) + 1;
+            localStorage.setItem("ad_count", adCount);
+            
+            if (adCount >= 3) {
+                let now = new Date().getTime();
+                let expiry = now + (72 * 60 * 60 * 1000); // 72 ghante
+                localStorage.setItem("unlock_time", expiry);
+                alert("Congratulations! 72 Ghante ka Access mil gaya.");
+                location.reload();
+            } else {
+                alert("Sirf " + (3 - adCount) + " ads aur dekhne hain!");
+            }
+        }
+    </script>
+</body>
+</html>

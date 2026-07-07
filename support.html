@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Support - ROX</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+
+    <div class="mobile-frame">
+        <div class="notch"></div>
+        <div class="app-content">
+            
+            <!-- ऊपर का हेडर -->
+            <div class="header">
+                <a href="index.html" class="back-link"><i class="fa-solid fa-arrow-left"></i> Home</a>
+                <h2 style="margin-top: 10px;"><i class="fa-solid fa-headset" style="color: #ff007f;"></i> Support</h2>
+                <p style="color: #666; font-size: 13px;">Koi dikkat aa rhi hai? Hamein batayein</p>
+            </div>
+
+            <!-- सपोर्ट फॉर्म बॉक्स -->
+            <div class="register-form">
+                <div class="input-group">
+                    <label for="issueInput"><i class="fa-solid fa-pen-to-square"></i> Apna Issue Likhein:</label>
+                    <textarea id="issueInput" rows="4" placeholder="Yahan apni dikkat poori likhein..." style="background: #14161d; border: 1px solid #282c37; border-radius: 10px; padding: 14px; color: white; font-size: 15px; outline: none; resize: none; transition: all 0.3s ease;"></textarea>
+                </div>
+                
+                <button class="neon-btn" onclick="sendSupportRequest()" style="width: 100%; margin-top: 20px; padding: 15px;">
+                    <i class="fa-solid fa-paper-plane"></i> Submit Request
+                </button>
+            </div>
+
+            <!-- नीचे वापस जाने का बटन -->
+            <div class="unlock-area">
+                <a href="index.html" class="pro-btn" style="text-decoration: none;">
+                    <i class="fa-solid fa-house"></i> Wapas Home Par Jayein
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function sendSupportRequest() {
+            const issue = document.getElementById('issueInput').value.trim();
+            if (issue === "") {
+                alert("❌ कृपया पहले अपना इशू टाइप करें!");
+                return;
+            }
+            alert("🚀 आपका मैसेज टीम को भेज दिया गया है! जल्द ही आपसे संपर्क किया जाएगा।");
+            window.location.href = "index.html";
+        }
+    </script>
+</body>
+</html>
