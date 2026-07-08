@@ -3,9 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Settings - ROX</title>
+    <title>Rox Settings</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body { margin: 0; background: #0b0c10; color: white; font-family: sans-serif; display: flex; justify-content: center; padding: 20px; }
+        .mobile-frame { width: 360px; height: 740px; background: #15161e; border: 8px solid #252836; border-radius: 40px; position: relative; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.8); }
+        .notch { width: 140px; height: 25px; background: #252836; border-bottom-left-radius: 15px; border-bottom-right-radius: 15px; position: absolute; top: 0; left: 50%; transform: translateX(-50%); z-index: 10; }
+        .app-content { padding: 25px 15px; height: 100%; box-sizing: border-box; overflow-y: auto; }
+        
+        .header-studio { display: flex; justify-content: space-between; align-items: center; margin-top: 15px; border-bottom: 1px solid #2d3142; padding-bottom: 10px; }
+        .back-btn { color: #ff007f; text-decoration: none; font-size: 18px; font-weight: bold; }
+        
+        .tool-block { background: #1f2232; border: 1px solid #2d3142; border-radius: 12px; padding: 15px; margin-top: 15px; }
+        .tool-block h4 { margin: 0 0 10px 0; color: #78ffd6; font-size: 14px; }
+        
+        select, input[type="file"], input[type="number"] { background: #15161e; color: #fff; border: 1px solid #2d3142; padding: 10px; border-radius: 8px; width: 100%; box-sizing: border-box; margin-top: 6px; }
+        .action-btn { background: linear-gradient(135deg, #ff007f, #7f00ff); color: white; border: none; padding: 12px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 12px; }
+    </style>
 </head>
 <body>
 
@@ -13,68 +28,69 @@
         <div class="notch"></div>
         <div class="app-content">
             
-            <!-- ऊपर का हेडर -->
-            <div class="header">
-                <a href="index.html" class="back-link"><i class="fa-solid fa-arrow-left"></i> Home</a>
-                <h2 style="margin-top: 10px;"><i class="fa-solid fa-gear" style="color: #ff007f;"></i> Settings</h2>
-                <p style="color: #666; font-size: 13px;">Manage your app configuration</p>
+            <div class="header-studio">
+                <a href="index.html" class="back-btn"><i class="fa-solid fa-arrow-left"></i> Back</a>
+                <h3 id="panel-title" style="margin: 0; font-size: 16px;">⚙️ Editor Settings</h3>
+                <div></div>
             </div>
 
-            <!-- सेटिंग्स ऑप्शन्स की लिस्ट -->
-            <div class="settings-list">
+            <div class="tool-block">
+                <h4 id="lbl-lang"><i class="fa-solid fa-globe"></i> 1. Select Language (भाषा चुनें)</h4>
+                <select id="lang-select">
+                    <option value="en">English (US)</option>
+                    <option value="hi">हिन्दी (Hindi)</option>
+                </select>
+            </div>
+
+            <div class="tool-block">
+                <h4 id="lbl-music"><i class="fa-solid fa-scissors"></i> 2. म्यूजिक / वीडियो कट-पेस्ट सेटिंग</h4>
+                <label style="font-size: 11px; color:#888;">अपलोड ऑडियो या वीडियो ट्रैक:</label>
+                <input type="file" id="audio-file" accept="audio/*,video/*">
                 
-                <!-- ऑप्शन 1: डार्क मोड (Toggle इफ़ेक्ट के साथ) -->
-                <div class="setting-item" onclick="toggleDarkMode()">
-                    <div class="setting-info">
-                        <i class="fa-solid fa-moon" style="color: #ff007f;"></i>
-                        <span>Dark Mode</span>
+                <div style="display: flex; gap: 8px; margin-top: 10px;">
+                    <div style="width: 50%;">
+                        <label style="font-size: 11px; color:#888;">स्टार्ट (सेकंड):</label>
+                        <input type="number" id="start-sec" value="0">
                     </div>
-                    <div class="toggle-switch" id="modeToggle">
-                        <div class="toggle-circle"></div>
+                    <div style="width: 50%;">
+                        <label style="font-size: 11px; color:#888;">एंड (सेकंड):</label>
+                        <input type="number" id="end-sec" value="15">
                     </div>
                 </div>
-
-                <!-- ऑप्शन 2: नोटिफिकेशन -->
-                <div class="setting-item" onclick="alert('Notification settings updated!')">
-                    <div class="setting-info">
-                        <i class="fa-solid fa-bell" style="color: #00ffff;"></i>
-                        <span>Push Notifications</span>
-                    </div>
-                    <i class="fa-solid fa-chevron-right" style="color: #444; font-size: 12px;"></i>
-                </div>
-
-                <!-- ऑप्शन 3: ऐप का वर्ज़न -->
-                <div class="setting-item">
-                    <div class="setting-info">
-                        <i class="fa-solid fa-circle-info" style="color: #ff9800;"></i>
-                        <span>App Version</span>
-                    </div>
-                    <span style="color: #555; font-size: 13px; font-weight: bold;">v1.0.2</span>
-                </div>
-
+                <button id="cut-mix-btn" class="action-btn">✂️ कस्टमाइज़ और मिक्स करें</button>
             </div>
 
-            <!-- नीचे वापस जाने का बटन -->
-            <div class="unlock-area">
-                <a href="index.html" class="pro-btn" style="text-decoration: none;">
-                    <i class="fa-solid fa-house"></i> Wapas Home Par Jayein
-                </a>
-            </div>
         </div>
     </div>
 
-    <!-- छोटा सा लॉजिक स्विच को ऑन/ऑफ दिखाने के लिए -->
     <script>
-        function toggleDarkMode() {
-            const toggle = document.getElementById('modeToggle');
-            toggle.classList.toggle('active');
-            
-            if(toggle.classList.contains('active')) {
-                alert("Dark Mode Enabled! (Your premium theme is already optimized)");
+        const langSelect = document.getElementById('lang-select');
+        const panelTitle = document.getElementById('panel-title');
+        const lblLang = document.getElementById('lbl-lang');
+        const lblMusic = document.getElementById('lbl-music');
+        const cutMixBtn = document.getElementById('cut-mix-btn');
+
+        // भाषा परिवर्तन एल्गोरिदम
+        langSelect.addEventListener('change', (e) => {
+            if(e.target.value === 'hi') {
+                panelTitle.innerText = "⚙️ एडिटर सेटिंग्स";
+                lblLang.innerHTML = "<i class='fa-solid fa-globe'></i> 1. भाषा का चयन करें";
+                lblMusic.innerHTML = "<i class='fa-solid fa-scissors'></i> 2. म्यूजिक / वीडियो कट-पेस्ट सेटिंग";
+                cutMixBtn.innerText = "✂️ कस्टमाइज़ और मिक्स करें";
             } else {
-                alert("Dark Mode Disabled!");
+                panelTitle.innerText = "⚙️ Editor Settings";
+                lblLang.innerHTML = "<i class='fa-solid fa-globe'></i> 1. Select Language";
+                lblMusic.innerHTML = "<i class='fa-solid fa-scissors'></i> 2. Audio/Video Cut-Paste Settings";
+                cutMixBtn.innerText = "✂️ Customize & Mix Track";
             }
-        }
+        });
+
+        // ट्रैक कटिंग ट्रिगर
+        document.getElementById('cut-mix-btn').addEventListener('click', () => {
+            const start = document.getElementById('start-sec').value;
+            const end = document.getElementById('end-sec').value;
+            alert(`✂️ टाइमलाइन सक्सेस! मीडिया फ़ाइल को ${start}s से ${end}s के बीच ट्रिम करके कस्टमाइज़ेशन लेयर के लिए सुरक्षित कर दिया गया है।`);
+        });
     </script>
 </body>
 </html>
