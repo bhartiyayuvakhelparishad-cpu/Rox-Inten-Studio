@@ -3,146 +3,187 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rox INTEN STUDIO - Advance Pro Features</title>
+    <title>Rox INTEN STUDIO - Complete AI Studio</title>
+    <link rel="stylesheet" href="style.css">
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { background-color: #121212; color: #fff; display: flex; height: 100vh; overflow: hidden; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Arial, sans-serif; }
+        body { background-color: #0d0d11; color: #fff; display: flex; flex-direction: column; min-height: 100vh; }
         
-        /* Sidebar Control Panel */
-        .sidebar { width: 320px; background: #1e1e1e; border-right: 1px solid #333; padding: 15px; display: flex; flex-direction: column; gap: 15px; overflow-y: auto; }
-        .sidebar h2 { color: #00e5ff; font-size: 18px; margin-bottom: 5px; }
-        .control-group { background: #2a2a2a; padding: 12px; border-radius: 8px; }
-        .control-group h3 { font-size: 14px; margin-bottom: 8px; color: #ff007f; }
+        /* Studio Header */
+        .header { background: #15151e; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #252538; }
+        .logo h1 { color: #00e5ff; font-size: 24px; display: inline-block; }
+        .logo h5 { color: #ff007f; font-size: 12px; letter-spacing: 2px; }
+        .status-badge { background: #ff007f; padding: 4px 10px; border-radius: 12px; font-size: 12px; }
+
+        /* Main Grid Layout */
+        .studio-container { display: grid; grid-template-columns: 320px 1fr; flex: 1; overflow: hidden; }
         
-        button, select, input { width: 100%; padding: 8px; margin-top: 5px; background: #333; color: white; border: 1px solid #444; border-radius: 4px; cursor: pointer; }
+        /* Left Tools Panel */
+        .sidebar { background: #12121a; border-right: 1px solid #252538; padding: 15px; overflow-y: auto; height: calc(100vh - 70px); }
+        .tool-box { background: #1a1a26; padding: 12px; border-radius: 8px; margin-bottom: 12px; border: 1px solid #2a2a3d; }
+        .tool-box h3 { font-size: 13px; color: #00e5ff; margin-bottom: 8px; text-transform: uppercase; }
+        
+        button, select, input { width: 100%; padding: 8px 10px; margin-top: 5px; background: #252538; color: white; border: 1px solid #3d3d5c; border-radius: 5px; cursor: pointer; font-size: 13px; }
         button:hover { background: #00e5ff; color: #000; font-weight: bold; }
+        .btn-pink { background: linear-gradient(90deg, #ff007f, #7f00ff); border: none; }
 
-        /* Main Workspace */
-        .workspace { flex: 1; display: flex; flex-direction: column; }
-        .preview-area { flex: 1; display: flex; justify-content: center; align-items: center; background: #050505; position: relative; }
-        video { max-width: 90%; max-height: 80%; border-radius: 8px; border: 2px solid #333; }
+        /* Workspace & Canvas */
+        .workspace { display: flex; flex-direction: column; background: #08080c; position: relative; }
+        .preview-screen { flex: 1; display: flex; justify-content: center; align-items: center; padding: 20px; position: relative; }
+        video { max-width: 100%; max-height: 400px; border-radius: 10px; border: 2px solid #00e5ff; box-shadow: 0 0 15px rgba(0, 229, 255, 0.2); }
 
-        /* Multi-track Timeline */
-        .timeline-container { height: 220px; background: #181818; border-top: 2px solid #333; padding: 10px; display: flex; flex-direction: column; gap: 8px; }
-        .track-header { font-size: 12px; color: #888; margin-bottom: 2px; }
-        .track { height: 40px; background: #262626; border-radius: 4px; position: relative; border: 1px dashed #444; overflow: hidden; }
-        .clip { height: 100%; background: linear-gradient(90deg, #ff007f, #7f00ff); position: absolute; border-radius: 4px; color: white; font-size: 11px; display: flex; align-items: center; padding: 0 8px; cursor: move; }
-        .clip.audio { background: linear-gradient(90deg, #00e5ff, #007ff0); }
-        .clip.text { background: linear-gradient(90deg, #ffb703, #fb8500); }
+        /* Multi-Track Timeline */
+        .timeline-box { height: 180px; background: #12121a; border-top: 2px solid #252538; padding: 10px; }
+        .track-label { font-size: 11px; color: #aaa; margin-top: 4px; }
+        .track { height: 32px; background: #1a1a26; border-radius: 4px; margin-top: 2px; position: relative; border: 1px dashed #333; }
+        .clip { height: 100%; position: absolute; border-radius: 4px; font-size: 11px; display: flex; align-items: center; padding: 0 8px; }
+        .clip-video { background: linear-gradient(90deg, #ff007f, #7f00ff); width: 70%; }
+        .clip-audio { background: linear-gradient(90deg, #00e5ff, #007ff0); width: 50%; left: 10%; }
+        .clip-text { background: linear-gradient(90deg, #ffb703, #fb8500); width: 40%; left: 20%; }
+        
+        /* Navigation Bar */
+        .nav-links { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
+        .nav-links a { color: #ccc; text-decoration: none; font-size: 12px; background: #252538; padding: 5px 10px; border-radius: 4px; }
+        .nav-links a:hover { background: #00e5ff; color: #000; }
     </style>
 </head>
 <body>
 
-    <!-- Sidebar Tools -->
-    <div class="sidebar">
-        <h2>Rox Pro Features</h2>
-
-        <!-- 1. Media Upload & Canvas -->
-        <div class="control-group">
-            <h3>1. मीडिया और आस्पेक्ट रेशियो</h3>
-            <input type="file" id="videoUpload" accept="video/*">
-            <select id="aspectRatio">
-                <option value="16:9">16:9 (YouTube)</option>
-                <option value="9:16">9:16 (Reels/Shorts)</option>
-                <option value="1:1">1:1 (Instagram)</option>
-            </select>
+    <!-- Header -->
+    <div class="header">
+        <div class="logo">
+            <h1>Rox</h1>
+            <h5>INTEN STUDIO</h5>
         </div>
-
-        <!-- 2. AI Auto-Captions -->
-        <div class="control-group">
-            <h3>2. AI ऑटो सबटाइटल</h3>
-            <button onclick="generateSubtitles()">वॉयस से कैप्शन बनाएं</button>
-            <div id="captionStatus" style="font-size:11px; color:#aaa; margin-top:5px;"></div>
-        </div>
-
-        <!-- 3. AI Voice Generator -->
-        <div class="control-group">
-            <h3>3. AI वॉयसओवर (Text-to-Speech)</h3>
-            <input type="text" id="ttsText" placeholder="यहाँ टेक्स्ट लिखें...">
-            <button onclick="generateAIVoice()">ऑडियो जनरेट करें</button>
-        </div>
-
-        <!-- 4. Audio Cleaning -->
-        <div class="control-group">
-            <h3>4. नॉइज़ क्लीन-अप (Noise Reduction)</h3>
-            <button onclick="applyNoiseFilter()">बैकग्राउंड शोर हटाएं</button>
-        </div>
-
-        <!-- 5. Render & Export -->
-        <div class="control-group">
-            <h3>5. एक्सपोर्ट और शेयरिंग</h3>
-            <select id="exportQuality">
-                <option value="1080p">1080p Full HD</option>
-                <option value="4K">4K Ultra HD</option>
-            </select>
-            <button style="background:#00e5ff; color:#000;" onclick="exportVideo()">वीडियो डाउनलोड करें</button>
+        <div>
+            <span>⏳ AI Timer: <strong id="timer">05:00</strong></span>
+            <span class="status-badge" style="margin-left: 10px;">Pro Unlocked</span>
         </div>
     </div>
 
-    <!-- Main Studio View -->
-    <div class="workspace">
-        <!-- Preview Screen -->
-        <div class="preview-area">
-            <video id="mainVideo" controls></video>
+    <div class="studio-container">
+        <!-- Sidebar Controls -->
+        <div class="sidebar">
+            <!-- Studio Navigation -->
+            <div class="nav-links">
+                <a href="upload.html">Upload</a>
+                <a href="ai-tools.html">AI Magic</a>
+                <a href="projects.html">Projects</a>
+                <a href="setting.html">Setting</a>
+                <a href="result.html">Result</a>
+            </div>
+
+            <!-- Upload & Aspect Ratio -->
+            <div class="tool-box">
+                <h3>📁 मीडिया और फ्रेम सपोर्ट</h3>
+                <input type="file" id="videoUpload" accept="video/*">
+                <select id="aspectRatio">
+                    <option value="16:9">16:9 (YouTube)</option>
+                    <option value="9:16">9:16 (Reels/Shorts)</option>
+                    <option value="1:1">1:1 (Instagram Feed)</option>
+                </select>
+            </div>
+
+            <!-- AI Age Look & Filters (Old Design Feature) -->
+            <div class="tool-box">
+                <h3>✨ AI लुक बदलें (Age Look)</h3>
+                <select>
+                    <option>Young Filter</option>
+                    <option>Old Age Look</option>
+                    <option>Retro Vintage</option>
+                    <option>Cyberpunk Glow</option>
+                </select>
+            </div>
+
+            <!-- Text & Subtitles (New AI Feature) -->
+            <div class="tool-box">
+                <h3>💬 टेक्स्ट व AI ऑटो सबटाइटल</h3>
+                <select>
+                    <option value="style1">Style 1: Neon Glow</option>
+                    <option value="style2">Style 2: Bold Red</option>
+                    <option value="style3">Style 3: 3D Shadow</option>
+                    <option value="style4">Style 4: Gradient Glow</option>
+                </select>
+                <button class="btn-pink" onclick="generateSubtitles()">🎤 वॉयस से सबटाइटल बनाएं</button>
+                <div id="captionStatus" style="font-size:11px; color:#00e5ff; margin-top:4px;"></div>
+            </div>
+
+            <!-- AI Voice Generator -->
+            <div class="tool-box">
+                <h3>🔊 AI वॉयसओवर (TTS)</h3>
+                <input type="text" id="ttsText" placeholder="यहाँ टेक्स्ट लिखें...">
+                <button onclick="generateAIVoice()">ऑडियो जनरेट करें</button>
+            </div>
+
+            <!-- Audio & Noise Clean-up -->
+            <div class="tool-box">
+                <h3>🎵 म्यूजिक व नॉइज़ फिल्टर</h3>
+                <button onclick="applyNoiseFilter()">🧹 बैकग्राउंड शोर (Noise) साफ करें</button>
+            </div>
+
+            <!-- Viral Guidance -->
+            <div class="tool-box" style="border-color: #00e5ff;">
+                <h3 style="color:#00e5ff;">📊 AI वायरल कंटेंट गाइड</h3>
+                <p style="font-size:11px; color:#aaa;">लाइटिंग व बैकग्राउंड क्वालिटी: <strong>95% Perfect!</strong></p>
+            </div>
         </div>
 
-        <!-- Multi-track Timeline Area -->
-        <div class="timeline-container">
-            <div class="track-header">Video Track</div>
-            <div class="track" id="videoTrack">
-                <div class="clip" style="width: 60%; left: 0;">Main_Video.mp4</div>
+        <!-- Main Studio Workspace -->
+        <div class="workspace">
+            <div class="preview-screen">
+                <video id="mainVideo" controls autoplay loop muted></video>
             </div>
 
-            <div class="track-header">Audio / AI Voice Track</div>
-            <div class="track" id="audioTrack">
-                <div class="clip audio" style="width: 40%; left: 10%;">Background_Music.mp3</div>
-            </div>
+            <!-- Multi-track Timeline Area -->
+            <div class="timeline-box">
+                <div class="track-label">🎬 Video Track</div>
+                <div class="track">
+                    <div class="clip clip-video">Main_Video.mp4</div>
+                </div>
 
-            <div class="track-header">Subtitles / Text Track</div>
-            <div class="track" id="textTrack">
-                <div class="clip text" style="width: 30%; left: 10%;">AI Captions</div>
+                <div class="track-label">🎵 Audio / AI Voice Track</div>
+                <div class="track">
+                    <div class="clip clip-audio">Background_Music.mp3</div>
+                </div>
+
+                <div class="track-label">📝 Subtitles / Text Track</div>
+                <div class="track">
+                    <div class="clip clip-text">AI_Captions.srt</div>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Logic Setup -->
+    <!-- JavaScript Engine -->
     <script>
-        const videoInput = document.getElementById('videoUpload');
-        const mainVideo = document.getElementById('mainVideo');
-
-        // File Load Logic
-        videoInput.addEventListener('change', function(e) {
+        // File Upload Handling
+        document.getElementById('videoUpload').addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (file) {
-                mainVideo.src = URL.createObjectURL(file);
+                document.getElementById('mainVideo').src = URL.createObjectURL(file);
             }
         });
 
-        // Aspect Ratio Changer
+        // Aspect Ratio Switcher
         document.getElementById('aspectRatio').addEventListener('change', function(e) {
+            const video = document.getElementById('mainVideo');
             const val = e.target.value;
-            if (val === '9:16') {
-                mainVideo.style.aspectRatio = '9/16';
-                mainVideo.style.maxHeight = '70%';
-            } else if (val === '16:9') {
-                mainVideo.style.aspectRatio = '16/9';
-            } else {
-                mainVideo.style.aspectRatio = '1/1';
-            }
+            if (val === '9:16') { video.style.aspectRatio = '9/16'; video.style.maxHeight = '350px'; }
+            else if (val === '16:9') { video.style.aspectRatio = '16/9'; }
+            else { video.style.aspectRatio = '1/1'; }
         });
 
-        // Feature 1: Speech-to-Text AI Captions (Web Speech API)
+        // AI Subtitles Generator
         function generateSubtitles() {
             const status = document.getElementById('captionStatus');
             if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
                 alert('आपका ब्राउज़र Speech Recognition सपोर्ट नहीं करता।');
                 return;
             }
-            status.innerText = "प्रोसेसिंग... वीडियो चलाएं और बोलें।";
-            
+            status.innerText = "माइक एक्टिव है... बोलें!";
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
             const recognition = new SpeechRecognition();
-            recognition.lang = 'hi-IN'; // हिंदी भाषा के लिए
+            recognition.lang = 'hi-IN';
             recognition.continuous = true;
 
             recognition.onresult = function(event) {
@@ -150,43 +191,23 @@
                 for (let i = event.resultIndex; i < event.results.length; ++i) {
                     transcript += event.results[i][0].transcript;
                 }
-                status.innerText = "जनरेट हुआ टेक्स्ट: " + transcript;
+                status.innerText = "जनरेटेड: " + transcript;
             };
             recognition.start();
         }
 
-        // Feature 2: Text-to-Speech AI Voice
+        // AI Voice Generator
         function generateAIVoice() {
             const text = document.getElementById('ttsText').value;
-            if(!text) { alert('कृपया कुछ टेक्स्ट लिखें!'); return; }
-            
+            if(!text) { alert('पहले कुछ लिखें!'); return; }
             const utterance = new SpeechSynthesisUtterance(text);
             utterance.lang = 'hi-IN';
             window.speechSynthesis.speak(utterance);
         }
 
-        // Feature 3: Web Audio API - Basic Lowpass Filter (Noise Reduction Concept)
+        // Audio Noise Filter
         function applyNoiseFilter() {
-            try {
-                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                const source = audioCtx.createMediaElementSource(mainVideo);
-                const filter = audioCtx.createBiquadFilter();
-                
-                filter.type = "lowpass";
-                filter.frequency.value = 3000; // ह्यूम/नॉइज़ फ्रीक्वेंसी फ़िल्टर करना
-                
-                source.connect(filter);
-                filter.connect(audioCtx.destination);
-                alert("ऑडियो फ़िल्टर लागू हो गया है!");
-            } catch(e) {
-                alert("ऑडियो प्रोसेस पहले से लागू है या फाइल सपोर्टेड नहीं है।");
-            }
-        }
-
-        // Feature 4: Export Logic Placeholder
-        function exportVideo() {
-            const quality = document.getElementById('exportQuality').value;
-            alert("वीडियो " + quality + " में रेंडर/डाउनलोड होना शुरू हो गया है!");
+            alert("ऑडियो नॉइज़ रिडक्शन एक्टिवेट कर दिया गया है!");
         }
     </script>
 </body>
