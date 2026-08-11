@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rox Inten Studio - AI Age Filter</title>
+    <title>AI Magic Studio</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         body {
@@ -11,7 +11,7 @@
             color: #ffffff;
             font-family: Arial, sans-serif;
             margin: 0;
-            padding: 20px;
+            padding: 15px;
             display: flex;
             justify-content: center;
         }
@@ -25,67 +25,36 @@
             box-shadow: 0 0 20px rgba(0,0,0,0.8);
             border: 2px solid #2d3142;
             box-sizing: border-box;
-            position: relative;
         }
 
-        .header { text-align: center; margin-bottom: 15px; }
-        .header h1 { margin: 5px 0; color: #ff007f; }
-
-        #main-menu-container { display: block; }
-        .setting-panel {
-            display: none;
-            flex-direction: column;
-            gap: 15px;
-            background: #15161e;
-            padding: 10px;
-            border-radius: 15px;
+        .header-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
         }
 
         .back-btn {
-            background: #1f2232;
             color: #ff007f;
-            border: 1px solid #2d3142;
-            padding: 8px 15px;
-            border-radius: 8px;
+            font-size: 18px;
             font-weight: bold;
             cursor: pointer;
-        }
-
-        .menu-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin-top: 15px;
-        }
-
-        .dark-btn {
-            background: #1f2232;
-            color: #fff;
-            padding: 12px;
-            text-align: center;
-            border-radius: 10px;
             text-decoration: none;
-            font-size: 14px;
+        }
+
+        .timer-box {
+            background: #1f2232;
             border: 1px solid #2d3142;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-
-        .pro-btn {
-            background: linear-gradient(135deg, #ff007f, #7f00ff);
-            color: white;
-            border: none;
-            padding: 12px;
-            width: 100%;
             border-radius: 10px;
+            padding: 8px;
+            text-align: center;
+            color: #ffcc00;
             font-weight: bold;
-            margin-top: 15px;
-            cursor: pointer;
+            margin-bottom: 15px;
+            font-size: 14px;
         }
 
-        /* 📸 AI कैमरा लेआउट और मास्क ओवरले */
+        /* 📸 फिक्स कैमरा बॉक्स */
         .canvas-container {
             position: relative;
             width: 100%;
@@ -94,23 +63,43 @@
             border-radius: 15px;
             overflow: hidden;
             border: 2px solid #ff007f;
+            margin-bottom: 15px;
         }
-        
-        #webcam { width: 100%; height: 100%; object-fit: cover; position: absolute; z-index: 1; transition: filter 0.4s ease; }
-        
-        /* 🎭 एज मास्क लेयर जो चेहरे के ऊपर दिखेगी */
-        #age-mask-overlay {
+
+        /* 🎥 वीडियो लेयर (सबसे ऊपर दिखेगी) */
+        #webcam {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 2;
+            transition: filter 0.3s ease;
+        }
+
+        /* 🖼️ बैकग्राउंड इमेज लेयर (वीडियो के पीछे रहेगी) */
+        #bg-overlay {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            z-index: 2;
-            pointer-events: none;
+            z-index: 1;
             background-size: cover;
             background-position: center;
-            opacity: 0.8;
-            transition: all 0.4s ease;
+        }
+
+        /* 🎭 एज फिल्टर मास्क लेयर */
+        #age-mask {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 3;
+            pointer-events: none;
+            transition: all 0.3s ease;
         }
 
         .tool-block {
@@ -118,136 +107,144 @@
             border: 1px solid #2d3142;
             border-radius: 15px;
             padding: 12px;
+            margin-bottom: 12px;
+        }
+
+        .tool-block h3 {
+            margin: 0 0 10px 0;
+            font-size: 14px;
+            color: #78ffd6;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .age-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        .age-btn {
+            background: #2d3142;
+            color: white;
+            border: 1px solid #3a3f58;
+            padding: 8px;
+            border-radius: 8px;
+            font-size: 12px;
+            cursor: pointer;
+            text-align: center;
+        }
+
+        .age-btn:active, .age-btn.active {
+            background: #ff007f;
+            border-color: #ff007f;
+        }
+
+        input[type="file"], input[type="text"] {
+            width: 100%;
+            background: #15161e;
+            color: white;
+            border: 1px solid #2d3142;
+            padding: 8px;
+            border-radius: 8px;
             box-sizing: border-box;
         }
-        .tool-block h3 { margin: 0 0 10px 0; font-size: 14px; color: #78ffd6; }
-
-        .age-grid { display: flex; flex-wrap: wrap; gap: 5px; }
-        .age-btn { background: #2d3142; color: white; border: none; padding: 8px 10px; border-radius: 6px; font-size: 12px; cursor: pointer; }
-        .age-btn:active { background: #ff007f; }
-
-        .action-btn { background: linear-gradient(135deg, #ff007f, #7f00ff); color: white; border: none; padding: 10px; width: 100%; border-radius: 10px; font-weight: bold; margin-top: 8px; cursor: pointer; }
     </style>
 </head>
 <body>
 
     <div class="mobile-frame">
-        <div class="header">
-            <h1>Rox</h1>
-            <h5>INTEN STUDIO</h5>
-            <h4 id="statusMsg" style="color: #ff4757; margin-top: 5px;">Status: Unlocked</h4>
+        <div class="header-nav">
+            <a href="#" class="back-btn"><i class="fa-solid fa-arrow-left"></i> Back</a>
+            <h3 style="margin: 0; font-size: 16px;"><i class="fa-solid fa-wand-magic-sparkles" style="color: #ffcc00;"></i> AI Magic Studio</h3>
         </div>
 
-        <!-- MAIN MENU -->
-        <div id="main-menu-container">
-            <div class="menu-grid">
-                <a href="#" id="setting-btn-trigger" class="dark-btn" style="grid-column: span 2; background: #ff007f;"><i class="fa-solid fa-camera"></i> Open AI Studio Camera</a>
+        <div class="timer-box">
+            ⏳ AI Access Timer: <span id="timer">04:04</span>
+        </div>
+
+        <!-- 📸 कैमरा व्यू फिक्स -->
+        <div class="canvas-container">
+            <video id="webcam" autoplay playsinline></video>
+            <div id="bg-overlay"></div>
+            <div id="age-mask"></div>
+        </div>
+
+        <!-- 1. AGE LOOK TOOL -->
+        <div class="tool-block">
+            <h3><i class="fa-solid fa-face-smile"></i> 1. AI लुक बदलें (Age View)</h3>
+            <div class="age-grid">
+                <button class="age-btn" onclick="applyAge('5', this)">5 Years (बालक)</button>
+                <button class="age-btn" onclick="applyAge('15', this)">15 Years (किशोरी)</button>
+                <button class="age-btn" onclick="applyAge('25', this)">25 Years (युवा)</button>
+                <button class="age-btn" onclick="applyAge('45', this)">45 Years (मैच्योर)</button>
+                <button class="age-btn" onclick="applyAge('70', this)" style="grid-column: span 2;">70 Years (बुजुर्ग)</button>
             </div>
         </div>
 
-        <!-- SETTING PANEL -->
-        <div id="setting-panel" class="setting-panel">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <button id="back-to-menu" class="back-btn"><i class="fa-solid fa-arrow-left"></i> Back</button>
-                <span style="color: #78ffd6; font-size: 14px; font-weight: bold;">AI Age Studio</span>
-            </div>
-
-            <div class="canvas-container">
-                <video id="webcam" autoplay playsinline></video>
-                <!-- झुर्रियों/एज मास्क की लेयर -->
-                <div id="age-mask-overlay"></div>
-            </div>
-
-            <div class="tool-block">
-                <h3><i class="fa-solid fa-face-smile"></i> Select AI Age Effect:</h3>
-                <div class="age-grid">
-                    <button class="age-btn" data-age="5">👶 5 Years (Baby)</button>
-                    <button class="age-btn" data-age="15">🧒 15 Years (Teen)</button>
-                    <button class="age-btn" data-age="25">🧑 25 Years (Original)</button>
-                    <button class="age-btn" data-age="45">👨 45 Years (Mature)</button>
-                    <button class="age-btn" data-age="70">👴 70 Years (Old Wrinkles)</button>
-                </div>
-            </div>
-
-            <button id="capture-btn" class="action-btn" style="background: #28a745;">📸 Save AI Photo</button>
+        <!-- 2. BACKGROUND TEMPLATE -->
+        <div class="tool-block">
+            <h3><i class="fa-solid fa-image"></i> 2. चेंज बैकग्राउंड टेंपलेट</h3>
+            <input type="file" id="bg-file" accept="image/*" onchange="changeBG(event)">
         </div>
 
+        <!-- 3. TEXT & STICKERS -->
+        <div class="tool-block">
+            <h3><i class="fa-solid fa-font"></i> 3. टेक्स्ट डिज़ाइन & स्टिकर्स</h3>
+            <input type="text" placeholder="यहाँ अपना टेक्स्ट लिखें...">
+        </div>
     </div>
 
     <script>
-        const settingBtnTrigger = document.getElementById('setting-btn-trigger');
-        const mainMenuContainer = document.getElementById('main-menu-container');
-        const settingPanel = document.getElementById('setting-panel');
-        const backToMenu = document.getElementById('back-to-menu');
         const webcam = document.getElementById('webcam');
-        const maskOverlay = document.getElementById('age-mask-overlay');
-        let aiCamStream = null;
+        const bgOverlay = document.getElementById('bg-overlay');
+        const ageMask = document.getElementById('age-mask');
 
+        // 🎥 लाइव कैमरा ऑन करें
         async function startCamera() {
             try {
-                aiCamStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" }, audio: false });
-                webcam.srcObject = aiCamStream;
+                const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" }, audio: false });
+                webcam.srcObject = stream;
             } catch (err) {
-                alert("कैमरा चालू करने की अनुमति दें!");
+                console.log("Camera Permision Required:", err);
+            }
+        }
+        startCamera();
+
+        // 🧠 AGE CHANGE FUNCTION (यह अब सीधे लाइव वीडियो पर काम करेगा)
+        function applyAge(age, btn) {
+            // बटन एक्टिव स्टाइल
+            document.querySelectorAll('.age-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+
+            if (age === '5') {
+                webcam.style.filter = 'saturate(1.8) brightness(1.2) contrast(0.9)';
+                ageMask.style.background = 'radial-gradient(circle, rgba(255, 192, 203, 0.25) 0%, transparent 70%)';
+            } else if (age === '15') {
+                webcam.style.filter = 'saturate(1.3) brightness(1.08) contrast(1.0)';
+                ageMask.style.background = 'none';
+            } else if (age === '25') {
+                webcam.style.filter = 'none';
+                ageMask.style.background = 'none';
+            } else if (age === '45') {
+                webcam.style.filter = 'contrast(1.25) sepia(0.2) brightness(0.9)';
+                ageMask.style.background = 'radial-gradient(circle, transparent 40%, rgba(80, 40, 0, 0.2) 100%)';
+            } else if (age === '70') {
+                webcam.style.filter = 'grayscale(0.6) contrast(1.45) brightness(0.8)';
+                ageMask.style.background = 'repeating-linear-gradient(45deg, transparent, transparent 8px, rgba(0,0,0,0.12) 8px, rgba(0,0,0,0.12) 10px)';
             }
         }
 
-        function stopCamera() {
-            if (aiCamStream) {
-                aiCamStream.getTracks().forEach(track => track.stop());
-                aiCamStream = null;
+        // 🖼️ बैकग्राउंड फोटो बदलने का फिक्स
+        function changeBG(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const url = URL.createObjectURL(file);
+                bgOverlay.style.backgroundImage = `url('${url}')`;
+                webcam.style.opacity = "0.75"; // ताकि पीछे का बैकग्राउंड भी साफ़ दिखे
             }
         }
-
-        settingBtnTrigger.addEventListener('click', (e) => {
-            e.preventDefault();
-            mainMenuContainer.style.display = 'none';
-            settingPanel.style.display = 'flex';
-            startCamera();
-        });
-
-        backToMenu.addEventListener('click', (e) => {
-            e.preventDefault();
-            settingPanel.style.display = 'none';
-            mainMenuContainer.style.display = 'block';
-            stopCamera();
-        });
-
-        // 🎭 AGE MASK AND FILTER LOGIC
-        document.querySelectorAll('.age-btn').forEach(button => {
-            button.addEventListener('click', (e) => {
-                const age = e.target.getAttribute('data-age');
-
-                if (age === '5') {
-                    // बच्चों जैसा सॉफ्ट ग्लो + पिंक चीक्स ओवरले
-                    webcam.style.filter = 'saturate(1.7) brightness(1.2) contrast(0.95)';
-                    maskOverlay.style.background = 'radial-gradient(circle, rgba(255, 182, 193, 0.3) 0%, transparent 70%)';
-                } 
-                else if (age === '15') {
-                    webcam.style.filter = 'saturate(1.2) brightness(1.05)';
-                    maskOverlay.style.background = 'none';
-                } 
-                else if (age === '25') {
-                    webcam.style.filter = 'none';
-                    maskOverlay.style.background = 'none';
-                } 
-                else if (age === '45') {
-                    // मैच्योर लुक (वार्म शेड)
-                    webcam.style.filter = 'contrast(1.1) sepia(0.2) brightness(0.9)';
-                    maskOverlay.style.background = 'radial-gradient(circle, transparent 40%, rgba(100, 50, 0, 0.25) 100%)';
-                } 
-                else if (age === '70') {
-                    // 👴 70 Years: चेहरे पर झुर्रियों/एजिंग टेक्सचर का मास्क और डार्क टोन
-                    webcam.style.filter = 'grayscale(0.5) contrast(1.3) brightness(0.85)';
-                    // विंटेज Wrinkle Texture Overlays
-                    maskOverlay.style.background = 'radial-gradient(circle, rgba(0,0,0,0.1) 20%, rgba(50,50,50,0.6) 90%), repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(0,0,0,0.08) 10px, rgba(0,0,0,0.08) 12px)';
-                }
-            });
-        });
-
-        document.getElementById('capture-btn').addEventListener('click', () => {
-            alert("📸 AI एज फोटो आपकी गैलरी में सेव हो गई!");
-        });
     </script>
 </body>
 </html>
