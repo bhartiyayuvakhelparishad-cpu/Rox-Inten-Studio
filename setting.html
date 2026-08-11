@@ -1,96 +1,177 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="hi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rox Settings</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <title>Settings - Rox INTEN STUDIO</title>
+    <!-- AI Background Removal Library -->
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation/selfie_segmentation.js" crossorigin="anonymous"></script>
     <style>
-        body { margin: 0; background: #0b0c10; color: white; font-family: sans-serif; display: flex; justify-content: center; padding: 20px; }
-        .mobile-frame { width: 360px; height: 740px; background: #15161e; border: 8px solid #252836; border-radius: 40px; position: relative; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.8); }
-        .notch { width: 140px; height: 25px; background: #252836; border-bottom-left-radius: 15px; border-bottom-right-radius: 15px; position: absolute; top: 0; left: 50%; transform: translateX(-50%); z-index: 10; }
-        .app-content { padding: 25px 15px; height: 100%; box-sizing: border-box; overflow-y: auto; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Arial, sans-serif; }
+        body { background: #0c0c14; color: #fff; padding: 15px; }
+
+        .back-btn { background: #222235; color: #00e5ff; padding: 8px 15px; border-radius: 5px; text-decoration: none; font-size: 13px; display: inline-block; margin-bottom: 15px; border: 1px solid #00e5ff; }
         
-        .header-studio { display: flex; justify-content: space-between; align-items: center; margin-top: 15px; border-bottom: 1px solid #2d3142; padding-bottom: 10px; }
-        .back-btn { color: #ff007f; text-decoration: none; font-size: 18px; font-weight: bold; }
-        
-        .tool-block { background: #1f2232; border: 1px solid #2d3142; border-radius: 12px; padding: 15px; margin-top: 15px; }
-        .tool-block h4 { margin: 0 0 10px 0; color: #78ffd6; font-size: 14px; }
-        
-        select, input[type="file"], input[type="number"] { background: #15161e; color: #fff; border: 1px solid #2d3142; padding: 10px; border-radius: 8px; width: 100%; box-sizing: border-box; margin-top: 6px; }
-        .action-btn { background: linear-gradient(135deg, #ff007f, #7f00ff); color: white; border: none; padding: 12px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 12px; }
+        .setting-card { background: #1a1a2b; border: 1px solid #2e2e48; padding: 15px; border-radius: 10px; margin-bottom: 15px; }
+        .setting-card h3 { color: #00e5ff; font-size: 14px; margin-bottom: 10px; text-transform: uppercase; }
+
+        button, input { width: 100%; padding: 10px; margin-top: 6px; background: #25253b; color: #fff; border: 1px solid #3e3e5e; border-radius: 5px; font-size: 12px; cursor: pointer; }
+        button:hover { background: #00e5ff; color: #000; font-weight: bold; }
+        .btn-green { background: #00c853; border: none; font-weight: bold; color: #000; }
+        .btn-pink { background: linear-gradient(90deg, #ff007f, #7f00ff); border: none; font-weight: bold; }
+        .btn-red { background: #ff1744; border: none; font-weight: bold; }
+
+        .preview-box { position: relative; width: 100%; max-width: 320px; aspect-ratio: 9/16; background: #111; border: 2px solid #00e5ff; border-radius: 10px; overflow: hidden; margin: 10px auto; }
+        canvas { width: 100%; height: 100%; object-fit: contain; }
+        video, img { display: none; }
+        #statusText { position: absolute; top: 10px; left: 10px; font-size: 11px; background: rgba(0,0,0,0.8); padding: 4px 8px; border-radius: 4px; color: #00e5ff; }
     </style>
 </head>
 <body>
 
-    <div class="mobile-frame">
-        <div class="notch"></div>
-        <div class="app-content">
-            
-            <div class="header-studio">
-                <a href="index.html" class="back-btn"><i class="fa-solid fa-arrow-left"></i> Back</a>
-                <h3 id="panel-title" style="margin: 0; font-size: 16px;">⚙️ Editor Settings</h3>
-                <div></div>
-            </div>
+    <a href="index.html" class="back-btn">⬅ वापस Studio (Home) पर जाएं</a>
+    <h2>⚙️ लाइव कैमरा व AI बैकग्राउंड सेटिंग्स</h2>
+    <br>
 
-            <div class="tool-block">
-                <h4 id="lbl-lang"><i class="fa-solid fa-globe"></i> 1. Select Language (भाषा चुनें)</h4>
-                <select id="lang-select">
-                    <option value="en">English (US)</option>
-                    <option value="hi">हिन्दी (Hindi)</option>
-                </select>
-            </div>
+    <!-- Camera Controls -->
+    <div class="setting-card">
+        <h3>📹 1. लाइव कैमरा कंट्रोल</h3>
+        <button onclick="startLiveCamera()" class="btn-green">▶️ कैमरा ऑन करें</button>
+        <button onclick="stopLiveCamera()" style="background:#333;">⏹️ कैमरा बंद करें</button>
+    </div>
 
-            <div class="tool-block">
-                <h4 id="lbl-music"><i class="fa-solid fa-scissors"></i> 2. म्यूजिक / वीडियो कट-पेस्ट सेटिंग</h4>
-                <label style="font-size: 11px; color:#888;">अपलोड ऑडियो या वीडियो ट्रैक:</label>
-                <input type="file" id="audio-file" accept="audio/*,video/*">
-                
-                <div style="display: flex; gap: 8px; margin-top: 10px;">
-                    <div style="width: 50%;">
-                        <label style="font-size: 11px; color:#888;">स्टार्ट (सेकंड):</label>
-                        <input type="number" id="start-sec" value="0">
-                    </div>
-                    <div style="width: 50%;">
-                        <label style="font-size: 11px; color:#888;">एंड (सेकंड):</label>
-                        <input type="number" id="end-sec" value="15">
-                    </div>
-                </div>
-                <button id="cut-mix-btn" class="action-btn">✂️ कस्टमाइज़ और मिक्स करें</button>
-            </div>
+    <!-- Background Selection -->
+    <div class="setting-card">
+        <h3>🖼️ 2. लाइव बैकग्राउंड रिप्लेसर</h3>
+        <label style="font-size:11px; color:#aaa;">नया बैकग्राउंड रंग चुनें:</label>
+        <input type="color" id="bgColorPicker" value="#00e5ff">
+        
+        <label style="font-size:11px; color:#aaa; margin-top:8px; display:block;">या नया बैकग्राउंड फोटो बदलें:</label>
+        <input type="file" id="bgImageUpload" accept="image/*">
+    </div>
 
+    <!-- Live Studio Display & Controls -->
+    <div class="setting-card" style="text-align: center;">
+        <h3>🔴 लाइव AI प्रीव्यू व कैप्चर</h3>
+        <div class="preview-box">
+            <canvas id="outputCanvas"></canvas>
+            <div id="statusText">कैमरा चालू करें</div>
         </div>
+        <video id="inputVideo" playsinline muted></video>
+        <img id="bgImage" crossorigin="anonymous">
+
+        <button onclick="capturePhoto()" class="btn-pink">📷 AI फोटो खींचें और डाउनलोड करें</button>
+        <button id="recordBtn" onclick="toggleRecord()" class="btn-red" style="margin-top:8px;">🔴 वीडियो रिकॉर्डिंग शुरू करें</button>
     </div>
 
     <script>
-        const langSelect = document.getElementById('lang-select');
-        const panelTitle = document.getElementById('panel-title');
-        const lblLang = document.getElementById('lbl-lang');
-        const lblMusic = document.getElementById('lbl-music');
-        const cutMixBtn = document.getElementById('cut-mix-btn');
+        const inputVideo = document.getElementById('inputVideo');
+        const bgImageUpload = document.getElementById('bgImageUpload');
+        const bgImage = document.getElementById('bgImage');
+        const canvas = document.getElementById('outputCanvas');
+        const ctx = canvas.getContext('2d');
+        const statusText = document.getElementById('statusText');
 
-        // भाषा परिवर्तन एल्गोरिदम
-        langSelect.addEventListener('change', (e) => {
-            if(e.target.value === 'hi') {
-                panelTitle.innerText = "⚙️ एडिटर सेटिंग्स";
-                lblLang.innerHTML = "<i class='fa-solid fa-globe'></i> 1. भाषा का चयन करें";
-                lblMusic.innerHTML = "<i class='fa-solid fa-scissors'></i> 2. म्यूजिक / वीडियो कट-पेस्ट सेटिंग";
-                cutMixBtn.innerText = "✂️ कस्टमाइज़ और मिक्स करें";
+        let selfieSegmentation, camera, mediaRecorder;
+        let recordedChunks = [], isRecording = false;
+
+        canvas.width = 360; 
+        canvas.height = 640;
+
+        function initAI() {
+            selfieSegmentation = new SelfieSegmentation({
+                locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation/${file}`
+            });
+            selfieSegmentation.setOptions({ modelSelection: 1 });
+            selfieSegmentation.onResults(onAIResults);
+        }
+
+        function onAIResults(results) {
+            const tempCanvas = document.createElement('canvas');
+            tempCanvas.width = canvas.width; 
+            tempCanvas.height = canvas.height;
+            const tempCtx = tempCanvas.getContext('2d');
+
+            tempCtx.drawImage(results.segmentationMask, 0, 0, canvas.width, canvas.height);
+            const maskData = tempCtx.getImageData(0, 0, canvas.width, canvas.height);
+
+            tempCtx.drawImage(results.image, 0, 0, canvas.width, canvas.height);
+            const imgData = tempCtx.getImageData(0, 0, canvas.width, canvas.height);
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            if (bgImage.src && bgImage.complete) {
+                ctx.drawImage(bgImage, 0, 0, canvas.width, canvas.height);
             } else {
-                panelTitle.innerText = "⚙️ Editor Settings";
-                lblLang.innerHTML = "<i class='fa-solid fa-globe'></i> 1. Select Language";
-                lblMusic.innerHTML = "<i class='fa-solid fa-scissors'></i> 2. Audio/Video Cut-Paste Settings";
-                cutMixBtn.innerText = "✂️ Customize & Mix Track";
+                ctx.fillStyle = document.getElementById('bgColorPicker').value;
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
             }
+
+            const bgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            for (let i = 0; i < maskData.data.length; i += 4) {
+                if (maskData.data[i] / 255 > 0.3) {
+                    bgData.data[i] = imgData.data[i];
+                    bgData.data[i+1] = imgData.data[i+1];
+                    bgData.data[i+2] = imgData.data[i+2];
+                }
+            }
+            ctx.putImageData(bgData, 0, 0);
+        }
+
+        function startLiveCamera() {
+            statusText.innerText = "कैमरा चालू हो रहा है...";
+            camera = new Camera(inputVideo, {
+                onFrame: async () => { await selfieSegmentation.send({ image: inputVideo }); },
+                width: 360, height: 640
+            });
+            camera.start();
+            statusText.innerText = "🔴 AI कैमरा एक्टिव";
+        }
+
+        function stopLiveCamera() {
+            if (camera) camera.stop();
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            statusText.innerText = "कैमरा बंद है";
+        }
+
+        bgImageUpload.addEventListener('change', (e) => {
+            if (e.target.files[0]) bgImage.src = URL.createObjectURL(e.target.files[0]);
         });
 
-        // ट्रैक कटिंग ट्रिगर
-        document.getElementById('cut-mix-btn').addEventListener('click', () => {
-            const start = document.getElementById('start-sec').value;
-            const end = document.getElementById('end-sec').value;
-            alert(`✂️ टाइमलाइन सक्सेस! मीडिया फ़ाइल को ${start}s से ${end}s के बीच ट्रिम करके कस्टमाइज़ेशन लेयर के लिए सुरक्षित कर दिया गया है।`);
-        });
+        function capturePhoto() {
+            const link = document.createElement('a');
+            link.download = "Rox_AI_Photo.png";
+            link.href = canvas.toDataURL("image/png");
+            link.click();
+        }
+
+        function toggleRecord() {
+            const btn = document.getElementById('recordBtn');
+            if (!isRecording) {
+                recordedChunks = [];
+                const stream = canvas.captureStream(30);
+                mediaRecorder = new MediaRecorder(stream, { mimeType: 'video/webm' });
+                mediaRecorder.ondataavailable = (e) => { if (e.data.size > 0) recordedChunks.push(e.data); };
+                mediaRecorder.onstop = () => {
+                    const blob = new Blob(recordedChunks, { type: 'video/webm' });
+                    const a = document.createElement('a');
+                    a.href = URL.createObjectURL(blob);
+                    a.download = 'Rox_AI_Video.webm';
+                    a.click();
+                };
+                mediaRecorder.start();
+                isRecording = true;
+                btn.innerText = "⏹️ रिकॉर्डिंग रोकें और सेव करें";
+                btn.style.background = "#ff9100";
+            } else {
+                mediaRecorder.stop();
+                isRecording = false;
+                btn.innerText = "🔴 वीडियो रिकॉर्डिंग शुरू करें";
+                btn.style.background = "#ff1744";
+            }
+        }
+
+        window.onload = initAI;
     </script>
 </body>
 </html>
