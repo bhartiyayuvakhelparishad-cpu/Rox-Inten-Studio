@@ -27,38 +27,10 @@
             box-sizing: border-box;
         }
 
-        .header-nav {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-
-        .back-btn {
-            color: #ff007f;
-            font-size: 18px;
-            font-weight: bold;
-            cursor: pointer;
-            text-decoration: none;
-        }
-
-        .timer-box {
-            background: #1f2232;
-            border: 1px solid #2d3142;
-            border-radius: 10px;
-            padding: 8px;
-            text-align: center;
-            color: #ffcc00;
-            font-weight: bold;
-            margin-bottom: 15px;
-            font-size: 14px;
-        }
-
-        /* 📸 फिक्स कैमरा बॉक्स */
         .canvas-container {
             position: relative;
             width: 100%;
-            height: 220px;
+            height: 230px;
             background: #000;
             border-radius: 15px;
             overflow: hidden;
@@ -66,7 +38,7 @@
             margin-bottom: 15px;
         }
 
-        /* 🎥 वीडियो लेयर (सबसे ऊपर दिखेगी) */
+        /* 🎥 कैमरा वीडियो फ़िक्स */
         #webcam {
             width: 100%;
             height: 100%;
@@ -74,32 +46,19 @@
             position: absolute;
             top: 0;
             left: 0;
-            z-index: 2;
-            transition: filter 0.3s ease;
+            z-index: 5; /* कैमरे को हमेशा ऊपर रखेगा */
         }
 
-        /* 🖼️ बैकग्राउंड इमेज लेयर (वीडियो के पीछे रहेगी) */
-        #bg-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
+        .cam-btn {
+            background: linear-gradient(135deg, #ff007f, #7f00ff);
+            color: white;
+            border: none;
+            padding: 10px;
             width: 100%;
-            height: 100%;
-            z-index: 1;
-            background-size: cover;
-            background-position: center;
-        }
-
-        /* 🎭 एज फिल्टर मास्क लेयर */
-        #age-mask {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 3;
-            pointer-events: none;
-            transition: all 0.3s ease;
+            border-radius: 10px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            cursor: pointer;
         }
 
         .tool-block {
@@ -108,15 +67,6 @@
             border-radius: 15px;
             padding: 12px;
             margin-bottom: 12px;
-        }
-
-        .tool-block h3 {
-            margin: 0 0 10px 0;
-            font-size: 14px;
-            color: #78ffd6;
-            display: flex;
-            align-items: center;
-            gap: 8px;
         }
 
         .age-grid {
@@ -133,116 +83,74 @@
             border-radius: 8px;
             font-size: 12px;
             cursor: pointer;
-            text-align: center;
-        }
-
-        .age-btn:active, .age-btn.active {
-            background: #ff007f;
-            border-color: #ff007f;
-        }
-
-        input[type="file"], input[type="text"] {
-            width: 100%;
-            background: #15161e;
-            color: white;
-            border: 1px solid #2d3142;
-            padding: 8px;
-            border-radius: 8px;
-            box-sizing: border-box;
         }
     </style>
 </head>
 <body>
 
     <div class="mobile-frame">
-        <div class="header-nav">
-            <a href="#" class="back-btn"><i class="fa-solid fa-arrow-left"></i> Back</a>
-            <h3 style="margin: 0; font-size: 16px;"><i class="fa-solid fa-wand-magic-sparkles" style="color: #ffcc00;"></i> AI Magic Studio</h3>
+        <!-- कैमरा ऑन करने का मैन्युअल बटन -->
+        <button class="cam-btn" onclick="startCamera()"><i class="fa-solid fa-camera"></i> 📸 यहाँ क्लिक करके कैमरा स्टार्ट करें</button>
+
+        <div id="main-canvas" class="canvas-container">
+            <video id="webcam" autoplay playsinline muted></video>
         </div>
 
-        <div class="timer-box">
-            ⏳ AI Access Timer: <span id="timer">04:04</span>
-        </div>
-
-        <!-- 📸 कैमरा व्यू फिक्स -->
-        <div class="canvas-container">
-            <video id="webcam" autoplay playsinline></video>
-            <div id="bg-overlay"></div>
-            <div id="age-mask"></div>
-        </div>
-
-        <!-- 1. AGE LOOK TOOL -->
         <div class="tool-block">
-            <h3><i class="fa-solid fa-face-smile"></i> 1. AI लुक बदलें (Age View)</h3>
+            <h3 style="color: #78ffd6; font-size: 14px;">1. AI लुक बदलें (Age View)</h3>
             <div class="age-grid">
-                <button class="age-btn" onclick="applyAge('5', this)">5 Years (बालक)</button>
-                <button class="age-btn" onclick="applyAge('15', this)">15 Years (किशोरी)</button>
-                <button class="age-btn" onclick="applyAge('25', this)">25 Years (युवा)</button>
-                <button class="age-btn" onclick="applyAge('45', this)">45 Years (मैच्योर)</button>
-                <button class="age-btn" onclick="applyAge('70', this)" style="grid-column: span 2;">70 Years (बुजुर्ग)</button>
+                <button class="age-btn" onclick="applyAge('5')">5 Years (बालक)</button>
+                <button class="age-btn" onclick="applyAge('15')">15 Years (किशोरी)</button>
+                <button class="age-btn" onclick="applyAge('25')">25 Years (युवा)</button>
+                <button class="age-btn" onclick="applyAge('45')">45 Years (मैच्योर)</button>
+                <button class="age-btn" onclick="applyAge('70')" style="grid-column: span 2;">70 Years (बुजुर्ग)</button>
             </div>
-        </div>
-
-        <!-- 2. BACKGROUND TEMPLATE -->
-        <div class="tool-block">
-            <h3><i class="fa-solid fa-image"></i> 2. चेंज बैकग्राउंड टेंपलेट</h3>
-            <input type="file" id="bg-file" accept="image/*" onchange="changeBG(event)">
-        </div>
-
-        <!-- 3. TEXT & STICKERS -->
-        <div class="tool-block">
-            <h3><i class="fa-solid fa-font"></i> 3. टेक्स्ट डिज़ाइन & स्टिकर्स</h3>
-            <input type="text" placeholder="यहाँ अपना टेक्स्ट लिखें...">
         </div>
     </div>
 
     <script>
         const webcam = document.getElementById('webcam');
-        const bgOverlay = document.getElementById('bg-overlay');
-        const ageMask = document.getElementById('age-mask');
+        const mainCanvas = document.getElementById('main-canvas');
 
-        // 🎥 लाइव कैमरा ऑन करें
+        // 🎥 कैमरा शुरू करने का फ़ंक्शन
         async function startCamera() {
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                alert("आपका ब्राउज़र कैमरे को सपोर्ट नहीं करता या HTTPS प्रोटोकॉल चालू नहीं है!");
+                return;
+            }
+
             try {
-                const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" }, audio: false });
+                const constraints = {
+                    video: { facingMode: "user", width: { ideal: 640 }, height: { ideal: 480 } },
+                    audio: false
+                };
+                const stream = await navigator.mediaDevices.getUserMedia(constraints);
                 webcam.srcObject = stream;
+                webcam.play();
+                alert("कैमरा सफलतापूर्वक चालू हो गया है!");
             } catch (err) {
-                console.log("Camera Permision Required:", err);
+                alert("कैमरा एरर: ब्राउज़र सेटिंग में जाकर Camera Permission को 'Allow' (अनुमति) करें।");
+                console.error(err);
             }
         }
-        startCamera();
 
-        // 🧠 AGE CHANGE FUNCTION (यह अब सीधे लाइव वीडियो पर काम करेगा)
-        function applyAge(age, btn) {
-            // बटन एक्टिव स्टाइल
-            document.querySelectorAll('.age-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
+        // ऑटोमैटिक कैमरा स्टार्ट की कोशिश करें
+        window.addEventListener('DOMContentLoaded', () => {
+            startCamera();
+        });
 
+        // 🧠 AGE FILTER FUNCTION
+        function applyAge(age) {
             if (age === '5') {
-                webcam.style.filter = 'saturate(1.8) brightness(1.2) contrast(0.9)';
-                ageMask.style.background = 'radial-gradient(circle, rgba(255, 192, 203, 0.25) 0%, transparent 70%)';
+                mainCanvas.style.filter = 'saturate(1.8) brightness(1.2) contrast(0.9)';
             } else if (age === '15') {
-                webcam.style.filter = 'saturate(1.3) brightness(1.08) contrast(1.0)';
-                ageMask.style.background = 'none';
+                mainCanvas.style.filter = 'saturate(1.3) brightness(1.08)';
             } else if (age === '25') {
-                webcam.style.filter = 'none';
-                ageMask.style.background = 'none';
+                mainCanvas.style.filter = 'none';
             } else if (age === '45') {
-                webcam.style.filter = 'contrast(1.25) sepia(0.2) brightness(0.9)';
-                ageMask.style.background = 'radial-gradient(circle, transparent 40%, rgba(80, 40, 0, 0.2) 100%)';
+                mainCanvas.style.filter = 'contrast(1.3) sepia(0.25) brightness(0.85)';
             } else if (age === '70') {
-                webcam.style.filter = 'grayscale(0.6) contrast(1.45) brightness(0.8)';
-                ageMask.style.background = 'repeating-linear-gradient(45deg, transparent, transparent 8px, rgba(0,0,0,0.12) 8px, rgba(0,0,0,0.12) 10px)';
-            }
-        }
-
-        // 🖼️ बैकग्राउंड फोटो बदलने का फिक्स
-        function changeBG(event) {
-            const file = event.target.files[0];
-            if (file) {
-                const url = URL.createObjectURL(file);
-                bgOverlay.style.backgroundImage = `url('${url}')`;
-                webcam.style.opacity = "0.75"; // ताकि पीछे का बैकग्राउंड भी साफ़ दिखे
+                mainCanvas.style.filter = 'grayscale(0.65) contrast(1.5) brightness(0.8)';
             }
         }
     </script>
