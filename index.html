@@ -4,14 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Rox INTEN STUDIO - AI BG Fix</title>
-    <!-- AI Background Removal Library -->
+    <!-- MediaPipe AI Libraries -->
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation/selfie_segmentation.js" crossorigin="anonymous"></script>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Arial, sans-serif; }
         body { background: #0c0c14; color: #fff; min-height: 100vh; display: flex; flex-direction: column; }
 
-        /* Top Navigation Bar with Setting Button */
+        /* Top Navbar */
         .top-navbar { background: #161625; padding: 10px 15px; border-bottom: 2px solid #28283d; }
         .nav-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
         .logo-area h1 { color: #00e5ff; font-size: 20px; display: inline-block; }
@@ -22,7 +22,7 @@
         .nav-links a:hover, .nav-links a.active { background: #00e5ff; color: #000; font-weight: bold; }
         .nav-links a.setting-btn { background: linear-gradient(90deg, #ff007f, #7f00ff); color: #fff; border: none; font-weight: bold; }
 
-        /* Studio Layout */
+        /* Workspace Grid */
         .studio-body { display: flex; flex-direction: column; flex: 1; }
         @media (min-width: 768px) { .studio-body { display: grid; grid-template-columns: 320px 1fr; } }
 
@@ -39,18 +39,17 @@
         canvas { width: 100%; height: 100%; object-fit: contain; }
         img { display: none; }
 
-        #statusText { position: absolute; top: 10px; left: 10px; font-size: 11px; background: rgba(0,0,0,0.8); padding: 4px 8px; border-radius: 4px; color: #00e5ff; z-index: 10; }
+        #statusText { position: absolute; top: 10px; left: 10px; font-size: 11px; background: rgba(0,0,0,0.85); padding: 5px 10px; border-radius: 4px; color: #00e5ff; z-index: 10; border: 1px solid #00e5ff; }
     </style>
 </head>
 <body>
 
-    <!-- Header Navbar with Working Setting Link -->
     <div class="top-navbar">
         <div class="nav-header">
             <div class="logo-area">
                 <h1>Rox</h1> <span>INTEN STUDIO</span>
             </div>
-            <div><span style="font-size: 11px; color: #00e5ff;">⏳ AI Engine: Active</span></div>
+            <div><span style="font-size: 11px; color: #00e5ff;">⏳ AI Engine: Ready</span></div>
         </div>
         <div class="nav-links">
             <a href="index.html" class="active">Home</a>
@@ -62,7 +61,6 @@
         </div>
     </div>
 
-    <!-- Main Studio Body (Your Good Working AI Function) -->
     <div class="studio-body">
         <div class="sidebar-tools">
             
@@ -72,11 +70,11 @@
             </div>
 
             <div class="tool-card">
-                <h3>🖼️ 2. AI बैकग्राउंड सेटिंग</h3>
+                <h3>🖼️ 2. AI बैकग्राउंड चुनें</h3>
                 <label style="font-size:11px; color:#aaa;">नया बैकग्राउंड रंग:</label>
                 <input type="color" id="bgColorPicker" value="#00e5ff">
                 
-                <label style="font-size:11px; color:#aaa; margin-top:8px; display:block;">या नया बैकग्राउंड फोटो बदलें:</label>
+                <label style="font-size:11px; color:#aaa; margin-top:8px; display:block;">या नया बैकग्राउंड फोटो लगाएं:</label>
                 <input type="file" id="bgImageUpload" accept="image/*">
                 
                 <button onclick="processAIBgRemove()" class="btn-pink">⚡ AI बैकग्राउंड बदलें</button>
@@ -93,7 +91,7 @@
         <div class="preview-workspace">
             <div class="stage-box">
                 <canvas id="outputCanvas"></canvas>
-                <div id="statusText">फोटो अपलोड करें</div>
+                <div id="statusText">फोटो लोड करें</div>
             </div>
 
             <img id="sourceImage" crossorigin="anonymous">
@@ -101,7 +99,6 @@
         </div>
     </div>
 
-    <!-- AI Pixel Removal Script -->
     <script>
         const mediaUpload = document.getElementById('mediaUpload');
         const bgImageUpload = document.getElementById('bgImageUpload');
@@ -126,17 +123,21 @@
         }
 
         function onAIResults(results) {
+            // Offscreen Canvas for calculation
             const tempCanvas = document.createElement('canvas');
             tempCanvas.width = canvas.width;
             tempCanvas.height = canvas.height;
             const tempCtx = tempCanvas.getContext('2d');
 
+            // 1. Draw Segmentation Mask
             tempCtx.drawImage(results.segmentationMask, 0, 0, canvas.width, canvas.height);
             const maskData = tempCtx.getImageData(0, 0, canvas.width, canvas.height);
 
+            // 2. Draw Original Image
             tempCtx.drawImage(results.image, 0, 0, canvas.width, canvas.height);
             const imgData = tempCtx.getImageData(0, 0, canvas.width, canvas.height);
 
+            // 3. Render Background First
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             if (bgImage.src && bgImage.complete) {
                 ctx.drawImage(bgImage, 0, 0, canvas.width, canvas.height);
@@ -147,9 +148,10 @@
 
             const bgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
 
+            // 4. Blend Person over Selected Background
             for (let i = 0; i < maskData.data.length; i += 4) {
                 const alpha = maskData.data[i] / 255;
-                if (alpha > 0.3) { 
+                if (alpha > 0.2) { 
                     bgData.data[i] = imgData.data[i];
                     bgData.data[i+1] = imgData.data[i+1];
                     bgData.data[i+2] = imgData.data[i+2];
@@ -157,9 +159,10 @@
             }
 
             ctx.putImageData(bgData, 0, 0);
-            statusText.innerText = "सफलतापूर्वक बैकग्राउंड बदल गया!";
+            statusText.innerText = "✅ बैकग्राउंड बदल गया!";
         }
 
+        // Upload User Photo
         mediaUpload.addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (!file) return;
@@ -167,25 +170,31 @@
             const fileUrl = URL.createObjectURL(file);
             sourceImage.src = fileUrl;
             sourceImage.onload = () => {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
                 ctx.drawImage(sourceImage, 0, 0, canvas.width, canvas.height);
-                statusText.innerText = "फोटो लोड हो गई, AI बटन दबाएं";
+                statusText.innerText = "फोटो लोड हो गई! अब 'AI बैकग्राउंड बदलें' दबाएं";
             };
         });
 
+        // Background Image Change
         bgImageUpload.addEventListener('change', function(e) {
             const file = e.target.files[0];
-            if (file) bgImage.src = URL.createObjectURL(file);
+            if (file) {
+                bgImage.src = URL.createObjectURL(file);
+            }
         });
 
+        // Trigger AI Removal
         async function processAIBgRemove() {
             if (!sourceImage.src) {
                 alert("कृपया पहले अपनी फोटो अपलोड करें!");
                 return;
             }
-            statusText.innerText = "AI प्रोसेस कर रहा है...";
+            statusText.innerText = "⏳ AI प्रोसेस कर रहा है...";
             await selfieSegmentation.send({ image: sourceImage });
         }
 
+        // Text to Speech
         function speakAIVoice() {
             const text = document.getElementById('ttsInput').value;
             if (!text) { alert('कृपया कुछ लिखें!'); return; }
