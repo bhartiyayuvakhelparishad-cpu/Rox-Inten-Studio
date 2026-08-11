@@ -25,39 +25,14 @@
             box-shadow: 0 0 20px rgba(0,0,0,0.8);
             border: 2px solid #2d3142;
             box-sizing: border-box;
+            position: relative;
         }
 
         .header { text-align: center; margin-bottom: 15px; }
         .header h1 { margin: 5px 0; color: #ff007f; }
-        .header h5 { margin: 0; color: #a0a5b5; }
 
-        /* Main Menu Container */
-        #main-menu-container {
-            display: block; /* डिफ़ॉल्ट रूप से विजिबल */
-        }
-
-        /* 📱 सेटिंग पैनल - बैकग्राउंड कलर फिक्स किया गया */
-        .setting-panel {
-            display: none; /* डिफ़ॉल्ट रूप से छुपा रहेगा */
-            flex-direction: column;
-            gap: 15px;
-            background: #15161e; /* बैकग्राउंड जोड़ा गया */
-            padding: 10px;
-            border-radius: 15px;
-        }
-
-        .back-btn {
-            background: #1f2232;
-            color: #ff007f;
-            border: 1px solid #2d3142;
-            padding: 8px 15px;
-            border-radius: 8px;
-            font-weight: bold;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-        }
+        #main-menu-container { display: block; }
+        .setting-panel { display: none; flex-direction: column; gap: 15px; }
 
         .menu-grid {
             display: grid;
@@ -81,13 +56,8 @@
             gap: 8px;
         }
 
-        .neon-btn {
-            background: linear-gradient(135deg, #ff007f, #7f00ff);
-            font-weight: bold;
-        }
-
         .pro-btn {
-            background: #ff007f;
+            background: linear-gradient(135deg, #ff007f, #7f00ff);
             color: white;
             border: none;
             padding: 12px;
@@ -98,244 +68,159 @@
             cursor: pointer;
         }
 
-        /* 📸 लाइव एआई कैमरा स्क्रीन */
-        .canvas-container {
-            position: relative;
+        /* 📺 AD SCREEN POPUP (ऐड देखने वाली स्क्रीन) */
+        .ad-modal {
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 0;
             width: 100%;
-            height: 200px;
-            background: #000;
-            border-radius: 15px;
-            overflow: hidden;
-            border: 2px solid #ff007f;
-        }
-        #webcam { width: 100%; height: 100%; object-fit: cover; position: absolute; z-index: 1; }
-        #bg-overlay { position: absolute; width: 100%; height: 100%; z-index: 0; background-size: cover; background-position: center; }
-        #sticker-zone { position: absolute; width: 100%; height: 100%; z-index: 2; pointer-events: none; }
-
-        .disabled-ai { opacity: 0.3; pointer-events: none; }
-        
-        .tool-block {
-            background: #1f2232;
-            border: 1px solid #2d3142;
-            border-radius: 15px;
-            padding: 12px;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            border-radius: 25px;
+            z-index: 10;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 20px;
             box-sizing: border-box;
         }
-        .tool-block h3 { margin: 0 0 10px 0; font-size: 14px; color: #78ffd6; display: flex; align-items: center; gap: 8px; }
-        
-        .age-grid { display: flex; flex-wrap: wrap; gap: 5px; }
-        .age-btn { background: #2d3142; color: white; border: none; padding: 6px 10px; border-radius: 6px; font-size: 12px; cursor: pointer; }
 
-        .tool-block input[type="text"], .tool-block select, .tool-block input[type="number"] {
-            width: 100%; background: #15161e; color: white; border: 1px solid #2d3142; padding: 8px; border-radius: 8px; margin-top: 5px; box-sizing: border-box;
+        .ad-box {
+            border: 2px dashed #ff007f;
+            padding: 20px;
+            border-radius: 15px;
+            background: #1f2232;
+            width: 80%;
         }
-        
-        .action-btn { background: linear-gradient(135deg, #ff007f, #7f00ff); color: white; border: none; padding: 10px; width: 100%; border-radius: 10px; font-weight: bold; margin-top: 8px; cursor: pointer; }
 
-        /* 10 अलग-अलग टेक्स्ट स्टाइल्स */
-        .style1 { font-family: 'Courier New', monospace; color: #00ffcc; text-shadow: 0 0 8px #00ffcc; font-weight: bold; }
-        .style2 { font-family: Arial, sans-serif; font-weight: 900; color: #ff0055; text-transform: uppercase; }
-
-        .share-grid { display: flex; justify-content: space-between; gap: 5px; margin-top: 8px; }
-        .share-btn { width: 32%; padding: 8px; border: none; border-radius: 6px; color: white; font-size: 12px; font-weight: bold; cursor: pointer; text-align: center; }
-        .fb { background: #3b5998; } .insta { background: #e1306c; } .yt { background: #ff0000; }
+        .back-btn {
+            background: #1f2232;
+            color: #ff007f;
+            border: 1px solid #2d3142;
+            padding: 8px 15px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
 
     <div class="mobile-frame">
         <div class="header">
-            <h1 id="txt-logo-title">Rox</h1>
+            <h1>Rox</h1>
             <h5>INTEN STUDIO</h5>
-            <h3 id="welcomeMsg" style="color: #78ffd6; margin-top: 5px; font-size: 16px;"></h3>
             <h4 id="statusMsg" style="color: #ff4757; margin-top: 5px;">Status: Locked</h4>
+            <p id="adCounterText" style="color: #78ffd6; font-size: 12px;">Ads Completed: 0/3</p>
         </div>
 
         <!-- MAIN MENU -->
         <div id="main-menu-container">
             <div class="menu-grid">
                 <a href="upload.html" class="dark-btn"><i class="fa-solid fa-upload"></i> Upload</a>
-                <a href="ai-tools.html" class="neon-btn"><i class="fa-solid fa-wand-magic-sparkles"></i> AI Magic</a>
-                <a href="projects.html" class="dark-btn"><i class="fa-solid fa-folder"></i> Projects</a>
-                <a href="explore.html" class="dark-btn"><i class="fa-solid fa-magnifying-glass"></i> Explore</a>
-                <a href="register.html" class="dark-btn"><i class="fa-solid fa-user-plus"></i> Register</a>
+                <a href="ai-tools.html" class="dark-btn"><i class="fa-solid fa-wand-magic-sparkles"></i> AI Magic</a>
                 <a href="#" id="setting-btn-trigger" class="dark-btn"><i class="fa-solid fa-gear"></i> Setting</a>
                 <a href="support.html" class="dark-btn"><i class="fa-solid fa-headset"></i> Support</a>
-                <a href="result.html" class="dark-btn"><i class="fa-solid fa-square-poll-vertical"></i> Result</a>
             </div>
 
             <div class="unlock-area">
-                <button onclick="checkAds()" class="pro-btn">
-                    <i class="fa-solid fa-crown"></i> Unlock Pro (watch 3 Ads)
+                <button onclick="openAdScreen()" class="pro-btn">
+                    <i class="fa-solid fa-crown"></i> Unlock Pro (Watch Ad)
                 </button>
             </div>
         </div>
 
         <!-- SETTING PANEL -->
         <div id="setting-panel" class="setting-panel">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <button id="back-to-menu" class="back-btn"><i class="fa-solid fa-arrow-left"></i> Back</button>
-                <select id="lang-select" style="width: auto; padding: 4px; background:#1f2232; color:white; border-radius:5px;">
-                    <option value="en">English</option>
-                    <option value="hi">हिन्दी</option>
-                </select>
-            </div>
+            <button id="back-to-menu" class="back-btn"><i class="fa-solid fa-arrow-left"></i> Back</button>
+            <h3 style="color:#78ffd6;">⚙️ Pro Settings Unlocked!</h3>
+            <p>यहाँ आपके एआई टूल्स उपलब्ध हैं।</p>
+        </div>
 
-            <div id="ai-timer-banner" style="background: #2d3142; padding: 10px; border-radius: 10px; text-align: center; font-size: 14px; color: #ffcc00; font-weight: bold;">
-                ⏳ AI Timer: <span id="time-left">05:00</span>
-            </div>
-
-            <div id="studio-camera-area" class="disabled-ai">
-                <div class="canvas-container">
-                    <video id="webcam" autoplay playsinline></video>
-                    <div id="bg-overlay"></div>
-                    <div id="sticker-zone"></div>
-                </div>
-            </div>
-
-            <div class="tool-block">
-                <h3 id="lbl-age-title"><i class="fa-solid fa-face-smile"></i> AI लुक बदलें (Age Look)</h3>
-                <div class="age-grid">
-                    <button class="age-btn" data-age="5">5 Years</button>
-                    <button class="age-btn" data-age="15">15 Years</button>
-                    <button class="age-btn" data-age="25">25 Years</button>
-                    <button class="age-btn" data-age="45">45 Years</button>
-                    <button class="age-btn" data-age="70">70 Years</button>
-                </div>
-            </div>
-
-            <div class="tool-block">
-                <h3 id="lbl-bg-title"><i class="fa-solid fa-image"></i> बैकग्राउंड इमेज/वीडियो</h3>
-                <input type="file" id="bg-upload" accept="image/*,video/*">
-            </div>
-
-            <div class="tool-block">
-                <h3 id="lbl-text-title"><i class="fa-solid fa-font"></i> टेक्स्ट और स्टिकर्स</h3>
-                <input type="text" id="custom-text" placeholder="यहाँ टेक्स्ट लिखें...">
-                <select id="text-style">
-                    <option value="style1">Style 1: Neon</option>
-                    <option value="style2">Style 2: Bold Red</option>
-                </select>
-                <button id="add-text-btn" class="action-btn">✍️ टेक्स्ट जोड़ें</button>
-            </div>
-
-            <div class="tool-block" style="background: none; border: none; padding: 0;">
-                <button id="capture-btn" class="pro-btn" style="background: #28a745; width: 100%;">
-                    <i class="fa-solid fa-download"></i> गैलरी में सेव करें
-                </button>
+        <!-- 📺 AD POPUP SCREEN -->
+        <div id="ad-modal" class="ad-modal">
+            <div class="ad-box">
+                <i class="fa-solid fa-rectangle-ad" style="font-size: 40px; color: #ffcc00; margin-bottom: 10px;"></i>
+                <h3 style="margin: 5px 0;">Sponsor Ad Playing...</h3>
+                <p style="font-size: 12px; color: #a0a5b5;">कृपया एड पूरा होने का इंतज़ार करें</p>
+                <h2 id="ad-timer" style="color: #ff007f;">5</h2>
             </div>
         </div>
 
     </div>
 
     <script>
-        // --- 1. Welcome Message ---
-        let savedName = localStorage.getItem("user_name") || "Rambha";
-        document.getElementById("welcomeMsg").innerText = "Welcome, " + savedName + "!";
-
-        // --- 2. Unlock Pro Logic ---
         let adCount = localStorage.getItem("ad_count") || 0;
         let unlockTime = localStorage.getItem("unlock_time");
-        let statusMsg = document.getElementById("statusMsg");
-
-        if (unlockTime && new Date().getTime() > unlockTime) {
-            localStorage.removeItem("unlock_time");
-            localStorage.setItem("ad_count", 0);
-        }
-
-        if (localStorage.getItem("unlock_time") && new Date().getTime() < localStorage.getItem("unlock_time")) {
-            statusMsg.innerText = "Status: Pro Access Active!";
-            statusMsg.style.color = "#78ffd6";
-        }
-
-        function checkAds() {
-            adCount = parseInt(adCount) + 1;
-            localStorage.setItem("ad_count", adCount);
-            
-            if (adCount >= 3) {
-                let now = new Date().getTime();
-                let expiry = now + (72 * 60 * 60 * 1000);
-                localStorage.setItem("unlock_time", expiry);
-                alert("Congratulations! 72 घंटे का Pro Access मिल गया।");
-                location.reload();
-            } else {
-                alert("सिर्फ " + (3 - adCount) + " ads और देखने हैं!");
-            }
-        }
-
-        // --- ⚙️ 3. Navigation & Camera Logic (FIXED) ---
-        const settingBtnTrigger = document.getElementById('setting-btn-trigger');
-        const mainMenuContainer = document.getElementById('main-menu-container');
-        const settingPanel = document.getElementById('setting-panel');
-        const backToMenu = document.getElementById('back-to-menu');
-        const studioCameraArea = document.getElementById('studio-camera-area');
-        const webcam = document.getElementById('webcam');
-        const timeLeftSpan = document.getElementById('time-left');
         
-        let timerInterval;
-        let aiCamStream = null;
+        const statusMsg = document.getElementById("statusMsg");
+        const adCounterText = document.getElementById("adCounterText");
+        const adModal = document.getElementById("ad-modal");
+        const adTimer = document.getElementById("ad-timer");
 
-        async function startAICamera() {
-            try {
-                aiCamStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" }, audio: false });
-                webcam.srcObject = aiCamStream;
-            } catch (err) {
-                console.log("Camera access error:", err);
+        function updateUI() {
+            adCounterText.innerText = "Ads Completed: " + adCount + "/3";
+            if (unlockTime && new Date().getTime() < unlockTime) {
+                statusMsg.innerText = "Status: Pro Access Active!";
+                statusMsg.style.color = "#78ffd6";
             }
         }
+        updateUI();
 
-        function stopAICamera() {
-            if (aiCamStream) {
-                aiCamStream.getTracks().forEach(track => track.stop());
-                aiCamStream = null;
+        // 1. Ad Screen खोलना और 5 सेकंड का टाइमर चलाना
+        function openAdScreen() {
+            if (adCount >= 3) {
+                alert("आप पहले ही 3 Ads देख चुके हैं! Pro अनलॉक है।");
+                return;
             }
-        }
 
-        // Setting बटन क्लिक करने पर
-        settingBtnTrigger.addEventListener('click', (e) => {
-            e.preventDefault();
-            let isPro = localStorage.getItem("unlock_time") && new Date().getTime() < localStorage.getItem("unlock_time");
-            
-            mainMenuContainer.style.display = 'none'; // मेनू छुपाएं
-            settingPanel.style.display = 'flex';     // सेटिंग दिखाएं
+            adModal.style.display = "flex";
+            let timeLeft = 5;
+            adTimer.innerText = timeLeft;
 
-            if (isPro) {
-                studioCameraArea.classList.remove('disabled-ai');
-                startAICamera();
-                startAITimer(300);
-            } else {
-                studioCameraArea.classList.add('disabled-ai');
-                alert("नोट: AI फीचर्स के लिए 'Unlock Pro' पूरा करें!");
-            }
-        });
-
-        // 🔙 BACK BUTTON FIX: मुख्य मेनू में वापस जाने के लिए
-        backToMenu.addEventListener('click', (e) => {
-            e.preventDefault();
-            settingPanel.style.display = 'none';        // सेटिंग छुपाएं
-            mainMenuContainer.style.display = 'block';   // मेनू दिखाएं
-            
-            stopAICamera();
-            clearInterval(timerInterval);
-        });
-
-        // Time Counter
-        function startAITimer(duration) {
-            let timeLeft = duration;
-            clearInterval(timerInterval);
-            timerInterval = setInterval(() => {
-                let minutes = Math.floor(timeLeft / 60);
-                let seconds = timeLeft % 60;
-                timeLeftSpan.textContent = `${minutes < 10 ? '0' : ''}${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+            let countdown = setInterval(() => {
+                timeLeft--;
+                adTimer.innerText = timeLeft;
 
                 if (timeLeft <= 0) {
-                    clearInterval(timerInterval);
-                    studioCameraArea.classList.add('disabled-ai');
-                    stopAICamera();
+                    clearInterval(countdown);
+                    adModal.style.display = "none"; // Ad स्क्रीन बंद करें
+                    
+                    adCount = parseInt(adCount) + 1;
+                    localStorage.setItem("ad_count", adCount);
+                    
+                    if (adCount >= 3) {
+                        let expiry = new Date().getTime() + (72 * 60 * 60 * 1000); // 72 घंटे
+                        localStorage.setItem("unlock_time", expiry);
+                        alert("बधाई हो! 3 Ads पूरे हो गए। Pro अनलॉक हो गया है!");
+                    } else {
+                        alert("Ad पूरा देखा गया! आपको " + (3 - adCount) + " Ad और देखने हैं।");
+                    }
+                    updateUI();
                 }
-                timeLeft--;
             }, 1000);
         }
+
+        // 2. Setting बटन लॉजिक
+        document.getElementById('setting-btn-trigger').addEventListener('click', (e) => {
+            e.preventDefault();
+            let isPro = localStorage.getItem("unlock_time") && new Date().getTime() < localStorage.getItem("unlock_time");
+
+            if (isPro || adCount >= 3) {
+                document.getElementById('main-menu-container').style.display = 'none';
+                document.getElementById('setting-panel').style.display = 'flex';
+            } else {
+                alert("एक्सेस डिनाइड! पहले 'Unlock Pro' बटन दबाकर 3 Ads देखें। (अभी तक: " + adCount + "/3)");
+            }
+        });
+
+        // 3. Back बटन
+        document.getElementById('back-to-menu').addEventListener('click', () => {
+            document.getElementById('setting-panel').style.display = 'none';
+            document.getElementById('main-menu-container').style.display = 'block';
+        });
     </script>
 </body>
 </html>
