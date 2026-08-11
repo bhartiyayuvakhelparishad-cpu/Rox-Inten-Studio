@@ -3,278 +3,173 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rox INTEN STUDIO - Complete Suite</title>
+    <title>Rox INTEN STUDIO - AI BG Remover</title>
+    <!-- AI Background Removal Library (MediaPipe Selfie Segmentation) -->
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation/selfie_segmentation.js" crossorigin="anonymous"></script>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Arial, sans-serif; }
-        body { background: #0c0c14; color: #fff; min-height: 100vh; display: flex; flex-direction: column; overflow-x: hidden; }
+        body { background: #0c0c14; color: #fff; min-height: 100vh; display: flex; flex-direction: column; }
 
-        /* Mobile First Navigation */
-        .top-navbar { background: #161625; padding: 10px 15px; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; border-bottom: 2px solid #28283d; }
+        /* Top Navbar */
+        .top-navbar { background: #161625; padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #28283d; }
         .logo-area h1 { color: #00e5ff; font-size: 20px; display: inline-block; }
-        .logo-area span { color: #ff007f; font-size: 10px; font-weight: bold; letter-spacing: 1px; }
-        .nav-links { display: flex; gap: 5px; overflow-x: auto; padding: 5px 0; width: 100%; margin-top: 5px; }
-        .nav-links a { color: #ccc; text-decoration: none; font-size: 11px; padding: 5px 10px; background: #222235; border-radius: 4px; white-space: nowrap; }
+        .logo-area span { color: #ff007f; font-size: 10px; font-weight: bold; }
 
-        /* Responsive Layout (Mobile Friendly) */
         .studio-body { display: flex; flex-direction: column; flex: 1; }
-        @media (min-width: 768px) {
-            .studio-body { display: grid; grid-template-columns: 340px 1fr; }
-        }
+        @media (min-width: 768px) { .studio-body { display: grid; grid-template-columns: 320px 1fr; } }
 
-        /* Editing Panel */
         .sidebar-tools { background: #12121c; padding: 12px; overflow-y: auto; }
         .tool-card { background: #1a1a2b; padding: 12px; border-radius: 8px; margin-bottom: 12px; border: 1px solid #2e2e48; }
         .tool-card h3 { font-size: 12px; color: #00e5ff; margin-bottom: 8px; text-transform: uppercase; }
 
         button, select, input { width: 100%; padding: 8px; margin-top: 5px; background: #25253b; color: #fff; border: 1px solid #3e3e5e; border-radius: 5px; font-size: 12px; cursor: pointer; }
         button:hover { background: #00e5ff; color: #000; font-weight: bold; }
-        .btn-pink { background: linear-gradient(90deg, #ff007f, #7f00ff); border: none; }
+        .btn-pink { background: linear-gradient(90deg, #ff007f, #7f00ff); border: none; font-weight: bold; }
 
-        /* Studio Stage & Live Canvas */
-        .preview-workspace { display: flex; flex-direction: column; background: #050508; align-items: center; padding: 10px; min-height: 400px; justify-content: center; }
-        .stage-box { position: relative; width: 100%; max-width: 320px; aspect-ratio: 9/16; background: #111; border: 2px solid #00e5ff; border-radius: 10px; overflow: hidden; display: flex; justify-content: center; align-items: center; }
-        
+        /* Workspace Stage */
+        .preview-workspace { display: flex; flex-direction: column; background: #050508; align-items: center; padding: 10px; justify-content: center; }
+        .stage-box { position: relative; width: 100%; max-width: 320px; aspect-ratio: 9/16; background: #111; border: 2px solid #00e5ff; border-radius: 10px; overflow: hidden; }
         canvas { width: 100%; height: 100%; object-fit: contain; }
-        video, img { display: none; }
+        img, video { display: none; }
 
-        /* Dynamic Overlay Subtitles */
-        #subtitleOverlay { position: absolute; bottom: 15%; width: 90%; text-align: center; font-size: 16px; font-weight: bold; color: #fff; text-shadow: 0 0 8px #ff007f, 0 0 10px #000; pointer-events: none; }
-
-        /* Timeline View */
-        .timeline-container { width: 100%; background: #12121c; border-top: 2px solid #28283d; padding: 10px; margin-top: 10px; }
-        .track-header { font-size: 10px; color: #888; margin-top: 4px; }
-        .track { height: 26px; background: #1a1a2b; border-radius: 4px; margin-top: 2px; position: relative; border: 1px dashed #3a3a58; overflow: hidden; }
-        .clip { height: 100%; position: absolute; border-radius: 4px; font-size: 10px; display: flex; align-items: center; padding: 0 8px; color: white; width: 80%; }
-        .v-clip { background: linear-gradient(90deg, #ff007f, #7f00ff); }
-        .a-clip { background: linear-gradient(90deg, #00e5ff, #007ff0); }
+        #statusText { position: absolute; top: 10px; left: 10px; font-size: 11px; background: rgba(0,0,0,0.7); padding: 4px 8px; border-radius: 4px; color: #00e5ff; }
     </style>
 </head>
 <body>
 
-    <!-- Top Bar -->
     <div class="top-navbar">
         <div class="logo-area">
-            <h1>Rox</h1> <span>INTEN STUDIO</span>
+            <h1>Rox</h1> <span>INTEN STUDIO (AI BG Remover)</span>
         </div>
-        <div>
-            <span style="font-size: 11px; color: #00e5ff;">⏳ AI Timer: <strong>05:00</strong></span>
-        </div>
-        <div class="nav-links">
-            <a href="upload.html">Upload</a>
-            <a href="ai-tools.html">AI Magic</a>
-            <a href="projects.html">Projects</a>
-            <a href="setting.html">Setting</a>
-            <a href="result.html">Result</a>
-        </div>
+        <div><span style="font-size: 11px; color: #00e5ff;">⏳ AI Engine: Active</span></div>
     </div>
 
     <div class="studio-body">
-        <!-- Sidebar Controls -->
         <div class="sidebar-tools">
             
-            <!-- 1. Upload Media -->
+            <!-- 1. Media Upload -->
             <div class="tool-card">
                 <h3>📁 फोटो या वीडियो अपलोड करें</h3>
-                <input type="file" id="mediaUpload" accept="video/*, image/*">
-                <select id="aspectRatio">
-                    <option value="9:16">9:16 (Insta Reels / YT Shorts)</option>
-                    <option value="16:9">16:9 (YouTube Main Video)</option>
-                    <option value="1:1">1:1 (FB / Insta Post)</option>
-                </select>
+                <input type="file" id="mediaUpload" accept="image/*, video/*">
             </div>
 
-            <!-- 2. Real Background Changer -->
+            <!-- 2. Real AI Background Removal & Replacement -->
             <div class="tool-card">
-                <h3>🖼️ बैकग्राउंड कलर व फिल्टर चेंज</h3>
-                <label style="font-size:11px; color:#aaa;">बैकग्राउंड कलर चुनें:</label>
-                <input type="color" id="bgColorPicker" value="#0c0c14">
-                <button onclick="applyBgColor()" class="btn-pink">रंग चेंज करें</button>
+                <h3>🤖 AI बैकग्राउंड रिमूवल</h3>
+                <label style="font-size:11px; color:#aaa;">नया बैकग्राउंड रंग चुनें:</label>
+                <input type="color" id="bgColorPicker" value="#ff007f">
+                
+                <label style="font-size:11px; color:#aaa; margin-top:8px; display:block;">या नया बैकग्राउंड फोटो लगाएं:</label>
+                <input type="file" id="bgImageUpload" accept="image/*">
+                
+                <button onclick="processAIBgRemove()" class="btn-pink">⚡ AI बैकग्राउंड हटाएं (Remove BG)</button>
             </div>
 
-            <!-- 3. Working Audio/Video Cut-Trim -->
+            <!-- 3. Text to Speech AI Voice -->
             <div class="tool-card">
-                <h3>✂️ प्ले / पॉज और ट्रिम कंट्रोल</h3>
-                <button onclick="togglePlay()" style="background:#00e5ff; color:#000; font-weight:bold;">▶️ प्ले / पॉज (Play/Pause)</button>
-                <div style="display:flex; gap:5px; margin-top:5px;">
-                    <input type="number" id="trimStart" placeholder="शुरू (Sec)" value="0">
-                    <input type="number" id="trimEnd" placeholder="अंत (Sec)" value="10">
-                </div>
-                <button onclick="applyTrim()">ट्रिम अप्लाई करें</button>
-            </div>
-
-            <!-- 4. Live Reels Auto Captions -->
-            <div class="tool-card">
-                <h3>💬 लाइव ऑटो सबटाइटल</h3>
-                <button onclick="startAutoCaptions()" class="btn-pink">🎤 बोलना शुरू करें (Auto Subtitles)</button>
-                <p id="captionStatus" style="font-size:10px; color:#00e5ff; margin-top:4px;"></p>
-            </div>
-
-            <!-- 5. Real AI Text-to-Speech -->
-            <div class="tool-card">
-                <h3>🔊 AI वॉयस ओवर (Text To Speech)</h3>
-                <input type="text" id="ttsInput" placeholder="यहाँ वॉयस ओवर टेक्स्ट लिखें...">
-                <button onclick="speakAIVoice()">AI आवाज सुनाएं</button>
+                <h3>🔊 AI वॉयस ओवर</h3>
+                <input type="text" id="ttsInput" placeholder="यहाँ टेक्स्ट लिखें...">
+                <button onclick="speakAIVoice()">AI आवाज बनाएं</button>
             </div>
 
         </div>
 
-        <!-- Studio Stage -->
+        <!-- Studio Display Stage -->
         <div class="preview-workspace">
-            <div class="stage-box" id="stageBox">
-                <!-- HTML Canvas Area -->
-                <canvas id="studioCanvas"></canvas>
-                <!-- Dynamic Text Overlay -->
-                <div id="subtitleOverlay"></div>
+            <div class="stage-box">
+                <canvas id="outputCanvas"></canvas>
+                <div id="statusText">रेडी - फोटो अपलोड करें</div>
             </div>
 
-            <!-- Media Elements (Hidden) -->
-            <video id="hiddenVideo" loop playsinline crossorigin="anonymous"></video>
-            <img id="hiddenImage" crossorigin="anonymous" alt="raw">
-
-            <!-- Timeline -->
-            <div class="timeline-container">
-                <div class="track-header">🎬 Media Canvas Track</div>
-                <div class="track"><div class="clip v-clip">Working_Media_Track</div></div>
-
-                <div class="track-header">🎵 Audio & Voice Track</div>
-                <div class="track"><div class="clip a-clip">Voiceover_Audio_Track</div></div>
-            </div>
+            <img id="sourceImage" crossorigin="anonymous">
+            <img id="bgImage" crossorigin="anonymous">
+            <video id="sourceVideo" loop playsinline crossorigin="anonymous"></video>
         </div>
     </div>
 
-    <!-- JS Canvas Logic -->
+    <!-- AI Script Logic -->
     <script>
         const mediaUpload = document.getElementById('mediaUpload');
-        const hiddenVideo = document.getElementById('hiddenVideo');
-        const hiddenImage = document.getElementById('hiddenImage');
-        const canvas = document.getElementById('studioCanvas');
+        const bgImageUpload = document.getElementById('bgImageUpload');
+        const sourceImage = document.getElementById('sourceImage');
+        const bgImage = document.getElementById('bgImage');
+        const canvas = document.getElementById('outputCanvas');
         const ctx = canvas.getContext('2d');
-        const stageBox = document.getElementById('stageBox');
-        
-        let mediaType = null;
-        let canvasBgColor = "#0c0c14";
-        let trimStartTime = 0;
-        let trimEndTime = 1000;
+        const statusText = document.getElementById('statusText');
 
-        // Initialize Canvas Engine
-        function initCanvas() {
-            canvas.width = 360;
-            canvas.height = 640;
-            renderLoop();
+        let selfieSegmentation;
+        let isAIBgActive = false;
+
+        // Initialize Canvas
+        canvas.width = 360;
+        canvas.height = 640;
+
+        // Load AI MediaPipe Model
+        function initAI() {
+            selfieSegmentation = new SelfieSegmentation({
+                locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation/${file}`
+            });
+            selfieSegmentation.setOptions({ modelSelection: 1 });
+            selfieSegmentation.onResults(onAIResults);
+            statusText.innerText = "AI तैयार है!";
         }
 
-        // Render Canvas Frame by Frame
-        function renderLoop() {
-            ctx.fillStyle = canvasBgColor;
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        // Output results after AI removes background
+        function onAIResults(results) {
+            ctx.save();
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            if (mediaType === 'image' && hiddenImage.src) {
-                drawCenteredImage();
-            } else if (mediaType === 'video' && hiddenVideo.src) {
-                ctx.drawImage(hiddenVideo, 0, 0, canvas.width, canvas.height);
-                
-                // Trim loop control
-                if (hiddenVideo.currentTime >= trimEndTime) {
-                    hiddenVideo.currentTime = trimStartTime;
-                }
+            // 1. Draw new background (Color or Image)
+            if (bgImage.src && bgImage.complete) {
+                ctx.drawImage(bgImage, 0, 0, canvas.width, canvas.height);
+            } else {
+                ctx.fillStyle = document.getElementById('bgColorPicker').value;
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
             }
-            requestAnimationFrame(renderLoop);
+
+            // 2. Extract Person cutout mask using AI
+            ctx.globalCompositeOperation = 'destination-atop';
+            ctx.drawImage(results.image, 0, 0, canvas.width, canvas.height);
+
+            // 3. Render Person on top of new Background
+            ctx.globalCompositeOperation = 'destination-over';
+            ctx.drawImage(results.segmentationMask, 0, 0, canvas.width, canvas.height);
+
+            ctx.restore();
+            statusText.innerText = "AI बैकग्राउंड रिमूव हो गया!";
         }
 
-        function drawCenteredImage() {
-            let hRatio = canvas.width / hiddenImage.width;
-            let vRatio = canvas.height / hiddenImage.height;
-            let ratio = Math.min(hRatio, vRatio);
-            let centerShiftX = (canvas.width - hiddenImage.width * ratio) / 2;
-            let centerShiftY = (canvas.height - hiddenImage.height * ratio) / 2;
-            ctx.drawImage(hiddenImage, 0, 0, hiddenImage.width, hiddenImage.height,
-                centerShiftX, centerShiftY, hiddenImage.width * ratio, hiddenImage.height * ratio);
-        }
-
-        // File Selection Handler
+        // Upload User Image
         mediaUpload.addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (!file) return;
 
             const fileUrl = URL.createObjectURL(file);
-            if (file.type.startsWith('image/')) {
-                mediaType = 'image';
-                hiddenImage.src = fileUrl;
-                hiddenImage.onload = () => { renderLoop(); };
-            } else if (file.type.startsWith('video/')) {
-                mediaType = 'video';
-                hiddenVideo.src = fileUrl;
-                hiddenVideo.load();
-                hiddenVideo.play();
-            }
+            sourceImage.src = fileUrl;
+            sourceImage.onload = () => {
+                ctx.drawImage(sourceImage, 0, 0, canvas.width, canvas.height);
+                statusText.innerText = "फोटो लोड हुई. AI बटन दबाएं!";
+            };
         });
 
-        // Aspect Ratio Changer
-        document.getElementById('aspectRatio').addEventListener('change', function(e) {
-            const val = e.target.value;
-            if (val === '9:16') {
-                stageBox.style.aspectRatio = '9/16';
-                canvas.width = 360; canvas.height = 640;
-            } else if (val === '16:9') {
-                stageBox.style.aspectRatio = '16/9';
-                canvas.width = 640; canvas.height = 360;
-            } else {
-                stageBox.style.aspectRatio = '1/1';
-                canvas.width = 500; canvas.height = 500;
-            }
+        // Upload New Custom Background Image
+        bgImageUpload.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) bgImage.src = URL.createObjectURL(file);
         });
 
-        // Change Background Color
-        function applyBgColor() {
-            canvasBgColor = document.getElementById('bgColorPicker').value;
-        }
-
-        // Play/Pause Video
-        function togglePlay() {
-            if (mediaType === 'video') {
-                if (hiddenVideo.paused) hiddenVideo.play();
-                else hiddenVideo.pause();
-            }
-        }
-
-        // Video Trim Function
-        function applyTrim() {
-            trimStartTime = parseFloat(document.getElementById('trimStart').value) || 0;
-            trimEndTime = parseFloat(document.getElementById('trimEnd').value) || 10;
-            if (mediaType === 'video') {
-                hiddenVideo.currentTime = trimStartTime;
-                hiddenVideo.play();
-            }
-            alert(`ट्रिम टाइमिंग सेट: ${trimStartTime}s से ${trimEndTime}s`);
-        }
-
-        // Speech Recognition Auto Subtitles
-        function startAutoCaptions() {
-            const status = document.getElementById('captionStatus');
-            const subOverlay = document.getElementById('subtitleOverlay');
-
-            if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-                alert('माइक्रोफोन या ब्राउज़र स्पीच सपोर्ट नहीं कर रहा है।');
+        // Trigger AI Processing
+        async function processAIBgRemove() {
+            if (!sourceImage.src) {
+                alert("पहले अपनी फोटो अपलोड करें!");
                 return;
             }
-
-            status.innerText = "सुन रहा है... बोलना शुरू करें!";
-            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            const recognition = new SpeechRecognition();
-            recognition.lang = 'hi-IN';
-            recognition.continuous = true;
-
-            recognition.onresult = function(event) {
-                let currentText = '';
-                for (let i = event.resultIndex; i < event.results.length; ++i) {
-                    currentText += event.results[i][0].transcript;
-                }
-                subOverlay.innerText = currentText;
-            };
-            recognition.start();
+            statusText.innerText = "AI कटआउट बना रहा है...";
+            await selfieSegmentation.send({ image: sourceImage });
         }
 
-        // Text To Speech AI Voice
+        // Text To Speech
         function speakAIVoice() {
             const text = document.getElementById('ttsInput').value;
             if (!text) { alert('कृपया कुछ टेक्स्ट लिखें!'); return; }
@@ -283,8 +178,7 @@
             window.speechSynthesis.speak(utterance);
         }
 
-        // Start Canvas Engine On Load
-        window.onload = initCanvas;
+        window.onload = initAI;
     </script>
 </body>
 </html>
