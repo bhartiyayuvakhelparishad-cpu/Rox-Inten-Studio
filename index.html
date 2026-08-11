@@ -3,53 +3,61 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rox INTEN STUDIO - Ultimate Creator Suite</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Rox INTEN STUDIO - Complete Suite</title>
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
-        body { background: #0c0c12; color: #fff; min-height: 100vh; display: flex; flex-direction: column; }
-        
-        /* Top Navigation Bar */
-        .top-navbar { background: #161622; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #28283d; }
-        .logo-area h1 { color: #00e5ff; font-size: 22px; display: inline-block; }
-        .logo-area span { color: #ff007f; font-size: 11px; font-weight: bold; letter-spacing: 2px; }
-        
-        .nav-links a { color: #ccc; text-decoration: none; font-size: 13px; margin: 0 6px; padding: 6px 12px; background: #222233; border-radius: 4px; }
-        .nav-links a:hover { background: #00e5ff; color: #000; font-weight: bold; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Arial, sans-serif; }
+        body { background: #0c0c14; color: #fff; min-height: 100vh; display: flex; flex-direction: column; overflow-x: hidden; }
 
-        /* Main Workspace Grid */
-        .studio-body { display: grid; grid-template-columns: 340px 1fr; flex: 1; overflow: hidden; }
+        /* Mobile First Navigation */
+        .top-navbar { background: #161625; padding: 10px 15px; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; border-bottom: 2px solid #28283d; }
+        .logo-area h1 { color: #00e5ff; font-size: 20px; display: inline-block; }
+        .logo-area span { color: #ff007f; font-size: 10px; font-weight: bold; letter-spacing: 1px; }
+        .nav-links { display: flex; gap: 5px; overflow-x: auto; padding: 5px 0; width: 100%; margin-top: 5px; }
+        .nav-links a { color: #ccc; text-decoration: none; font-size: 11px; padding: 5px 10px; background: #222235; border-radius: 4px; white-space: nowrap; }
 
-        /* Left Editing Sidebar */
-        .sidebar-tools { background: #12121c; border-right: 1px solid #28283d; padding: 15px; overflow-y: auto; height: calc(100vh - 65px); }
+        /* Responsive Layout (Mobile Friendly) */
+        .studio-body { display: flex; flex-direction: column; flex: 1; }
+        @media (min-width: 768px) {
+            .studio-body { display: grid; grid-template-columns: 340px 1fr; }
+        }
+
+        /* Editing Panel */
+        .sidebar-tools { background: #12121c; padding: 12px; overflow-y: auto; }
         .tool-card { background: #1a1a2b; padding: 12px; border-radius: 8px; margin-bottom: 12px; border: 1px solid #2e2e48; }
-        .tool-card h3 { font-size: 13px; color: #00e5ff; margin-bottom: 8px; text-transform: uppercase; }
+        .tool-card h3 { font-size: 12px; color: #00e5ff; margin-bottom: 8px; text-transform: uppercase; }
 
-        button, select, input { width: 100%; padding: 8px 10px; margin-top: 5px; background: #25253b; color: #fff; border: 1px solid #3e3e5e; border-radius: 5px; font-size: 12px; cursor: pointer; }
+        button, select, input { width: 100%; padding: 8px; margin-top: 5px; background: #25253b; color: #fff; border: 1px solid #3e3e5e; border-radius: 5px; font-size: 12px; cursor: pointer; }
         button:hover { background: #00e5ff; color: #000; font-weight: bold; }
         .btn-pink { background: linear-gradient(90deg, #ff007f, #7f00ff); border: none; }
 
-        /* Preview Area */
-        .preview-workspace { display: flex; flex-direction: column; background: #050508; justify-content: space-between; position: relative; }
-        .media-stage { flex: 1; display: flex; justify-content: center; align-items: center; padding: 15px; position: relative; }
-        video, img { max-width: 100%; max-height: 380px; border-radius: 8px; border: 2px solid #00e5ff; box-shadow: 0 0 15px rgba(0,229,255,0.2); }
+        /* Studio Stage & Live Canvas */
+        .preview-workspace { display: flex; flex-direction: column; background: #050508; align-items: center; padding: 10px; min-height: 400px; justify-content: center; }
+        .stage-box { position: relative; width: 100%; max-width: 320px; aspect-ratio: 9/16; background: #111; border: 2px solid #00e5ff; border-radius: 10px; overflow: hidden; display: flex; justify-content: center; align-items: center; }
+        
+        canvas { width: 100%; height: 100%; object-fit: contain; }
+        video, img { display: none; }
 
-        /* Creator Multi-Track Timeline */
-        .timeline-container { height: 190px; background: #12121c; border-top: 2px solid #28283d; padding: 10px; }
-        .track-header { font-size: 11px; color: #888; margin-top: 2px; display: flex; justify-content: space-between; }
-        .track { height: 32px; background: #1a1a2b; border-radius: 4px; margin-top: 2px; position: relative; border: 1px dashed #3a3a58; overflow: hidden; }
-        .clip { height: 100%; position: absolute; border-radius: 4px; font-size: 11px; display: flex; align-items: center; padding: 0 8px; color: white; }
-        .v-clip { background: linear-gradient(90deg, #ff007f, #7f00ff); width: 65%; }
-        .a-clip { background: linear-gradient(90deg, #00e5ff, #007ff0); width: 50%; left: 10%; }
-        .t-clip { background: linear-gradient(90deg, #ffb703, #fb8500); width: 40%; left: 20%; }
+        /* Dynamic Overlay Subtitles */
+        #subtitleOverlay { position: absolute; bottom: 15%; width: 90%; text-align: center; font-size: 16px; font-weight: bold; color: #fff; text-shadow: 0 0 8px #ff007f, 0 0 10px #000; pointer-events: none; }
+
+        /* Timeline View */
+        .timeline-container { width: 100%; background: #12121c; border-top: 2px solid #28283d; padding: 10px; margin-top: 10px; }
+        .track-header { font-size: 10px; color: #888; margin-top: 4px; }
+        .track { height: 26px; background: #1a1a2b; border-radius: 4px; margin-top: 2px; position: relative; border: 1px dashed #3a3a58; overflow: hidden; }
+        .clip { height: 100%; position: absolute; border-radius: 4px; font-size: 10px; display: flex; align-items: center; padding: 0 8px; color: white; width: 80%; }
+        .v-clip { background: linear-gradient(90deg, #ff007f, #7f00ff); }
+        .a-clip { background: linear-gradient(90deg, #00e5ff, #007ff0); }
     </style>
 </head>
 <body>
 
-    <!-- Header Navbar -->
+    <!-- Top Bar -->
     <div class="top-navbar">
         <div class="logo-area">
             <h1>Rox</h1> <span>INTEN STUDIO</span>
+        </div>
+        <div>
+            <span style="font-size: 11px; color: #00e5ff;">⏳ AI Timer: <strong>05:00</strong></span>
         </div>
         <div class="nav-links">
             <a href="upload.html">Upload</a>
@@ -58,18 +66,15 @@
             <a href="setting.html">Setting</a>
             <a href="result.html">Result</a>
         </div>
-        <div>
-            <span style="font-size: 12px; color: #00e5ff;">⏳ AI Timer: <strong>05:00</strong></span>
-        </div>
     </div>
 
     <div class="studio-body">
         <!-- Sidebar Controls -->
         <div class="sidebar-tools">
             
-            <!-- 1. Frame & Upload -->
+            <!-- 1. Upload Media -->
             <div class="tool-card">
-                <h3>🎬 मीडिया अपलोड व रील्स साइज</h3>
+                <h3>📁 फोटो या वीडियो अपलोड करें</h3>
                 <input type="file" id="mediaUpload" accept="video/*, image/*">
                 <select id="aspectRatio">
                     <option value="9:16">9:16 (Insta Reels / YT Shorts)</option>
@@ -78,174 +83,208 @@
                 </select>
             </div>
 
-            <!-- 2. BG Remover (Photo & Video) -->
+            <!-- 2. Real Background Changer -->
             <div class="tool-card">
-                <h3>🖼️ फोटो और वीडियो बैकग्राउंड चेंजर</h3>
-                <label style="font-size:11px; color:#aaa;">नया बैकग्राउंड इमेज/रंग चुनें:</label>
-                <input type="color" id="bgColorPicker" value="#00e5ff">
-                <button onclick="changeBackground()" class="btn-pink">1-क्लिक AI बैकग्राउंड चेंज करें</button>
+                <h3>🖼️ बैकग्राउंड कलर व फिल्टर चेंज</h3>
+                <label style="font-size:11px; color:#aaa;">बैकग्राउंड कलर चुनें:</label>
+                <input type="color" id="bgColorPicker" value="#0c0c14">
+                <button onclick="applyBgColor()" class="btn-pink">रंग चेंज करें</button>
             </div>
 
-            <!-- 3. Audio Video Cut / Trim Settings -->
+            <!-- 3. Working Audio/Video Cut-Trim -->
             <div class="tool-card">
-                <h3>✂️ ऑडियो-वीडियो कट और ट्रिम</h3>
-                <div style="display:flex; gap:5px;">
-                    <input type="number" id="trimStart" placeholder="स्टार्ट (sec)" value="0">
-                    <input type="number" id="trimEnd" placeholder="एंड (sec)" value="10">
+                <h3>✂️ प्ले / पॉज और ट्रिम कंट्रोल</h3>
+                <button onclick="togglePlay()" style="background:#00e5ff; color:#000; font-weight:bold;">▶️ प्ले / पॉज (Play/Pause)</button>
+                <div style="display:flex; gap:5px; margin-top:5px;">
+                    <input type="number" id="trimStart" placeholder="शुरू (Sec)" value="0">
+                    <input type="number" id="trimEnd" placeholder="अंत (Sec)" value="10">
                 </div>
-                <button onclick="trimMedia()">क्लिप ट्रिम / कट करें</button>
+                <button onclick="applyTrim()">ट्रिम अप्लाई करें</button>
             </div>
 
-            <!-- 4. Text & Auto Captions for Reels -->
+            <!-- 4. Live Reels Auto Captions -->
             <div class="tool-card">
-                <h3>💬 टेक्स्ट और ऑटो सबटाइटल</h3>
-                <select id="textStyle">
-                    <option value="neon">Style 1: Neon Glow</option>
-                    <option value="bold">Style 2: Bold Red (Viral)</option>
-                    <option value="retro">Style 3: Retro Gold</option>
-                    <option value="3d">Style 4: 3D Shadow</option>
-                </select>
-                <button onclick="generateSubtitles()" class="btn-pink">🎤 ऑटो वॉयस सबटाइटल बनाएं</button>
-                <p id="captionStatus" style="font-size:11px; color:#00e5ff; margin-top:4px;"></p>
+                <h3>💬 लाइव ऑटो सबटाइटल</h3>
+                <button onclick="startAutoCaptions()" class="btn-pink">🎤 बोलना शुरू करें (Auto Subtitles)</button>
+                <p id="captionStatus" style="font-size:10px; color:#00e5ff; margin-top:4px;"></p>
             </div>
 
-            <!-- 5. AI Voice Generator (TTS) -->
+            <!-- 5. Real AI Text-to-Speech -->
             <div class="tool-card">
-                <h3>🔊 AI वॉयस ओवर (Text to Speech)</h3>
-                <input type="text" id="ttsInput" placeholder="यहाँ वॉयसओवर टेक्स्ट लिखें...">
-                <button onclick="generateVoice()">AI वॉयस जोड़ें</button>
-            </div>
-
-            <!-- 6. AI Viral Guidance -->
-            <div class="tool-card" style="border-color:#00e5ff;">
-                <h3 style="color:#00e5ff;">📊 AI वायरल कंटेंट गाइडेंस</h3>
-                <p style="font-size:11px; color:#aaa;">लाइटिंग, बैकग्राउंड और साउंड क्वालिटी: <strong style="color:#00e5ff;">98% Perfect!</strong></p>
+                <h3>🔊 AI वॉयस ओवर (Text To Speech)</h3>
+                <input type="text" id="ttsInput" placeholder="यहाँ वॉयस ओवर टेक्स्ट लिखें...">
+                <button onclick="speakAIVoice()">AI आवाज सुनाएं</button>
             </div>
 
         </div>
 
-        <!-- Right Preview Workspace -->
+        <!-- Studio Stage -->
         <div class="preview-workspace">
-            <div class="media-stage" id="mediaStage">
-                <video id="mainVideo" controls autoplay loop muted></video>
-                <img id="mainImage" style="display:none;" alt="Preview">
+            <div class="stage-box" id="stageBox">
+                <!-- HTML Canvas Area -->
+                <canvas id="studioCanvas"></canvas>
+                <!-- Dynamic Text Overlay -->
+                <div id="subtitleOverlay"></div>
             </div>
 
-            <!-- Multi-Track Timeline -->
+            <!-- Media Elements (Hidden) -->
+            <video id="hiddenVideo" loop playsinline crossorigin="anonymous"></video>
+            <img id="hiddenImage" crossorigin="anonymous" alt="raw">
+
+            <!-- Timeline -->
             <div class="timeline-container">
-                <div class="track-header">
-                    <span>🎬 Video / Image Track</span>
-                    <span id="videoTime">00:00 / 00:00</span>
-                </div>
-                <div class="track">
-                    <div class="clip v-clip">Media_Clip.mp4</div>
-                </div>
+                <div class="track-header">🎬 Media Canvas Track</div>
+                <div class="track"><div class="clip v-clip">Working_Media_Track</div></div>
 
-                <div class="track-header">
-                    <span>🎵 Cut-Paste Audio Track</span>
-                </div>
-                <div class="track">
-                    <div class="clip a-clip">Background_Music.mp3</div>
-                </div>
-
-                <div class="track-header">
-                    <span>📝 Viral Captions Track</span>
-                </div>
-                <div class="track">
-                    <div class="clip t-clip">Auto_Captions.srt</div>
-                </div>
+                <div class="track-header">🎵 Audio & Voice Track</div>
+                <div class="track"><div class="clip a-clip">Voiceover_Audio_Track</div></div>
             </div>
         </div>
     </div>
 
-    <!-- JS Studio Logic -->
+    <!-- JS Canvas Logic -->
     <script>
         const mediaUpload = document.getElementById('mediaUpload');
-        const mainVideo = document.getElementById('mainVideo');
-        const mainImage = document.getElementById('mainImage');
-        const mediaStage = document.getElementById('mediaStage');
+        const hiddenVideo = document.getElementById('hiddenVideo');
+        const hiddenImage = document.getElementById('hiddenImage');
+        const canvas = document.getElementById('studioCanvas');
+        const ctx = canvas.getContext('2d');
+        const stageBox = document.getElementById('stageBox');
+        
+        let mediaType = null;
+        let canvasBgColor = "#0c0c14";
+        let trimStartTime = 0;
+        let trimEndTime = 1000;
 
-        // File Handler (Supports Photo & Video)
+        // Initialize Canvas Engine
+        function initCanvas() {
+            canvas.width = 360;
+            canvas.height = 640;
+            renderLoop();
+        }
+
+        // Render Canvas Frame by Frame
+        function renderLoop() {
+            ctx.fillStyle = canvasBgColor;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            if (mediaType === 'image' && hiddenImage.src) {
+                drawCenteredImage();
+            } else if (mediaType === 'video' && hiddenVideo.src) {
+                ctx.drawImage(hiddenVideo, 0, 0, canvas.width, canvas.height);
+                
+                // Trim loop control
+                if (hiddenVideo.currentTime >= trimEndTime) {
+                    hiddenVideo.currentTime = trimStartTime;
+                }
+            }
+            requestAnimationFrame(renderLoop);
+        }
+
+        function drawCenteredImage() {
+            let hRatio = canvas.width / hiddenImage.width;
+            let vRatio = canvas.height / hiddenImage.height;
+            let ratio = Math.min(hRatio, vRatio);
+            let centerShiftX = (canvas.width - hiddenImage.width * ratio) / 2;
+            let centerShiftY = (canvas.height - hiddenImage.height * ratio) / 2;
+            ctx.drawImage(hiddenImage, 0, 0, hiddenImage.width, hiddenImage.height,
+                centerShiftX, centerShiftY, hiddenImage.width * ratio, hiddenImage.height * ratio);
+        }
+
+        // File Selection Handler
         mediaUpload.addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (!file) return;
 
-            const url = URL.createObjectURL(file);
+            const fileUrl = URL.createObjectURL(file);
             if (file.type.startsWith('image/')) {
-                mainVideo.style.display = 'none';
-                mainImage.style.display = 'block';
-                mainImage.src = url;
-            } else {
-                mainImage.style.display = 'none';
-                mainVideo.style.display = 'block';
-                mainVideo.src = url;
+                mediaType = 'image';
+                hiddenImage.src = fileUrl;
+                hiddenImage.onload = () => { renderLoop(); };
+            } else if (file.type.startsWith('video/')) {
+                mediaType = 'video';
+                hiddenVideo.src = fileUrl;
+                hiddenVideo.load();
+                hiddenVideo.play();
             }
         });
 
-        // Aspect Ratio Changer (Reels 9:16 / YT 16:9)
+        // Aspect Ratio Changer
         document.getElementById('aspectRatio').addEventListener('change', function(e) {
             const val = e.target.value;
             if (val === '9:16') {
-                mediaStage.style.aspectRatio = '9/16';
-                mainVideo.style.maxHeight = '350px';
-                mainImage.style.maxHeight = '350px';
+                stageBox.style.aspectRatio = '9/16';
+                canvas.width = 360; canvas.height = 640;
             } else if (val === '16:9') {
-                mediaStage.style.aspectRatio = '16/9';
-                mainVideo.style.maxHeight = '380px';
+                stageBox.style.aspectRatio = '16/9';
+                canvas.width = 640; canvas.height = 360;
             } else {
-                mediaStage.style.aspectRatio = '1/1';
+                stageBox.style.aspectRatio = '1/1';
+                canvas.width = 500; canvas.height = 500;
             }
         });
 
-        // AI Background Change Function
-        function changeBackground() {
-            const color = document.getElementById('bgColorPicker').value;
-            mediaStage.style.backgroundColor = color;
-            alert('बैकग्राउंड सफ़लतापूर्वक बदल दिया गया है!');
+        // Change Background Color
+        function applyBgColor() {
+            canvasBgColor = document.getElementById('bgColorPicker').value;
         }
 
-        // Audio-Video Trim Function
-        function trimMedia() {
-            const start = document.getElementById('trimStart').value;
-            const end = document.getElementById('trimEnd').value;
-            if (mainVideo.style.display !== 'none') {
-                mainVideo.currentTime = start;
-                alert('वीडियो ' + start + ' से ' + end + ' सेकंड तक कट/ट्रिम कर दिया गया है!');
-            } else {
-                alert('इमेज की समय सीमा सेट कर दी गई है!');
+        // Play/Pause Video
+        function togglePlay() {
+            if (mediaType === 'video') {
+                if (hiddenVideo.paused) hiddenVideo.play();
+                else hiddenVideo.pause();
             }
         }
 
-        // Auto Subtitles Logic
-        function generateSubtitles() {
+        // Video Trim Function
+        function applyTrim() {
+            trimStartTime = parseFloat(document.getElementById('trimStart').value) || 0;
+            trimEndTime = parseFloat(document.getElementById('trimEnd').value) || 10;
+            if (mediaType === 'video') {
+                hiddenVideo.currentTime = trimStartTime;
+                hiddenVideo.play();
+            }
+            alert(`ट्रिम टाइमिंग सेट: ${trimStartTime}s से ${trimEndTime}s`);
+        }
+
+        // Speech Recognition Auto Subtitles
+        function startAutoCaptions() {
             const status = document.getElementById('captionStatus');
+            const subOverlay = document.getElementById('subtitleOverlay');
+
             if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-                alert('ब्राउज़र Speech Recognition सपोर्ट नहीं करता।'); return;
+                alert('माइक्रोफोन या ब्राउज़र स्पीच सपोर्ट नहीं कर रहा है।');
+                return;
             }
-            status.innerText = "माइक ऑन है... बोलें!";
+
+            status.innerText = "सुन रहा है... बोलना शुरू करें!";
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
             const recognition = new SpeechRecognition();
             recognition.lang = 'hi-IN';
             recognition.continuous = true;
 
-            recognition.onresult = function(e) {
-                let text = '';
-                for (let i = e.resultIndex; i < e.results.length; ++i) {
-                    text += e.results[i][0].transcript;
+            recognition.onresult = function(event) {
+                let currentText = '';
+                for (let i = event.resultIndex; i < event.results.length; ++i) {
+                    currentText += event.results[i][0].transcript;
                 }
-                status.innerText = "कैप्शन: " + text;
+                subOverlay.innerText = currentText;
             };
             recognition.start();
         }
 
-        // AI Voice Generator
-        function generateVoice() {
+        // Text To Speech AI Voice
+        function speakAIVoice() {
             const text = document.getElementById('ttsInput').value;
-            if (!text) { alert('कृपया कुछ लिखें!'); return; }
+            if (!text) { alert('कृपया कुछ टेक्स्ट लिखें!'); return; }
             const utterance = new SpeechSynthesisUtterance(text);
             utterance.lang = 'hi-IN';
             window.speechSynthesis.speak(utterance);
         }
+
+        // Start Canvas Engine On Load
+        window.onload = initCanvas;
     </script>
 </body>
 </html>
