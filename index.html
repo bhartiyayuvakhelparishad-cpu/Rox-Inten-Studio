@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rox Inten Studio</title>
+    <title>Rox Inten Studio - AI Age Filter</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         body {
@@ -30,9 +30,7 @@
 
         .header { text-align: center; margin-bottom: 15px; }
         .header h1 { margin: 5px 0; color: #ff007f; }
-        .header h5 { margin: 0; color: #a0a5b5; }
 
-        /* Main Screen & Settings Switch */
         #main-menu-container { display: block; }
         .setting-panel {
             display: none;
@@ -51,9 +49,6 @@
             border-radius: 8px;
             font-weight: bold;
             cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
         }
 
         .menu-grid {
@@ -63,7 +58,7 @@
             margin-top: 15px;
         }
 
-        .dark-btn, .neon-btn {
+        .dark-btn {
             background: #1f2232;
             color: #fff;
             padding: 12px;
@@ -78,8 +73,6 @@
             gap: 8px;
         }
 
-        .neon-btn { background: linear-gradient(135deg, #ff007f, #7f00ff); font-weight: bold; }
-
         .pro-btn {
             background: linear-gradient(135deg, #ff007f, #7f00ff);
             color: white;
@@ -92,19 +85,33 @@
             cursor: pointer;
         }
 
-        /* Live Camera Screen */
+        /* 📸 AI कैमरा लेआउट और मास्क ओवरले */
         .canvas-container {
             position: relative;
             width: 100%;
-            height: 200px;
+            height: 220px;
             background: #000;
             border-radius: 15px;
             overflow: hidden;
             border: 2px solid #ff007f;
         }
-        #webcam { width: 100%; height: 100%; object-fit: cover; position: absolute; z-index: 1; transition: filter 0.3s ease; }
-        #bg-overlay { position: absolute; width: 100%; height: 100%; z-index: 0; background-size: cover; background-position: center; }
-        #sticker-zone { position: absolute; width: 100%; height: 100%; z-index: 2; pointer-events: none; }
+        
+        #webcam { width: 100%; height: 100%; object-fit: cover; position: absolute; z-index: 1; transition: filter 0.4s ease; }
+        
+        /* 🎭 एज मास्क लेयर जो चेहरे के ऊपर दिखेगी */
+        #age-mask-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 2;
+            pointer-events: none;
+            background-size: cover;
+            background-position: center;
+            opacity: 0.8;
+            transition: all 0.4s ease;
+        }
 
         .tool-block {
             background: #1f2232;
@@ -113,78 +120,28 @@
             padding: 12px;
             box-sizing: border-box;
         }
-        .tool-block h3 { margin: 0 0 10px 0; font-size: 14px; color: #78ffd6; display: flex; align-items: center; gap: 8px; }
+        .tool-block h3 { margin: 0 0 10px 0; font-size: 14px; color: #78ffd6; }
 
         .age-grid { display: flex; flex-wrap: wrap; gap: 5px; }
-        .age-btn { background: #2d3142; color: white; border: none; padding: 6px 10px; border-radius: 6px; font-size: 12px; cursor: pointer; }
+        .age-btn { background: #2d3142; color: white; border: none; padding: 8px 10px; border-radius: 6px; font-size: 12px; cursor: pointer; }
         .age-btn:active { background: #ff007f; }
 
-        .tool-block input[type="text"], .tool-block select {
-            width: 100%; background: #15161e; color: white; border: 1px solid #2d3142; padding: 8px; border-radius: 8px; margin-top: 5px; box-sizing: border-box;
-        }
-
         .action-btn { background: linear-gradient(135deg, #ff007f, #7f00ff); color: white; border: none; padding: 10px; width: 100%; border-radius: 10px; font-weight: bold; margin-top: 8px; cursor: pointer; }
-
-        /* Text Styles */
-        .style1 { font-family: 'Courier New', monospace; color: #00ffcc; text-shadow: 0 0 8px #00ffcc; font-weight: bold; }
-        .style2 { font-family: Arial, sans-serif; font-weight: 900; color: #ff0055; text-transform: uppercase; }
-
-        /* Ad Screen Popup */
-        .ad-modal {
-            display: none;
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.95);
-            border-radius: 25px;
-            z-index: 10;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            padding: 20px;
-            box-sizing: border-box;
-        }
-
-        .ad-box {
-            border: 2px dashed #ff007f;
-            padding: 20px;
-            border-radius: 15px;
-            background: #1f2232;
-            width: 80%;
-        }
     </style>
 </head>
 <body>
 
     <div class="mobile-frame">
         <div class="header">
-            <h1 id="txt-logo-title">Rox</h1>
+            <h1>Rox</h1>
             <h5>INTEN STUDIO</h5>
-            <h3 id="welcomeMsg" style="color: #78ffd6; margin-top: 5px; font-size: 14px;"></h3>
-            <h4 id="statusMsg" style="color: #ff4757; margin-top: 5px;">Status: Locked</h4>
-            <p id="adCounterText" style="color: #ffcc00; font-size: 12px; margin: 2px;">Ads Completed: 0/3</p>
+            <h4 id="statusMsg" style="color: #ff4757; margin-top: 5px;">Status: Unlocked</h4>
         </div>
 
         <!-- MAIN MENU -->
         <div id="main-menu-container">
             <div class="menu-grid">
-                <a href="upload.html" class="dark-btn"><i class="fa-solid fa-upload"></i> Upload</a>
-                <a href="ai-tools.html" class="neon-btn"><i class="fa-solid fa-wand-magic-sparkles"></i> AI Magic</a>
-                <a href="projects.html" class="dark-btn"><i class="fa-solid fa-folder"></i> Projects</a>
-                <a href="explore.html" class="dark-btn"><i class="fa-solid fa-magnifying-glass"></i> Explore</a>
-                <a href="register.html" class="dark-btn"><i class="fa-solid fa-user-plus"></i> Register</a>
-                <a href="#" id="setting-btn-trigger" class="dark-btn"><i class="fa-solid fa-gear"></i> Setting</a>
-                <a href="support.html" class="dark-btn"><i class="fa-solid fa-headset"></i> Support</a>
-                <a href="result.html" class="dark-btn"><i class="fa-solid fa-square-poll-vertical"></i> Result</a>
-            </div>
-
-            <div class="unlock-area">
-                <button onclick="openAdScreen()" class="pro-btn">
-                    <i class="fa-solid fa-crown"></i> Unlock Pro (Watch Ad)
-                </button>
+                <a href="#" id="setting-btn-trigger" class="dark-btn" style="grid-column: span 2; background: #ff007f;"><i class="fa-solid fa-camera"></i> Open AI Studio Camera</a>
             </div>
         </div>
 
@@ -192,121 +149,38 @@
         <div id="setting-panel" class="setting-panel">
             <div style="display: flex; justify-content: space-between; align-items: center;">
                 <button id="back-to-menu" class="back-btn"><i class="fa-solid fa-arrow-left"></i> Back</button>
-                <span style="color: #78ffd6; font-size: 14px; font-weight: bold;">AI Studio Settings</span>
+                <span style="color: #78ffd6; font-size: 14px; font-weight: bold;">AI Age Studio</span>
             </div>
 
             <div class="canvas-container">
                 <video id="webcam" autoplay playsinline></video>
-                <div id="bg-overlay"></div>
-                <div id="sticker-zone"></div>
+                <!-- झुर्रियों/एज मास्क की लेयर -->
+                <div id="age-mask-overlay"></div>
             </div>
 
-            <!-- AGE LOOK TOOL -->
             <div class="tool-block">
-                <h3><i class="fa-solid fa-face-smile"></i> AI लुक बदलें (Age Look)</h3>
+                <h3><i class="fa-solid fa-face-smile"></i> Select AI Age Effect:</h3>
                 <div class="age-grid">
-                    <button class="age-btn" data-age="5">5 Years</button>
-                    <button class="age-btn" data-age="15">15 Years</button>
-                    <button class="age-btn" data-age="25">25 Years</button>
-                    <button class="age-btn" data-age="45">45 Years</button>
-                    <button class="age-btn" data-age="70">70 Years</button>
+                    <button class="age-btn" data-age="5">👶 5 Years (Baby)</button>
+                    <button class="age-btn" data-age="15">🧒 15 Years (Teen)</button>
+                    <button class="age-btn" data-age="25">🧑 25 Years (Original)</button>
+                    <button class="age-btn" data-age="45">👨 45 Years (Mature)</button>
+                    <button class="age-btn" data-age="70">👴 70 Years (Old Wrinkles)</button>
                 </div>
             </div>
 
-            <!-- BACKGROUND TOOL -->
-            <div class="tool-block">
-                <h3><i class="fa-solid fa-image"></i> बैकग्राउंड इमेज बदलें</h3>
-                <input type="file" id="bg-upload" accept="image/*">
-            </div>
-
-            <!-- TEXT TOOL -->
-            <div class="tool-block">
-                <h3><i class="fa-solid fa-font"></i> टेक्स्ट जोड़ें</h3>
-                <input type="text" id="custom-text" placeholder="यहाँ टेक्स्ट लिखें...">
-                <select id="text-style">
-                    <option value="style1">Neon Style</option>
-                    <option value="style2">Bold Red Style</option>
-                </select>
-                <button id="add-text-btn" class="action-btn">✍️ टेक्स्ट जोड़ें</button>
-            </div>
-
-            <button id="capture-btn" class="action-btn" style="background: #28a745;">📸 सेव करें</button>
-        </div>
-
-        <!-- 📺 AD SCREEN POPUP -->
-        <div id="ad-modal" class="ad-modal">
-            <div class="ad-box">
-                <i class="fa-solid fa-rectangle-ad" style="font-size: 40px; color: #ffcc00; margin-bottom: 10px;"></i>
-                <h3 style="margin: 5px 0;">Sponsor Ad Playing...</h3>
-                <p style="font-size: 12px; color: #a0a5b5;">कृपया ऐड पूरा होने का इंतज़ार करें</p>
-                <h2 id="ad-timer" style="color: #ff007f;">5</h2>
-            </div>
+            <button id="capture-btn" class="action-btn" style="background: #28a745;">📸 Save AI Photo</button>
         </div>
 
     </div>
 
     <script>
-        // 1. User Name & Ad Tracker
-        let savedName = localStorage.getItem("user_name") || "Rambha";
-        document.getElementById("welcomeMsg").innerText = "Welcome, " + savedName + "!";
-
-        let adCount = localStorage.getItem("ad_count") || 0;
-        let unlockTime = localStorage.getItem("unlock_time");
-        
-        const statusMsg = document.getElementById("statusMsg");
-        const adCounterText = document.getElementById("adCounterText");
-        const adModal = document.getElementById("ad-modal");
-        const adTimer = document.getElementById("ad-timer");
-
-        function updateUI() {
-            adCounterText.innerText = "Ads Completed: " + adCount + "/3";
-            if (unlockTime && new Date().getTime() < unlockTime) {
-                statusMsg.innerText = "Status: Pro Access Active!";
-                statusMsg.style.color = "#78ffd6";
-            }
-        }
-        updateUI();
-
-        // 2. Open Ad Logic (5 Second Popup)
-        function openAdScreen() {
-            if (adCount >= 3) {
-                alert("आप पहले ही 3 Ads देख चुके हैं! Pro अनलॉक है।");
-                return;
-            }
-
-            adModal.style.display = "flex";
-            let timeLeft = 5;
-            adTimer.innerText = timeLeft;
-
-            let countdown = setInterval(() => {
-                timeLeft--;
-                adTimer.innerText = timeLeft;
-
-                if (timeLeft <= 0) {
-                    clearInterval(countdown);
-                    adModal.style.display = "none";
-                    
-                    adCount = parseInt(adCount) + 1;
-                    localStorage.setItem("ad_count", adCount);
-                    
-                    if (adCount >= 3) {
-                        let expiry = new Date().getTime() + (72 * 60 * 60 * 1000); // 72 घँटे
-                        localStorage.setItem("unlock_time", expiry);
-                        alert("बधाई हो! 3 Ads पूरे हो गए। Pro अनलॉक हो गया!");
-                    } else {
-                        alert("Ad पूरा देखा गया! आपको " + (3 - adCount) + " Ad और देखने हैं।");
-                    }
-                    updateUI();
-                }
-            }, 1000);
-        }
-
-        // 3. Navigation & Camera Logic
         const settingBtnTrigger = document.getElementById('setting-btn-trigger');
         const mainMenuContainer = document.getElementById('main-menu-container');
         const settingPanel = document.getElementById('setting-panel');
         const backToMenu = document.getElementById('back-to-menu');
         const webcam = document.getElementById('webcam');
+        const maskOverlay = document.getElementById('age-mask-overlay');
         let aiCamStream = null;
 
         async function startCamera() {
@@ -314,7 +188,7 @@
                 aiCamStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" }, audio: false });
                 webcam.srcObject = aiCamStream;
             } catch (err) {
-                console.log("Camera access error:", err);
+                alert("कैमरा चालू करने की अनुमति दें!");
             }
         }
 
@@ -327,15 +201,9 @@
 
         settingBtnTrigger.addEventListener('click', (e) => {
             e.preventDefault();
-            let isPro = localStorage.getItem("unlock_time") && new Date().getTime() < localStorage.getItem("unlock_time");
-
-            if (isPro || adCount >= 3) {
-                mainMenuContainer.style.display = 'none';
-                settingPanel.style.display = 'flex';
-                startCamera();
-            } else {
-                alert("एक्सेस डिनाइड! पहले 'Unlock Pro' बटन दबाकर 3 Ads देखें। (अभी तक: " + adCount + "/3)");
-            }
+            mainMenuContainer.style.display = 'none';
+            settingPanel.style.display = 'flex';
+            startCamera();
         });
 
         backToMenu.addEventListener('click', (e) => {
@@ -345,59 +213,40 @@
             stopCamera();
         });
 
-        // 4. Age Look Changing Logic
+        // 🎭 AGE MASK AND FILTER LOGIC
         document.querySelectorAll('.age-btn').forEach(button => {
             button.addEventListener('click', (e) => {
                 const age = e.target.getAttribute('data-age');
-                if (!age) return;
 
-                if (age == '5') {
-                    webcam.style.filter = 'saturate(1.8) contrast(1.1) brightness(1.1)';
-                    alert("Age Look: 5 Years (Baby Look)");
-                } else if (age == '15') {
-                    webcam.style.filter = 'saturate(1.3) contrast(1.0) brightness(1.05)';
-                    alert("Age Look: 15 Years");
-                } else if (age == '25') {
+                if (age === '5') {
+                    // बच्चों जैसा सॉफ्ट ग्लो + पिंक चीक्स ओवरले
+                    webcam.style.filter = 'saturate(1.7) brightness(1.2) contrast(0.95)';
+                    maskOverlay.style.background = 'radial-gradient(circle, rgba(255, 182, 193, 0.3) 0%, transparent 70%)';
+                } 
+                else if (age === '15') {
+                    webcam.style.filter = 'saturate(1.2) brightness(1.05)';
+                    maskOverlay.style.background = 'none';
+                } 
+                else if (age === '25') {
                     webcam.style.filter = 'none';
-                    alert("Age Look: 25 Years (Original)");
-                } else if (age == '45') {
-                    webcam.style.filter = 'contrast(0.9) sepia(0.3) brightness(0.95)';
-                    alert("Age Look: 45 Years");
-                } else if (age == '70') {
-                    webcam.style.filter = 'grayscale(0.8) contrast(0.85) blur(0.3px)';
-                    alert("Age Look: 70 Years (Old Look)");
+                    maskOverlay.style.background = 'none';
+                } 
+                else if (age === '45') {
+                    // मैच्योर लुक (वार्म शेड)
+                    webcam.style.filter = 'contrast(1.1) sepia(0.2) brightness(0.9)';
+                    maskOverlay.style.background = 'radial-gradient(circle, transparent 40%, rgba(100, 50, 0, 0.25) 100%)';
+                } 
+                else if (age === '70') {
+                    // 👴 70 Years: चेहरे पर झुर्रियों/एजिंग टेक्सचर का मास्क और डार्क टोन
+                    webcam.style.filter = 'grayscale(0.5) contrast(1.3) brightness(0.85)';
+                    // विंटेज Wrinkle Texture Overlays
+                    maskOverlay.style.background = 'radial-gradient(circle, rgba(0,0,0,0.1) 20%, rgba(50,50,50,0.6) 90%), repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(0,0,0,0.08) 10px, rgba(0,0,0,0.08) 12px)';
                 }
             });
         });
 
-        // 5. Background Changer
-        document.getElementById('bg-upload').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file) {
-                const url = URL.createObjectURL(file);
-                document.getElementById('bg-overlay').style.backgroundImage = `url('${url}')`;
-                webcam.style.opacity = "0.65";
-            }
-        });
-
-        // 6. Add Text
-        document.getElementById('add-text-btn').addEventListener('click', () => {
-            const txtInput = document.getElementById('custom-text');
-            if(!txtInput.value) return;
-            
-            const txt = document.createElement('div');
-            txt.innerText = txtInput.value;
-            txt.className = document.getElementById('text-style').value;
-            txt.style.position = 'absolute';
-            txt.style.top = '40%';
-            txt.style.left = '20%';
-            txt.style.fontSize = '18px';
-            document.getElementById('sticker-zone').appendChild(txt);
-            txtInput.value = '';
-        });
-
         document.getElementById('capture-btn').addEventListener('click', () => {
-            alert("📸 आपकी फोटो/वीडियो गैलरी में सेव हो गई है!");
+            alert("📸 AI एज फोटो आपकी गैलरी में सेव हो गई!");
         });
     </script>
 </body>
