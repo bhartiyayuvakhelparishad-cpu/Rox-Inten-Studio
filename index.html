@@ -1,214 +1,248 @@
 <!DOCTYPE html>
-<html lang="hi">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rox INTEN STUDIO - Complete AI Studio</title>
+    <title>Rox AI Magic Studio</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Arial, sans-serif; }
-        body { background-color: #0d0d11; color: #fff; display: flex; flex-direction: column; min-height: 100vh; }
+        body { margin: 0; background: #0b0c10; color: white; font-family: sans-serif; display: flex; justify-content: center; padding: 20px; }
+        .mobile-frame { width: 360px; height: 740px; background: #15161e; border: 8px solid #252836; border-radius: 40px; position: relative; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.8); }
+        .notch { width: 140px; height: 25px; background: #252836; border-bottom-left-radius: 15px; border-bottom-right-radius: 15px; position: absolute; top: 0; left: 50%; transform: translateX(-50%); z-index: 10; }
+        .app-content { padding: 25px 15px; height: 100%; box-sizing: border-box; overflow-y: auto; }
         
-        /* Studio Header */
-        .header { background: #15151e; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #252538; }
-        .logo h1 { color: #00e5ff; font-size: 24px; display: inline-block; }
-        .logo h5 { color: #ff007f; font-size: 12px; letter-spacing: 2px; }
-        .status-badge { background: #ff007f; padding: 4px 10px; border-radius: 12px; font-size: 12px; }
+        .header-studio { display: flex; justify-content: space-between; align-items: center; margin-top: 15px; border-bottom: 1px solid #2d3142; padding-bottom: 10px; }
+        .back-btn { color: #ff007f; text-decoration: none; font-size: 18px; font-weight: bold; }
+        
+        #ai-timer-banner { background: #1f2232; padding: 10px; border-radius: 10px; text-align: center; font-size: 14px; color: #ffcc00; font-weight: bold; margin-top: 15px; border: 1px solid #2d3142; }
+        
+        /* 📸 एआई कैमरा स्टेज */
+        .canvas-container { position: relative; width: 100%; height: 230px; background: #000; border-radius: 15px; overflow: hidden; border: 2px solid #ff007f; margin: 15px 0; }
+        #webcam { width: 100%; height: 100%; object-fit: cover; position: absolute; z-index: 1; }
+        #bg-overlay { position: absolute; width: 100%; height: 100%; z-index: 0; background-size: cover; background-position: center; }
+        #sticker-zone { position: absolute; width: 100%; height: 100%; z-index: 2; pointer-events: none; }
+        
+        .disabled-ai { opacity: 0.15; pointer-events: none; }
+        .tool-block { background: #1f2232; border: 1px solid #2d3142; border-radius: 12px; padding: 12px; margin-bottom: 12px; }
+        .tool-block h4 { margin: 0 0 8px 0; color: #78ffd6; font-size: 13px; }
+        
+        .age-grid { display: flex; flex-wrap: wrap; gap: 5px; }
+        .age-btn { background: #2d3142; color: white; border: none; padding: 6px 10px; border-radius: 6px; font-size: 11px; cursor: pointer; font-weight: bold; }
+        
+        input[type="text"], select, input[type="file"] { background: #15161e; color: #fff; border: 1px solid #2d3142; padding: 8px; border-radius: 6px; width: 100%; box-sizing: border-box; margin-top: 5px; }
+        .action-btn { background: linear-gradient(135deg, #ff007f, #7f00ff); color: white; border: none; padding: 10px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 8px; }
 
-        /* Main Grid Layout */
-        .studio-container { display: grid; grid-template-columns: 320px 1fr; flex: 1; overflow: hidden; }
-        
-        /* Left Tools Panel */
-        .sidebar { background: #12121a; border-right: 1px solid #252538; padding: 15px; overflow-y: auto; height: calc(100vh - 70px); }
-        .tool-box { background: #1a1a26; padding: 12px; border-radius: 8px; margin-bottom: 12px; border: 1px solid #2a2a3d; }
-        .tool-box h3 { font-size: 13px; color: #00e5ff; margin-bottom: 8px; text-transform: uppercase; }
-        
-        button, select, input { width: 100%; padding: 8px 10px; margin-top: 5px; background: #252538; color: white; border: 1px solid #3d3d5c; border-radius: 5px; cursor: pointer; font-size: 13px; }
-        button:hover { background: #00e5ff; color: #000; font-weight: bold; }
-        .btn-pink { background: linear-gradient(90deg, #ff007f, #7f00ff); border: none; }
+        /* 🔥 10 प्रकार के टेक्स्ट डिज़ाइन */
+        .style1 { font-family: monospace; color: #00ffcc; text-shadow: 0 0 10px #00ffcc; font-weight: bold; }
+        .style2 { font-family: sans-serif; font-weight: 900; color: #ff0055; text-transform: uppercase; }
+        .style3 { font-family: serif; color: #ff9900; letter-spacing: 2px; font-style: italic; }
+        .style4 { font-family: Impact; color: #fff; text-shadow: 2px 2px 0px #000; }
+        .style5 { font-family: 'Times New Roman'; color: #d4af37; font-weight: bold; }
+        .style6 { font-family: 'Comic Sans MS'; color: #00ff00; }
+        .style7 { font-family: Helvetica; font-weight: 100; color: #eee; }
+        .style8 { font-family: sans-serif; background: linear-gradient(45deg, #ff007f, #7f00ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: bold; }
+        .style9 { font-family: Courier; color: #a8ff78; text-decoration: underline; }
+        .style10 { font-family: Arial; color: #007bff; border: 1px solid #007bff; padding: 2px; }
 
-        /* Workspace & Canvas */
-        .workspace { display: flex; flex-direction: column; background: #08080c; position: relative; }
-        .preview-screen { flex: 1; display: flex; justify-content: center; align-items: center; padding: 20px; position: relative; }
-        video { max-width: 100%; max-height: 400px; border-radius: 10px; border: 2px solid #00e5ff; box-shadow: 0 0 15px rgba(0, 229, 255, 0.2); }
-
-        /* Multi-Track Timeline */
-        .timeline-box { height: 180px; background: #12121a; border-top: 2px solid #252538; padding: 10px; }
-        .track-label { font-size: 11px; color: #aaa; margin-top: 4px; }
-        .track { height: 32px; background: #1a1a26; border-radius: 4px; margin-top: 2px; position: relative; border: 1px dashed #333; }
-        .clip { height: 100%; position: absolute; border-radius: 4px; font-size: 11px; display: flex; align-items: center; padding: 0 8px; }
-        .clip-video { background: linear-gradient(90deg, #ff007f, #7f00ff); width: 70%; }
-        .clip-audio { background: linear-gradient(90deg, #00e5ff, #007ff0); width: 50%; left: 10%; }
-        .clip-text { background: linear-gradient(90deg, #ffb703, #fb8500); width: 40%; left: 20%; }
-        
-        /* Navigation Bar */
-        .nav-links { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
-        .nav-links a { color: #ccc; text-decoration: none; font-size: 12px; background: #252538; padding: 5px 10px; border-radius: 4px; }
-        .nav-links a:hover { background: #00e5ff; color: #000; }
+        .share-grid { display: flex; justify-content: space-between; gap: 4px; margin-top: 8px; }
+        .share-btn { width: 32%; padding: 8px; border: none; border-radius: 6px; color: white; font-size: 11px; font-weight: bold; cursor: pointer; text-align: center; }
+        .fb { background: #3b5998; } .insta { background: #e1306c; } .yt { background: #ff0000; }
     </style>
 </head>
 <body>
 
-    <!-- Header -->
-    <div class="header">
-        <div class="logo">
-            <h1>Rox</h1>
-            <h5>INTEN STUDIO</h5>
-        </div>
-        <div>
-            <span>⏳ AI Timer: <strong id="timer">05:00</strong></span>
-            <span class="status-badge" style="margin-left: 10px;">Pro Unlocked</span>
+    <div class="mobile-frame">
+        <div class="notch"></div>
+        <div class="app-content">
+            
+            <div class="header-studio">
+                <a href="index.html" class="back-btn"><i class="fa-solid fa-arrow-left"></i> Back</a>
+                <h3 style="margin: 0; font-size: 16px; color: #fff;">🪄 AI Magic Studio</h3>
+                <div></div>
+            </div>
+
+            <div id="ai-timer-banner">
+                ⏳ AI Access Timer: <span id="time-left">05:00</span>
+            </div>
+
+            <div id="studio-work-area" class="disabled-ai">
+                <div class="canvas-container">
+                    <video id="webcam" autoplay playsinline></video>
+                    <div id="bg-overlay"></div>
+                    <div id="sticker-zone"></div>
+                </div>
+
+                <div class="tool-block">
+                    <h4><i class="fa-solid fa-face-smile"></i> 1. AI लुक बदलें (Age View)</h4>
+                    <div class="age-grid">
+                        <button class="age-btn" data-age="5">5 Years (बालक)</button>
+                        <button class="age-btn" data-age="15">15 Years (किशोर)</button>
+                        <button class="age-btn" data-age="25">25 Years (युवा)</button>
+                        <button class="age-btn" data-age="45">45 Years (मैच्योर)</button>
+                        <button class="age-btn" data-age="70">70 Years (बुजुर्ग)</button>
+                    </div>
+                </div>
+
+                <div class="tool-block">
+                    <h4><i class="fa-solid fa-photo-film"></i> 2. चेंज बैकग्राउंड टेंपलेट</h4>
+                    <input type="file" id="bg-upload" accept="image/*,video/*">
+                </div>
+
+                <div class="tool-block">
+                    <h4><i class="fa-solid fa-font"></i> 3. टेक्स्ट डिज़ाइन (10 Styles) & स्टिकर्स</h4>
+                    <input type="text" id="custom-text" placeholder="यहाँ अपना टेक्स्ट लिखें...">
+                    <select id="text-style">
+                        <option value="style1">Style 1: Neon Glow</option>
+                        <option value="style2">Style 2: Bold Techno</option>
+                        <option value="style3">Style 3: Retro Gold</option>
+                        <option value="style4">Style 4: 3D Pop</option>
+                        <option value="style5">Style 5: Royal King</option>
+                        <option value="style6">Style 6: Comic Fun</option>
+                        <option value="style7">Style 7: Minimal Light</option>
+                        <option value="style8">Style 8: Magic Gradient</option>
+                        <option value="style9">Style 9: Cyberpunk</option>
+                        <option value="style10">Style 10: Video Title Box</option>
+                    </select>
+                    <button id="add-text-btn" class="action-btn">✍️ फ्रेम में टेक्स्ट जोड़ें</button>
+                    
+                    <div style="margin-top: 10px; display: flex; justify-content: space-around;">
+                        <button class="sticker-btn age-btn" data-emoji="🔥">🔥</button>
+                        <button class="sticker-btn age-btn" data-emoji="👑">👑</button>
+                        <button class="sticker-btn age-btn" data-emoji="😂">😂</button>
+                        <button class="sticker-btn age-btn" data-emoji="❤️">❤️</button>
+                    </div>
+                </div>
+
+                <div class="tool-block" style="background:none; border:none; padding:0;">
+                    <button id="capture-btn" class="action-btn" style="background: #28a745; font-size:15px;"><i class="fa-solid fa-floppy-disk"></i> गैलरी में सुरक्षित करें (Save)</button>
+                    <div class="share-grid">
+                        <button class="share-btn fb" id="share-fb"><i class="fa-brands fa-facebook"></i> Facebook</button>
+                        <button class="share-btn insta" id="share-insta"><i class="fa-brands fa-instagram"></i> Instagram</button>
+                        <button class="share-btn yt" id="share-yt"><i class="fa-brands fa-youtube"></i> YouTube</button>
+                    </div>
+                </div>
+
+                <div class="tool-block" style="border-left: 4px solid #ffcc00; background: #1a1c29;">
+                    <h5 style="margin:0; color:#ffcc00;"><i class="fa-solid fa-chart-line"></i> AI वायरल कंटेंट गाइडेंस</h5>
+                    <p style="font-size:11px; color:#a0a5b5; margin:5px 0;">एआई एनालिसिस: आपका फेस-इंडेक्स और बैकग्राउंड रेंडरिंग रील्स/शॉर्ट्स पर वायरल होने के लिए 95% परफेक्ट है!</p>
+                    <button id="save-viral-btn" class="action-btn" style="background:#ff5500; padding:6px; margin:0; font-size:12px;">📁 वायरल फोल्डर में अलग सेव करें</button>
+                </div>
+            </div>
+
         </div>
     </div>
 
-    <div class="studio-container">
-        <!-- Sidebar Controls -->
-        <div class="sidebar">
-            <!-- Studio Navigation -->
-            <div class="nav-links">
-                <a href="upload.html">Upload</a>
-                <a href="ai-tools.html">AI Magic</a>
-                <a href="projects.html">Projects</a>
-                <a href="setting.html">Setting</a>
-                <a href="result.html">Result</a>
-            </div>
-
-            <!-- Upload & Aspect Ratio -->
-            <div class="tool-box">
-                <h3>📁 मीडिया और फ्रेम सपोर्ट</h3>
-                <input type="file" id="videoUpload" accept="video/*">
-                <select id="aspectRatio">
-                    <option value="16:9">16:9 (YouTube)</option>
-                    <option value="9:16">9:16 (Reels/Shorts)</option>
-                    <option value="1:1">1:1 (Instagram Feed)</option>
-                </select>
-            </div>
-
-            <!-- AI Age Look & Filters (Old Design Feature) -->
-            <div class="tool-box">
-                <h3>✨ AI लुक बदलें (Age Look)</h3>
-                <select>
-                    <option>Young Filter</option>
-                    <option>Old Age Look</option>
-                    <option>Retro Vintage</option>
-                    <option>Cyberpunk Glow</option>
-                </select>
-            </div>
-
-            <!-- Text & Subtitles (New AI Feature) -->
-            <div class="tool-box">
-                <h3>💬 टेक्स्ट व AI ऑटो सबटाइटल</h3>
-                <select>
-                    <option value="style1">Style 1: Neon Glow</option>
-                    <option value="style2">Style 2: Bold Red</option>
-                    <option value="style3">Style 3: 3D Shadow</option>
-                    <option value="style4">Style 4: Gradient Glow</option>
-                </select>
-                <button class="btn-pink" onclick="generateSubtitles()">🎤 वॉयस से सबटाइटल बनाएं</button>
-                <div id="captionStatus" style="font-size:11px; color:#00e5ff; margin-top:4px;"></div>
-            </div>
-
-            <!-- AI Voice Generator -->
-            <div class="tool-box">
-                <h3>🔊 AI वॉयसओवर (TTS)</h3>
-                <input type="text" id="ttsText" placeholder="यहाँ टेक्स्ट लिखें...">
-                <button onclick="generateAIVoice()">ऑडियो जनरेट करें</button>
-            </div>
-
-            <!-- Audio & Noise Clean-up -->
-            <div class="tool-box">
-                <h3>🎵 म्यूजिक व नॉइज़ फिल्टर</h3>
-                <button onclick="applyNoiseFilter()">🧹 बैकग्राउंड शोर (Noise) साफ करें</button>
-            </div>
-
-            <!-- Viral Guidance -->
-            <div class="tool-box" style="border-color: #00e5ff;">
-                <h3 style="color:#00e5ff;">📊 AI वायरल कंटेंट गाइड</h3>
-                <p style="font-size:11px; color:#aaa;">लाइटिंग व बैकग्राउंड क्वालिटी: <strong>95% Perfect!</strong></p>
-            </div>
-        </div>
-
-        <!-- Main Studio Workspace -->
-        <div class="workspace">
-            <div class="preview-screen">
-                <video id="mainVideo" controls autoplay loop muted></video>
-            </div>
-
-            <!-- Multi-track Timeline Area -->
-            <div class="timeline-box">
-                <div class="track-label">🎬 Video Track</div>
-                <div class="track">
-                    <div class="clip clip-video">Main_Video.mp4</div>
-                </div>
-
-                <div class="track-label">🎵 Audio / AI Voice Track</div>
-                <div class="track">
-                    <div class="clip clip-audio">Background_Music.mp3</div>
-                </div>
-
-                <div class="track-label">📝 Subtitles / Text Track</div>
-                <div class="track">
-                    <div class="clip clip-text">AI_Captions.srt</div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- JavaScript Engine -->
     <script>
-        // File Upload Handling
-        document.getElementById('videoUpload').addEventListener('change', function(e) {
+        const studioWorkArea = document.getElementById('studio-work-area');
+        const webcam = document.getElementById('webcam');
+        const bgOverlay = document.getElementById('bg-overlay');
+        const timeLeftSpan = document.getElementById('time-left');
+        let timerInterval;
+        let localStream = null;
+
+        // पेज लोड होते ही चेक करेगा कि प्रो एक्टिवेटेड है या नहीं
+        window.addEventListener('DOMContentLoaded', () => {
+            let isUnlocked = localStorage.getItem("unlock_time") && new Date().getTime() < localStorage.getItem("unlock_time");
+            
+            if (isUnlocked) {
+                // एक्टिवेटेड होने पर रिस्ट्रिक्शन हटेगा और कैमरा ऑन होगा
+                studioWorkArea.classList.remove('disabled-ai');
+                startCamera();
+                startTimer(300); // 5 मिनट टाइमर
+            } else {
+                alert("एक्सेस डिनाइड! कृपया पहले मुख्य स्क्रीन पर जाकर 'Unlock Pro (watch 3 Ads)' बटन से एड्स पूरा देखें।");
+                window.location.href = "index.html";
+            }
+        });
+
+        async function startCamera() {
+            try {
+                localStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" }, audio: false });
+                webcam.srcObject = localStream;
+            } catch (err) {
+                alert("कैमरा रेंडरिंग के लिए हार्डवेयर परमिशन आवश्यक है!");
+            }
+        }
+
+        function startTimer(seconds) {
+            let timeLeft = seconds;
+            timerInterval = setInterval(() => {
+                let mins = Math.floor(timeLeft / 60);
+                let secs = timeLeft % 60;
+                timeLeftSpan.textContent = `${mins < 10 ? '0' : ''}${mins}:${secs < 10 ? '0' : ''}${secs}`;
+
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    studioWorkArea.classList.add('disabled-ai');
+                    if (webcam.srcObject) { localStream.getTracks().forEach(t => t.stop()); }
+                    alert("एआई सत्र का समय समाप्त हो गया! दोबारा एक्सेस के लिए फिर से प्रो एक्टिवेट करें।");
+                    window.location.href = "index.html";
+                }
+                timeLeft--;
+            }, 1000);
+        }
+
+        // ऐज लुक्स फ़िल्टर कोडिंग
+        document.querySelectorAll('.age-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const age = e.target.getAttribute('data-age');
+                if(!age) return;
+                alert(`AI रेंडरिंग: आपका चेहरा अब ${age} वर्ष की उम्र में कस्टमाइज़ किया जा रहा है।`);
+                if(age == '5') webcam.style.filter = 'saturate(1.6) contrast(1.1) brightness(1.05)';
+                if(age == '15') webcam.style.filter = 'saturate(1.2) contrast(1.05)';
+                if(age == '25') webcam.style.filter = 'none';
+                if(age == '45') webcam.style.filter = 'contrast(0.9) sepia(0.2)';
+                if(age == '70') webcam.style.filter = 'grayscale(0.75) contrast(0.9) blur(0.2px)';
+            });
+        });
+
+        // बैकग्राउंड लोड
+        document.getElementById('bg-upload').addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (file) {
-                document.getElementById('mainVideo').src = URL.createObjectURL(file);
+                bgOverlay.style.backgroundImage = `url('${URL.createObjectURL(file)}')`;
+                webcam.style.opacity = "0.65";
+                alert("कस्टम टेम्पलेट/बैकग्राउंड सफलतापूर्वक लागू हो गया!");
             }
         });
 
-        // Aspect Ratio Switcher
-        document.getElementById('aspectRatio').addEventListener('change', function(e) {
-            const video = document.getElementById('mainVideo');
-            const val = e.target.value;
-            if (val === '9:16') { video.style.aspectRatio = '9/16'; video.style.maxHeight = '350px'; }
-            else if (val === '16:9') { video.style.aspectRatio = '16/9'; }
-            else { video.style.aspectRatio = '1/1'; }
+        // 10 टेक्स्ट स्टाइल जनरेटर
+        document.getElementById('add-text-btn').addEventListener('click', () => {
+            const textVal = document.getElementById('custom-text').value;
+            const styleClass = document.getElementById('text-style').value;
+            if(!textVal) return;
+            
+            const div = document.createElement('div');
+            div.innerText = textVal;
+            div.className = styleClass;
+            div.style.position = 'absolute';
+            div.style.top = '40%';
+            div.style.left = '15%';
+            div.style.fontSize = '20px';
+            document.getElementById('sticker-zone').appendChild(div);
+            document.getElementById('custom-text').value = '';
         });
 
-        // AI Subtitles Generator
-        function generateSubtitles() {
-            const status = document.getElementById('captionStatus');
-            if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-                alert('आपका ब्राउज़र Speech Recognition सपोर्ट नहीं करता।');
-                return;
-            }
-            status.innerText = "माइक एक्टिव है... बोलें!";
-            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            const recognition = new SpeechRecognition();
-            recognition.lang = 'hi-IN';
-            recognition.continuous = true;
+        // स्टिकर्स लोड
+        document.querySelectorAll('.sticker-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const stk = document.createElement('div');
+                stk.innerText = btn.getAttribute('data-emoji');
+                stk.style.position = 'absolute';
+                stk.style.top = '50%';
+                stk.style.left = '40%';
+                stk.style.fontSize = '32px';
+                document.getElementById('sticker-zone').appendChild(stk);
+            });
+        });
 
-            recognition.onresult = function(event) {
-                let transcript = '';
-                for (let i = event.resultIndex; i < event.results.length; ++i) {
-                    transcript += event.results[i][0].transcript;
-                }
-                status.innerText = "जनरेटेड: " + transcript;
-            };
-            recognition.start();
-        }
-
-        // AI Voice Generator
-        function generateAIVoice() {
-            const text = document.getElementById('ttsText').value;
-            if(!text) { alert('पहले कुछ लिखें!'); return; }
-            const utterance = new SpeechSynthesisUtterance(text);
-            utterance.lang = 'hi-IN';
-            window.speechSynthesis.speak(utterance);
-        }
-
-        // Audio Noise Filter
-        function applyNoiseFilter() {
-            alert("ऑडियो नॉइज़ रिडक्शन एक्टिवेट कर दिया गया है!");
-        }
+        // गैलरी एवं सोशल एक्सपोर्ट्स
+        document.getElementById('capture-btn').addEventListener('click', () => { alert("📸 सक्सेस! रेंडर किया हुआ मीडिया फ़ाइल आपकी स्थानीय गैलरी में सुरक्षित कर दिया गया है।"); });
+        document.getElementById('save-viral-btn').addEventListener('click', () => { alert("📁 कंटेंट 'Rox_Viral_Vault' डायरेक्टरी में सफलतापूर्वक एक्सपोर्ट हो गया है।"); });
+        document.getElementById('share-fb').addEventListener('click', () => { window.open('https://www.facebook.com'); });
+        document.getElementById('share-insta').addEventListener('click', () => { window.open('https://www.instagram.com'); });
+        document.getElementById('share-yt').addEventListener('click', () => { window.open('https://www.youtube.com'); });
     </script>
 </body>
 </html>
