@@ -146,12 +146,12 @@
             let isUnlocked = localStorage.getItem("unlock_time") && new Date().getTime() < localStorage.getItem("unlock_time");
             
             if (isUnlocked) {
-                // एक्टिवेटेड होने पर रिस्ट्रिक्शन हटेगा और कैमरा ऑन होगा
+                // एक्टिवेटेड कैमरा ऑन 
                 studioWorkArea.classList.remove('disabled-ai');
                 startCamera();
-                startTimer(300); // 5 मिनट टाइमर
+                startTimer(300); // 0 मिनट टाइमर
             } else {
-                alert("एक्सेस डिनाइड! कृपया पहले मुख्य स्क्रीन पर जाकर 'Unlock Pro (watch 3 Ads)' बटन से एड्स पूरा देखें।");
+                alert("एक्सेस ok कृपया पहले मुख्य स्क्रीन पर जाकर 'Unlock Pro (watch 3 Ads)' बटन से एड्स पूरा देखें।");
                 window.location.href = "index.html";
             }
         });
