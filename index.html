@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rox INTEN STUDIO - Perfect AI BG</title>
+    <title>Rox INTEN STUDIO - Free AI BG</title>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation/selfie_segmentation.js" crossorigin="anonymous"></script>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Arial, sans-serif; }
         body { background: #0c0c14; color: #fff; min-height: 100vh; display: flex; flex-direction: column; }
@@ -32,6 +34,7 @@
         .preview-workspace { display: flex; flex-direction: column; background: #050508; align-items: center; padding: 10px; justify-content: center; }
         .stage-box { position: relative; width: 100%; max-width: 320px; aspect-ratio: 9/16; background: #111; border: 2px solid #00e5ff; border-radius: 10px; overflow: hidden; }
         canvas { width: 100%; height: 100%; object-fit: contain; }
+        img { display: none; }
 
         #statusText { position: absolute; top: 10px; left: 10px; font-size: 11px; background: rgba(0,0,0,0.85); padding: 5px 10px; border-radius: 4px; color: #00e5ff; z-index: 10; border: 1px solid #00e5ff; }
     </style>
@@ -43,7 +46,7 @@
             <div class="logo-area">
                 <h1>Rox</h1> <span>INTEN STUDIO</span>
             </div>
-            <div><span style="font-size: 11px; color: #00e5ff;">⏳ HD AI Engine</span></div>
+            <div><span style="font-size: 11px; color: #00e5ff;">⏳ AI Engine: Active</span></div>
         </div>
         <div class="nav-links">
             <a href="index.html" class="active">Home</a>
@@ -59,24 +62,19 @@
         <div class="sidebar-tools">
             
             <div class="tool-card">
-                <h3>🔑 1. Remove.bg API Key डालें</h3>
-                <input type="text" id="apiKeyInput" placeholder="यहाँ अपनी API Key पेस्ट करें...">
-            </div>
-
-            <div class="tool-card">
-                <h3>📁 2. फोटो अपलोड करें</h3>
+                <h3>📁 1. फोटो अपलोड करें</h3>
                 <input type="file" id="mediaUpload" accept="image/*">
             </div>
 
             <div class="tool-card">
-                <h3>🖼️ 3. नया बैकग्राउंड चुनें</h3>
-                <label style="font-size:11px; color:#aaa;">नया बैकग्राउंड रंग:</label>
+                <h3>🖼️ 2. बैकग्राउंड बदलें</h3>
+                <label style="font-size:11px; color:#aaa;">नया रंग:</label>
                 <input type="color" id="bgColorPicker" value="#00e5ff">
                 
-                <label style="font-size:11px; color:#aaa; margin-top:8px; display:block;">या नया बैकग्राउंड फोटो बदलें:</label>
+                <label style="font-size:11px; color:#aaa; margin-top:8px; display:block;">या नया फोटो लगाएं:</label>
                 <input type="file" id="bgImageUpload" accept="image/*">
                 
-                <button onclick="processPerfectAIBg()" class="btn-pink">⚡ HD AI बैकग्राउंड बदलें</button>
+                <button onclick="processFreeAIBg()" class="btn-pink">⚡ AI बैकग्राउंड बदलें</button>
             </div>
 
             <div class="tool-card">
@@ -90,94 +88,46 @@
         <div class="preview-workspace">
             <div class="stage-box">
                 <canvas id="outputCanvas"></canvas>
-                <div id="statusText">फोटो अपलोड करें</div>
+                <div id="statusText">फोटो लोड करें</div>
             </div>
-            <img id="bgImage" crossorigin="anonymous" style="display:none;">
+
+            <img id="sourceImage" crossorigin="anonymous">
+            <img id="bgImage" crossorigin="anonymous">
         </div>
     </div>
 
     <script>
         const mediaUpload = document.getElementById('mediaUpload');
         const bgImageUpload = document.getElementById('bgImageUpload');
+        const sourceImage = document.getElementById('sourceImage');
         const bgImage = document.getElementById('bgImage');
         const canvas = document.getElementById('outputCanvas');
         const ctx = canvas.getContext('2d');
         const statusText = document.getElementById('statusText');
 
-        let rawSelectedFile = null;
-        let transparentPersonImg = null;
+        let selfieSegmentation;
 
         canvas.width = 360;
         canvas.height = 640;
 
-        // 1. File Upload Handler
-        mediaUpload.addEventListener('change', function(e) {
-            rawSelectedFile = e.target.files[0];
-            if (!rawSelectedFile) return;
-
-            const img = new Image();
-            img.src = URL.createObjectURL(rawSelectedFile);
-            img.onload = () => {
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                statusText.innerText = "फोटो लोड हो गई, 'HD AI बैकग्राउंड बदलें' दबाएं";
-            };
-        });
-
-        // 2. Background Image Handler
-        bgImageUpload.addEventListener('change', function(e) {
-            if (e.target.files[0]) {
-                bgImage.src = URL.createObjectURL(e.target.files[0]);
-            }
-        });
-
-        // 3. Perfect API HD BG Removal
-        async function processPerfectAIBg() {
-            const apiKey = document.getElementById('apiKeyInput').value.trim();
-            if (!apiKey) {
-                alert("कृपया पहले अपनी Remove.bg API Key डालें!");
-                return;
-            }
-            if (!rawSelectedFile) {
-                alert("कृपया पहले फोटो अपलोड करें!");
-                return;
-            }
-
-            statusText.innerText = "⏳ HD AI बैकग्राउंड रिमूव हो रहा है...";
-
-            const formData = new FormData();
-            formData.append('image_file', rawSelectedFile);
-            formData.append('size', 'auto');
-
-            try {
-                const response = await fetch('https://api.remove.bg/v1.0/removebg', {
-                    method: 'POST',
-                    headers: { 'X-Api-Key': apiKey },
-                    body: formData
-                });
-
-                if (!response.ok) throw new Error("API एरर - Key चेक करें!");
-
-                const blob = await response.blob();
-                transparentPersonImg = new Image();
-                transparentPersonImg.src = URL.createObjectURL(blob);
-
-                transparentPersonImg.onload = () => {
-                    renderFinalCanvas();
-                    statusText.innerText = "✅ HD बैकग्राउंड सफलतापूर्वक बदल गया!";
-                };
-
-            } catch (err) {
-                alert("एरर: " + err.message);
-                statusText.innerText = "प्रोसेस फेल हो गया";
-            }
+        function initAI() {
+            selfieSegmentation = new SelfieSegmentation({
+                locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation/${file}`
+            });
+            selfieSegmentation.setOptions({ modelSelection: 1 });
+            selfieSegmentation.onResults(onAIResults);
         }
 
-        // 4. Render Final Composite Canvas
-        function renderFinalCanvas() {
+        function onAIResults(results) {
+            ctx.save();
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            // Draw Selected Background (Image or Color)
+            ctx.drawImage(results.segmentationMask, 0, 0, canvas.width, canvas.height);
+            ctx.globalCompositeOperation = 'source-in';
+
+            ctx.drawImage(results.image, 0, 0, canvas.width, canvas.height);
+
+            ctx.globalCompositeOperation = 'destination-over';
             if (bgImage.src && bgImage.complete) {
                 ctx.drawImage(bgImage, 0, 0, canvas.width, canvas.height);
             } else {
@@ -185,10 +135,35 @@
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
             }
 
-            // Draw Transparent Person Image on Top
-            if (transparentPersonImg) {
-                ctx.drawImage(transparentPersonImg, 0, 0, canvas.width, canvas.height);
+            ctx.restore();
+            statusText.innerText = "✅ AI बैकग्राउंड बदल गया!";
+        }
+
+        mediaUpload.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const fileUrl = URL.createObjectURL(file);
+            sourceImage.src = fileUrl;
+            sourceImage.onload = () => {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.drawImage(sourceImage, 0, 0, canvas.width, canvas.height);
+                statusText.innerText = "फोटो लोड हो गई! 'AI बैकग्राउंड बदलें' दबाएं";
+            };
+        });
+
+        bgImageUpload.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) bgImage.src = URL.createObjectURL(file);
+        });
+
+        async function processFreeAIBg() {
+            if (!sourceImage.src) {
+                alert("कृपया पहले फोटो अपलोड करें!");
+                return;
             }
+            statusText.innerText = "⏳ AI प्रोसेस कर रहा है...";
+            await selfieSegmentation.send({ image: sourceImage });
         }
 
         function speakAIVoice() {
@@ -198,6 +173,8 @@
             utterance.lang = 'hi-IN';
             window.speechSynthesis.speak(utterance);
         }
+
+        window.onload = initAI;
     </script>
 </body>
 </html>
