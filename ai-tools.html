@@ -56,22 +56,32 @@
         <video id="bgVideo" class="hidden-elem" playsinline loop></video>
         <img id="bgImage" class="hidden-elem" crossorigin="anonymous">
 
-        <!-- Animated & HD Backgrounds Selector -->
+        <!-- Background Options with GIF URL Option -->
         <div class="tools-panel">
-            <h3>🌄 1. बैकग्राउंड चुनें (HD & Live Animations)</h3>
+            <h3>🌄 1. बैकग्राउंड चुनें (HD Landscapes & GIF Link)</h3>
             <label>बैकग्राउंड मोड:</label>
             <select id="bgSelect" onchange="changeHDBackground()">
-                <option value="anim_rain">1. 🌧️ मूसलाधार बारिश एवं बहती बूंदें (Rain Animation)</option>
-                <option value="anim_garden">2. 🌺 बगीचा, हिलते फूल एवं उड़ते पक्षी (Garden & Birds)</option>
+                <option value="https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?w=720&q=80" selected>1. 🌺 बगीचा, सुंदर फूल एवं पक्षी (Garden)</option>
+                <option value="https://images.unsplash.com/photo-1519692933481-e162a57d6721?w=720&q=80">2. 🌧️ मूसलाधार बारिश एवं बूंदें (Rain)</option>
                 <option value="https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=720&q=80">3. 🌅 Sunset Mountain & River (सूर्यास्त)</option>
-                <option value="https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=720&q=80">4. 🏔️ Misty Mountains (धुंध भरे पहाड़)</option>
-                <option value="https://images.unsplash.com/photo-1433086966358-54859d0ed716?w=720&q=80">5. 🌊 Waterfall & Greenery (HD झरना)</option>
-                <option value="custom_upload">6. 📁 अपनी खुद की फोटो अपलोड करें</option>
-                <option value="custom_video">7. 🎬 अपना खुद का वीडियो अपलोड करें</option>
+                <option value="https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=720&q=80">4. 🏔️ Misty Mountains (पहाड़)</option>
+                <option value="https://images.unsplash.com/photo-1433086966358-54859d0ed716?w=720&q=80">5. 🌊 Waterfall & Greenery (झरना)</option>
+                <option value="custom_url">🌐 6. ऑनलाइन GIF / फोटो का URL लिंक डालें</option>
+                <option value="custom_upload">📁 7. अपनी खुद की फोटो/GIF अपलोड करें</option>
+                <option value="custom_video">🎬 8. अपना खुद का वीडियो अपलोड करें</option>
             </select>
 
+            <!-- Online GIF / Image URL Box -->
+            <div id="urlInputGroup" style="display:none; margin-top:6px;">
+                <label>GIF / Photo URL का डायरेक्ट लिंक पेस्ट करें:</label>
+                <div style="display:flex; gap:5px;">
+                    <input type="text" id="bgUrlInput" placeholder="https://example.com/image.gif" style="flex:1;">
+                    <button onclick="applyUrlBackground()" class="btn-blue" style="width: auto; padding: 0 10px;">अप्लाई</button>
+                </div>
+            </div>
+
             <div id="photoUploadGroup" style="display:none; margin-top:6px;">
-                <label>कस्टम फोटो अपलोड करें:</label>
+                <label>कस्टम फोटो/GIF फ़ाइल अपलोड करें:</label>
                 <input type="file" id="bgImageUpload" accept="image/*">
             </div>
 
@@ -81,14 +91,29 @@
             </div>
         </div>
 
+        <!-- Camera Actions with Back/Front Camera Options -->
+        <div class="tools-panel">
+            <h3>📹 2. कैमरा कंट्रोल (Front / Back Camera)</h3>
+            <label>कैमरा चुनें:</label>
+            <select id="cameraModeSelect">
+                <option value="user">📱 फ्रंट कैमरा (Front Camera)</option>
+                <option value="environment">📸 बैक कैमरा (Back / Rear Camera)</option>
+            </select>
+
+            <button onclick="startLiveCamera()" class="btn-green" style="margin-top:8px;">▶️ कैमरा ऑन / स्विच करें</button>
+            <button onclick="capturePhoto()" style="margin-top:8px;">📸 HD फोटो खींचें</button>
+            <button id="recBtn" onclick="toggleRecording()" class="btn-rec" style="margin-top:8px;">🎥 HD वीडियो रिकॉर्ड करें</button>
+            <button onclick="stopLiveCamera()" style="background:#333; margin-top:8px;">⏹️ कैमरा बंद करें</button>
+        </div>
+
         <!-- Layout Controls -->
         <div class="tools-panel">
-            <h3>📐 2. लेआउट एवं थंबनेल</h3>
+            <h3>📐 3. लेआउट एवं थंबनेल</h3>
             <label>कैमरा लेआउट:</label>
             <select id="layoutModeSelect" onchange="updateLayoutMode()">
                 <option value="full">1. Full Camera Cutout (पीछे बैकग्राउंड)</option>
-                <option value="pip_bottom_right">2. Thumbnail Mode (नीचे दाएँ)</option>
-                <option value="pip_top_right">3. Thumbnail Mode (ऊपर दाएँ)</option>
+                <option value="pip_top_right" selected>2. Thumbnail Mode (ऊपर दाएँ)</option>
+                <option value="pip_bottom_right">3. Thumbnail Mode (नीचे दाएँ)</option>
             </select>
 
             <label>थंबनेल आकार:</label>
@@ -101,19 +126,10 @@
 
         <!-- Audio Mixer Panel -->
         <div class="tools-panel">
-            <h3>🎵 3. ऑडियो मिक्सर</h3>
+            <h3>🎵 4. ऑडियो मिक्सर</h3>
             <label>ऑडियो ट्रैक अपलोड करें (MP3/WAV):</label>
             <input type="file" id="audioUpload" accept="audio/*" multiple onchange="handleAudioUpload(event)">
             <div id="audioList"></div>
-        </div>
-
-        <!-- Camera Actions -->
-        <div class="tools-panel">
-            <h3>📹 4. कैमरा कंट्रोल</h3>
-            <button onclick="startLiveCamera()" class="btn-green">▶️ कैमरा ऑन करें</button>
-            <button onclick="capturePhoto()" style="margin-top:8px;">📸 HD फोटो खींचें</button>
-            <button id="recBtn" onclick="toggleRecording()" class="btn-rec" style="margin-top:8px;">🎥 HD वीडियो रिकॉर्ड करें</button>
-            <button onclick="stopLiveCamera()" style="background:#333; margin-top:8px;">⏹️ कैमरा बंद करें</button>
         </div>
 
     </div>
@@ -134,42 +150,16 @@
 
         let selfieSegmentation, camera, mediaRecorder;
         let recordedChunks = [], isRecording = false;
-        let activeBgMode = 'anim_rain';
-        let layoutMode = 'full';
+        let activeBgMode = 'image';
+        let layoutMode = 'pip_top_right';
         let pipScale = 0.4;
         let micAudioStream = null;
+        let currentFacingMode = 'user';
 
         // Audio Setup
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         const audioMixDestination = audioCtx.createMediaStreamDestination();
         let loadedAudios = [];
-
-        // Animation Particles
-        let animFrame = 0;
-        let rainDrops = [];
-        let birds = [];
-
-        function initAnimations() {
-            rainDrops = [];
-            for (let i = 0; i < 100; i++) {
-                rainDrops.push({
-                    x: Math.random() * 720,
-                    y: Math.random() * 1280,
-                    speed: Math.random() * 15 + 10,
-                    len: Math.random() * 20 + 10
-                });
-            }
-
-            birds = [];
-            for (let i = 0; i < 4; i++) {
-                birds.push({
-                    x: Math.random() * 300,
-                    y: Math.random() * 200 + 50,
-                    speed: Math.random() * 2 + 1,
-                    wingState: 0
-                });
-            }
-        }
 
         function initAI() {
             selfieSegmentation = new SelfieSegmentation({
@@ -177,17 +167,18 @@
             });
             selfieSegmentation.setOptions({ modelSelection: 1 });
             selfieSegmentation.onResults(onAIResults);
-            initAnimations();
+            
+            // Default Garden HD Image
+            bgImage.src = "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?w=720&q=80";
         }
 
         function changeHDBackground() {
             const val = document.getElementById('bgSelect').value;
+            document.getElementById('urlInputGroup').style.display = (val === 'custom_url') ? 'block' : 'none';
             document.getElementById('photoUploadGroup').style.display = (val === 'custom_upload') ? 'block' : 'none';
             document.getElementById('videoUploadGroup').style.display = (val === 'custom_video') ? 'block' : 'none';
 
-            if (val.startsWith('anim_')) {
-                activeBgMode = val;
-            } else if (val === 'custom_upload') {
+            if (val === 'custom_url' || val === 'custom_upload') {
                 activeBgMode = 'image';
             } else if (val === 'custom_video') {
                 activeBgMode = 'video';
@@ -197,96 +188,31 @@
             }
         }
 
+        function applyUrlBackground() {
+            const url = document.getElementById('bgUrlInput').value.trim();
+            if (url) {
+                bgImage.src = url;
+                activeBgMode = 'image';
+                statusText.innerText = "✅ GIF/URL लिंक लोड हो गया!";
+            } else {
+                alert("कृपया एक वैध GIF या इमेज का URL डालें!");
+            }
+        }
+
         function updateLayoutMode() {
             layoutMode = document.getElementById('layoutModeSelect').value;
             pipScale = parseFloat(document.getElementById('pipSizeSelect').value);
         }
 
-        // Draw Animated Backgrounds
-        function drawAnimatedBG(w, h) {
-            animFrame++;
-            ctx.save();
-
-            if (activeBgMode === 'anim_rain') {
-                // Dark Rain Sky & Ground
-                let grad = ctx.createLinearGradient(0, 0, 0, h);
-                grad.addColorStop(0, '#1c2541');
-                grad.addColorStop(1, '#0b132b');
-                ctx.fillStyle = grad;
-                ctx.fillRect(0, 0, w, h);
-
-                // Raindrops Animation
-                ctx.strokeStyle = 'rgba(255, 255, 255, 0.6)';
-                ctx.lineWidth = 2;
-                rainDrops.forEach(r => {
-                    r.y += r.speed;
-                    if (r.y > h) r.y = -20;
-                    ctx.beginPath();
-                    ctx.moveTo(r.x * (w/720), r.y * (h/1280));
-                    ctx.lineTo((r.x - 2) * (w/720), (r.y + r.len) * (h/1280));
-                    ctx.stroke();
-                });
-
-            } else if (activeBgMode === 'anim_garden') {
-                // Sky
-                let skyGrad = ctx.createLinearGradient(0, 0, 0, h);
-                skyGrad.addColorStop(0, '#70e000');
-                skyGrad.addColorStop(0.5, '#38b000');
-                skyGrad.addColorStop(1, '#007200');
-                ctx.fillStyle = skyGrad;
-                ctx.fillRect(0, 0, w, h);
-
-                // Swaying Flowers
-                let sway = Math.sin(animFrame * 0.05) * 10;
-                for (let i = 1; i <= 5; i++) {
-                    let fx = (w / 6) * i;
-                    let fy = h - 80;
-
-                    // Stem
-                    ctx.strokeStyle = '#004b23';
-                    ctx.lineWidth = 6;
-                    ctx.beginPath();
-                    ctx.moveTo(fx, h);
-                    ctx.quadraticCurveTo(fx + sway, fy + 40, fx + sway, fy);
-                    ctx.stroke();
-
-                    // Flower Petals
-                    ctx.fillStyle = ['#ff007f', '#ffb703', '#9d4edd', '#00f5d4', '#ff4d6d'][i - 1];
-                    for (let a = 0; a < 6; a++) {
-                        ctx.beginPath();
-                        let angle = (Math.PI / 3) * a;
-                        ctx.arc(fx + sway + Math.cos(angle) * 18, fy + Math.sin(angle) * 18, 12, 0, Math.PI * 2);
-                        ctx.fill();
-                    }
-                    ctx.fillStyle = '#fff';
-                    ctx.beginPath();
-                    ctx.arc(fx + sway, fy, 10, 0, Math.PI * 2);
-                    ctx.fill();
-                }
-
-                // Flying Birds Animation
-                ctx.strokeStyle = '#111';
-                ctx.lineWidth = 3;
-                birds.forEach(b => {
-                    b.x += b.speed;
-                    if (b.x > w + 20) b.x = -20;
-                    let wing = Math.sin(animFrame * 0.2) * 12;
-                    ctx.beginPath();
-                    ctx.moveTo(b.x, b.y);
-                    ctx.quadraticCurveTo(b.x + 10, b.y - wing, b.x + 20, b.y);
-                    ctx.quadraticCurveTo(b.x + 30, b.y - wing, b.x + 40, b.y);
-                    ctx.stroke();
-                });
-            } else if (activeBgMode === 'image' && bgImage.complete && bgImage.src) {
-                ctx.drawImage(bgImage, 0, 0, w, h);
+        function renderBackground(targetCtx, w, h) {
+            if (activeBgMode === 'image' && bgImage.complete && bgImage.src) {
+                targetCtx.drawImage(bgImage, 0, 0, w, h);
             } else if (activeBgMode === 'video' && bgVideo.readyState >= 2) {
-                ctx.drawImage(bgVideo, 0, 0, w, h);
+                targetCtx.drawImage(bgVideo, 0, 0, w, h);
             } else {
-                ctx.fillStyle = '#000';
-                ctx.fillRect(0, 0, w, h);
+                targetCtx.fillStyle = '#0f172a';
+                targetCtx.fillRect(0, 0, w, h);
             }
-
-            ctx.restore();
         }
 
         function onAIResults(results) {
@@ -300,33 +226,31 @@
             const w = canvas.width;
             const h = canvas.height;
 
-            // Step 1: Crystal Clear Crisp Edge Masking (Removes White Edge/Halo Blur)
             bufferCtx.save();
             bufferCtx.clearRect(0, 0, w, h);
             
-            // Mirroring Correct Fix for Buffer
-            bufferCtx.translate(w, 0);
-            bufferCtx.scale(-1, 1);
+            // Mirror flip only for front camera
+            if (currentFacingMode === 'user') {
+                bufferCtx.translate(w, 0);
+                bufferCtx.scale(-1, 1);
+            }
 
-            // High Contrast Sharp Cut
-            bufferCtx.filter = 'contrast(1000%) brightness(100%)';
+            bufferCtx.filter = 'contrast(2000%) brightness(95%)';
             bufferCtx.drawImage(results.segmentationMask, 0, 0, w, h);
             
-            // Mask Source Composite
             bufferCtx.globalCompositeOperation = 'source-in';
             bufferCtx.filter = 'none';
             bufferCtx.drawImage(results.image, 0, 0, w, h);
             bufferCtx.restore();
 
-            // Step 2: Main Canvas Drawing
             ctx.save();
             ctx.clearRect(0, 0, w, h);
 
             if (layoutMode === 'full') {
-                drawAnimatedBG(w, h);
+                renderBackground(ctx, w, h);
                 ctx.drawImage(bufferCanvas, 0, 0, w, h);
             } else {
-                drawAnimatedBG(w, h);
+                renderBackground(ctx, w, h);
 
                 let thumbW = w * pipScale;
                 let thumbH = h * pipScale;
@@ -334,45 +258,70 @@
                 let posY = (layoutMode === 'pip_bottom_right') ? (h - thumbH - 20) : 20;
 
                 ctx.fillStyle = '#00e5ff';
-                ctx.fillRect(posX - 4, posY - 4, thumbW + 8, thumbH + 8);
+                ctx.fillRect(posX - 3, posY - 3, thumbW + 6, thumbH + 6);
+
+                ctx.save();
+                ctx.beginPath();
+                ctx.rect(posX, posY, thumbW, thumbH);
+                ctx.clip();
+                renderBackground(ctx, w, h);
                 ctx.drawImage(bufferCanvas, posX, posY, thumbW, thumbH);
+                ctx.restore();
             }
 
             ctx.restore();
         }
 
         async function startLiveCamera() {
-            statusText.innerText = "⏳ HD AI कैमरा ऑन हो रहा है...";
+            if (camera) { camera.stop(); }
             
+            currentFacingMode = document.getElementById('cameraModeSelect').value;
+            statusText.innerText = "⏳ कैमरा कनेक्ट हो रहा है...";
+
             try {
-                micAudioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                let micSource = audioCtx.createMediaStreamSource(micAudioStream);
-                micSource.connect(audioMixDestination);
+                if (!micAudioStream) {
+                    micAudioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    let micSource = audioCtx.createMediaStreamSource(micAudioStream);
+                    micSource.connect(audioMixDestination);
+                }
             } catch (err) {
-                console.warn("माइक एक्सेस नहीं मिला:", err);
+                console.warn("माइक अनुमति नहीं मिली:", err);
             }
 
-            camera = new Camera(inputVideo, {
-                onFrame: async () => { await selfieSegmentation.send({ image: inputVideo }); },
-                width: 1280, 
-                height: 720
-            });
-            camera.start();
-            if (activeBgMode === 'video') bgVideo.play();
-            statusText.innerText = "🔴 Live Crystal Clear HD Active";
+            // Custom MediaStream constraint for Front/Back Selection
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: currentFacingMode, width: 1280, height: 720 },
+                    audio: false
+                });
+                inputVideo.srcObject = stream;
+                await inputVideo.play();
+
+                async function renderFrame() {
+                    if (!inputVideo.paused && !inputVideo.ended) {
+                        await selfieSegmentation.send({ image: inputVideo });
+                        requestAnimationFrame(renderFrame);
+                    }
+                }
+                renderFrame();
+
+                if (activeBgMode === 'video') bgVideo.play();
+                statusText.innerText = currentFacingMode === 'user' ? "🔴 Front Camera Active" : "🔴 Back Camera Active";
+            } catch (e) {
+                alert("कैमरा ऑन नहीं हो सका: " + e.message);
+                statusText.innerText = "कैमरा त्रुटि";
+            }
         }
 
         function stopLiveCamera() {
-            if (camera) camera.stop();
-            if (bgVideo) bgVideo.pause();
-            if (micAudioStream) {
-                micAudioStream.getTracks().forEach(track => track.stop());
+            if (inputVideo.srcObject) {
+                inputVideo.srcObject.getTracks().forEach(track => track.stop());
             }
+            if (bgVideo) bgVideo.pause();
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             statusText.innerText = "कैमरा बंद है";
         }
 
-        // Audio Mixing Logic
         function handleAudioUpload(e) {
             const files = e.target.files;
             const audioList = document.getElementById('audioList');
@@ -408,7 +357,7 @@
         }
 
         function pauseAudio(index) {
-            loadedAudios[index].pause();
+            loadedAudios[index].audioEl.pause();
         }
 
         function setAudioVolume(index, val) {
