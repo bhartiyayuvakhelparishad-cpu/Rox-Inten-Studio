@@ -122,7 +122,7 @@
         const recBtn = document.getElementById('recBtn');
         const audioToggleBtn = document.getElementById('audioToggleBtn');
 
-        // Solid Cutout बनाने के लिए Offscreen Canvas बफ़र
+        // Mask Buffer Canvas (फिल्टर और शार्पनेस के लिए)
         const bufferCanvas = document.createElement('canvas');
         const bufferCtx = bufferCanvas.getContext('2d');
 
@@ -131,8 +131,8 @@
         let activeBgMode = 'color';
         let layoutMode = 'full';
         let pipScale = 0.4;
+        let micAudioStream = null;
 
-        // Sliders
         const brightRange = document.getElementById('brightRange');
         const contrastRange = document.getElementById('contrastRange');
         const blurRange = document.getElementById('blurRange');
@@ -166,12 +166,12 @@
             const h = canvas.height;
             const filterStr = `brightness(${brightRange.value}%) contrast(${contrastRange.value}%) blur(${blurRange.value}px)`;
 
-            // Step 1: बफर कैनवास में केवल पर्सन (Solid Cutout) तैयार करें
+            // 1. बालों के ब्लर को खत्म करने के लिए हार्ड एज थ्रेशोल्डिंग
             bufferCtx.save();
             bufferCtx.clearRect(0, 0, w, h);
             
-            // Mask Sharpening Edge
-            bufferCtx.filter = 'contrast(200%)';
+            // एक्स्ट्रा शार्पनेस जोड़ें ताकि बालों के किनारे ब्लर न रहें
+            bufferCtx.filter = 'contrast(500%) threshold(50%)';
             bufferCtx.drawImage(results.segmentationMask, 0, 0, w, h);
             
             bufferCtx.globalCompositeOperation = 'source-in';
@@ -179,18 +179,14 @@
             bufferCtx.drawImage(results.image, 0, 0, w, h);
             bufferCtx.restore();
 
-            // Step 2: Main Canvas पर ड्रा करें
+            // 2. मेन कैनवास पर रेंडर करें
             ctx.save();
             ctx.clearRect(0, 0, w, h);
 
             if (layoutMode === 'full') {
-                // पहले बैकग्राउंड
                 drawBackgroundLayer(0, 0, w, h);
-                // उसके ऊपर सॉलिड कटआउट
                 ctx.drawImage(bufferCanvas, 0, 0, w, h);
-
             } else {
-                // PIP / Thumbnail Mode
                 drawBackgroundLayer(0, 0, w, h);
 
                 let thumbW = w * pipScale;
@@ -200,7 +196,6 @@
 
                 ctx.fillStyle = '#00e5ff';
                 ctx.fillRect(posX - 4, posY - 4, thumbW + 8, thumbH + 8);
-
                 ctx.drawImage(bufferCanvas, posX, posY, thumbW, thumbH);
             }
 
@@ -218,8 +213,16 @@
             }
         }
 
-        function startLiveCamera() {
+        async function startLiveCamera() {
             statusText.innerText = "⏳ HD AI कैमरा ऑन हो रहा है...";
+            
+            // माइक एक्सेस अनुमति (रिकॉर्डिंग में साउंड के लिए)
+            try {
+                micAudioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            } catch (err) {
+                console.warn("माइक एक्सेस अनुमति नहीं मिली:", err);
+            }
+
             camera = new Camera(inputVideo, {
                 onFrame: async () => { await selfieSegmentation.send({ image: inputVideo }); },
                 width: 1280, 
@@ -233,6 +236,9 @@
         function stopLiveCamera() {
             if (camera) camera.stop();
             if (bgVideo) bgVideo.pause();
+            if (micAudioStream) {
+                micAudioStream.getTracks().forEach(track => track.stop());
+            }
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             statusText.innerText = "कैमरा बंद है";
         }
@@ -282,8 +288,26 @@
         function toggleRecording() {
             if (!isRecording) {
                 recordedChunks = [];
-                const stream = canvas.captureStream(30);
-                mediaRecorder = new MediaRecorder(stream, { mimeType: 'video/webm' });
+                
+                // Canvas वीडियो स्ट्रीम बनाएँ
+                const canvasStream = canvas.captureStream(30);
+                const combinedStream = new MediaStream();
+
+                // वीडियो ट्रैक जोड़ें
+                canvasStream.getVideoTracks().forEach(track => combinedStream.addTrack(track));
+
+                // 1. माइक का ऑडियो स्ट्रीम जोड़ें
+                if (micAudioStream && micAudioStream.getAudioTracks().length > 0) {
+                    micAudioStream.getAudioTracks().forEach(track => combinedStream.addTrack(track));
+                }
+
+                // 2. अगर बैकग्राउंड वीडियो चल रहा है तो उसका ऑडियो स्ट्रीम भी जोड़ें
+                if (activeBgMode === 'video' && bgVideo.captureStream) {
+                    const bgStream = bgVideo.captureStream();
+                    bgStream.getAudioTracks().forEach(track => combinedStream.addTrack(track));
+                }
+
+                mediaRecorder = new MediaRecorder(combinedStream, { mimeType: 'video/webm' });
                 mediaRecorder.ondataavailable = (e) => { if (e.data.size > 0) recordedChunks.push(e.data); };
                 mediaRecorder.onstop = () => {
                     const blob = new Blob(recordedChunks, { type: 'video/webm' });
@@ -292,6 +316,7 @@
                     a.download = 'Rox_HD_Live_Video.webm';
                     a.click();
                 };
+                
                 mediaRecorder.start();
                 isRecording = true;
                 recBtn.innerText = "⏹️ रिकॉर्डिंग रोकें";
@@ -301,7 +326,7 @@
                 isRecording = false;
                 recBtn.innerText = "🎥 HD वीडियो रिकॉर्ड करें";
                 recBtn.classList.remove('recording');
-                statusText.innerText = "✅ वीडियो डाउनलोड हो गया!";
+                statusText.innerText = "✅ वीडियो (साउंड के साथ) डाउनलोड हो गया!";
             }
         }
 
