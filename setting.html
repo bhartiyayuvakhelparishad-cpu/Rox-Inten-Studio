@@ -16,8 +16,8 @@
 
         .studio-body { display: flex; flex-direction: column; flex: 1; padding: 15px; align-items: center; }
         
-        .camera-container { position: relative; width: 100%; max-width: 360px; aspect-ratio: 9/16; background: #000; border: 2px solid #00e5ff; border-radius: 10px; overflow: hidden; }
-        canvas { width: 100%; height: 100%; object-fit: cover; }
+        .camera-container { position: relative; width: 100%; max-width: 360px; aspect-ratio: 9/16; background: #000; border: 2px solid #00e5ff; border-radius: 10px; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+        canvas { width: 100%; height: 100%; object-fit: contain; }
         video, img { display: none; }
 
         .tools-panel { width: 100%; max-width: 360px; background: #1a1a2b; border: 1px solid #2e2e48; padding: 12px; border-radius: 8px; margin-top: 15px; }
@@ -44,16 +44,14 @@
 
     <div class="studio-body">
         
-        <!-- Live Display Box -->
         <div class="camera-container">
             <canvas id="outputCanvas"></canvas>
-            <div id="statusText">कैमरा चालू करें</div>
+            <div id="statusText">कैमरा ऑन करें</div>
         </div>
 
         <video id="inputVideo" playsinline muted></video>
         <img id="bgImage" crossorigin="anonymous">
 
-        <!-- Controls -->
         <div class="tools-panel">
             <h3>🖼️ 1. बैकग्राउंड चुनें</h3>
             <label>नया रंग सेट करें:</label>
@@ -85,10 +83,10 @@
         let selfieSegmentation, camera, mediaRecorder;
         let recordedChunks = [], isRecording = false;
 
-        canvas.width = 360;
-        canvas.height = 640;
+        // Correct Mobile Portrait Canvas Dimensions
+        canvas.width = 720;
+        canvas.height = 1280;
 
-        // Initialize AI
         function initAI() {
             selfieSegmentation = new SelfieSegmentation({
                 locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation/${file}`
@@ -97,10 +95,13 @@
             selfieSegmentation.onResults(onAIResults);
         }
 
-        // Live Frame Processing
         function onAIResults(results) {
             ctx.save();
             ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Mirror Fix for Front Camera
+            ctx.translate(canvas.width, 0);
+            ctx.scale(-1, 1);
 
             // 1. Draw Segmentation Mask
             ctx.drawImage(results.segmentationMask, 0, 0, canvas.width, canvas.height);
@@ -121,12 +122,12 @@
             ctx.restore();
         }
 
-        // Start Live WebCam
         function startLiveCamera() {
-            statusText.innerText = "⏳ AI चालू हो रहा है...";
+            statusText.innerText = "⏳ AI कैमरा स्टार्ट हो रहा है...";
             camera = new Camera(inputVideo, {
                 onFrame: async () => { await selfieSegmentation.send({ image: inputVideo }); },
-                width: 360, height: 640
+                width: 720, height: 1280,
+                facingMode: "user"
             });
             camera.start();
             statusText.innerText = "🔴 लाइव AI बैकग्राउंड एक्टिव";
@@ -142,7 +143,6 @@
             if (e.target.files[0]) bgImage.src = URL.createObjectURL(e.target.files[0]);
         });
 
-        // Capture AI Photo
         function capturePhoto() {
             const link = document.createElement('a');
             link.download = "Rox_Live_AI_Photo.png";
@@ -151,7 +151,6 @@
             statusText.innerText = "📸 फोटो सेव हो गई!";
         }
 
-        // Video Recording
         function toggleRecording() {
             if (!isRecording) {
                 recordedChunks = [];
