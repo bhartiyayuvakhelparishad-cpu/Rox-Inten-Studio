@@ -122,6 +122,10 @@
         const recBtn = document.getElementById('recBtn');
         const audioToggleBtn = document.getElementById('audioToggleBtn');
 
+        // Solid Cutout बनाने के लिए Offscreen Canvas बफ़र
+        const bufferCanvas = document.createElement('canvas');
+        const bufferCtx = bufferCanvas.getContext('2d');
+
         let selfieSegmentation, camera, mediaRecorder;
         let recordedChunks = [], isRecording = false;
         let activeBgMode = 'color';
@@ -154,44 +158,50 @@
             if (canvas.width !== results.image.width) {
                 canvas.width = results.image.width;
                 canvas.height = results.image.height;
+                bufferCanvas.width = results.image.width;
+                bufferCanvas.height = results.image.height;
             }
 
-            ctx.save();
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            // Apply Custom Camera Filters
+            const w = canvas.width;
+            const h = canvas.height;
             const filterStr = `brightness(${brightRange.value}%) contrast(${contrastRange.value}%) blur(${blurRange.value}px)`;
 
+            // Step 1: बफर कैनवास में केवल पर्सन (Solid Cutout) तैयार करें
+            bufferCtx.save();
+            bufferCtx.clearRect(0, 0, w, h);
+            
+            // Mask Sharpening Edge
+            bufferCtx.filter = 'contrast(200%)';
+            bufferCtx.drawImage(results.segmentationMask, 0, 0, w, h);
+            
+            bufferCtx.globalCompositeOperation = 'source-in';
+            bufferCtx.filter = filterStr;
+            bufferCtx.drawImage(results.image, 0, 0, w, h);
+            bufferCtx.restore();
+
+            // Step 2: Main Canvas पर ड्रा करें
+            ctx.save();
+            ctx.clearRect(0, 0, w, h);
+
             if (layoutMode === 'full') {
-                ctx.drawImage(results.segmentationMask, 0, 0, canvas.width, canvas.height);
-                ctx.globalCompositeOperation = 'source-in';
-                ctx.filter = filterStr;
-                ctx.drawImage(results.image, 0, 0, canvas.width, canvas.height);
-                ctx.filter = 'none';
-                ctx.globalCompositeOperation = 'destination-over';
-                drawBackgroundLayer(0, 0, canvas.width, canvas.height);
+                // पहले बैकग्राउंड
+                drawBackgroundLayer(0, 0, w, h);
+                // उसके ऊपर सॉलिड कटआउट
+                ctx.drawImage(bufferCanvas, 0, 0, w, h);
 
             } else {
-                drawBackgroundLayer(0, 0, canvas.width, canvas.height);
+                // PIP / Thumbnail Mode
+                drawBackgroundLayer(0, 0, w, h);
 
-                let thumbW = canvas.width * pipScale;
-                let thumbH = canvas.height * pipScale;
-                let posX = canvas.width - thumbW - 20;
-                let posY = (layoutMode === 'pip_bottom_right') ? (canvas.height - thumbH - 20) : 20;
+                let thumbW = w * pipScale;
+                let thumbH = h * pipScale;
+                let posX = w - thumbW - 20;
+                let posY = (layoutMode === 'pip_bottom_right') ? (h - thumbH - 20) : 20;
 
                 ctx.fillStyle = '#00e5ff';
                 ctx.fillRect(posX - 4, posY - 4, thumbW + 8, thumbH + 8);
 
-                ctx.save();
-                ctx.beginPath();
-                ctx.rect(posX, posY, thumbW, thumbH);
-                ctx.clip();
-
-                ctx.drawImage(results.segmentationMask, posX, posY, thumbW, thumbH);
-                ctx.globalCompositeOperation = 'source-in';
-                ctx.filter = filterStr;
-                ctx.drawImage(results.image, posX, posY, thumbW, thumbH);
-                ctx.restore();
+                ctx.drawImage(bufferCanvas, posX, posY, thumbW, thumbH);
             }
 
             ctx.restore();
@@ -212,7 +222,8 @@
             statusText.innerText = "⏳ HD AI कैमरा ऑन हो रहा है...";
             camera = new Camera(inputVideo, {
                 onFrame: async () => { await selfieSegmentation.send({ image: inputVideo }); },
-                width: 1920, height: 1080
+                width: 1280, 
+                height: 720
             });
             camera.start();
             if (activeBgMode === 'video') bgVideo.play();
