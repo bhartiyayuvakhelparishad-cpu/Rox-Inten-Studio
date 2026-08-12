@@ -56,20 +56,18 @@
         <video id="bgVideo" class="hidden-elem" playsinline loop></video>
         <img id="bgImage" class="hidden-elem" crossorigin="anonymous">
 
-        <!-- HD Realistic Backgrounds -->
+        <!-- Animated & HD Backgrounds Selector -->
         <div class="tools-panel">
-            <h3>🌄 1. HD प्राकृतिक बैकग्राउंड्स (Realistic Landscapes)</h3>
-            <label>बैकग्राउंड चुनें:</label>
+            <h3>🌄 1. बैकग्राउंड चुनें (HD & Live Animations)</h3>
+            <label>बैकग्राउंड मोड:</label>
             <select id="bgSelect" onchange="changeHDBackground()">
-                <option value="https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=720&q=80">1. 🌅 Sunset Mountain & River (सूर्यास्त और पहाड़)</option>
-                <option value="https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=720&q=80">2. 🏔️ Misty Mountains & Valley (धुंध भरे पहाड़)</option>
-                <option value="https://images.unsplash.com/photo-1433086966358-54859d0ed716?w=720&q=80">3. 🌊 Waterfall & Green Bridge (झरना और पुल)</option>
-                <option value="https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=720&q=80">4. 🌲 Deep Forest Sunshine (जंगल और धूप)</option>
-                <option value="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=720&q=80">5. 🏖️ Tropical Beach & Sea (समुद्र तट)</option>
-                <option value="https://images.unsplash.com/photo-1518837695005-2083093ee35b?w=720&q=80">6. 🌸 Cherry Blossom Flowers (गुलाबी फूल)</option>
-                <option value="https://images.unsplash.com/photo-1519681393784-d120267933ba?w=720&q=80">7. 🌌 Night Starry Sky (तारे और रात)</option>
-                <option value="custom_upload">8. 📁 अपनी खुद की फोटो अपलोड करें</option>
-                <option value="custom_video">9. 🎬 अपना खुद का वीडियो अपलोड करें</option>
+                <option value="anim_rain">1. 🌧️ मूसलाधार बारिश एवं बहती बूंदें (Rain Animation)</option>
+                <option value="anim_garden">2. 🌺 बगीचा, हिलते फूल एवं उड़ते पक्षी (Garden & Birds)</option>
+                <option value="https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=720&q=80">3. 🌅 Sunset Mountain & River (सूर्यास्त)</option>
+                <option value="https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=720&q=80">4. 🏔️ Misty Mountains (धुंध भरे पहाड़)</option>
+                <option value="https://images.unsplash.com/photo-1433086966358-54859d0ed716?w=720&q=80">5. 🌊 Waterfall & Greenery (HD झरना)</option>
+                <option value="custom_upload">6. 📁 अपनी खुद की फोटो अपलोड करें</option>
+                <option value="custom_video">7. 🎬 अपना खुद का वीडियो अपलोड करें</option>
             </select>
 
             <div id="photoUploadGroup" style="display:none; margin-top:6px;">
@@ -103,7 +101,7 @@
 
         <!-- Audio Mixer Panel -->
         <div class="tools-panel">
-            <h3>🎵 3. ऑडियो मिक्सर एवं कटर</h3>
+            <h3>🎵 3. ऑडियो मिक्सर</h3>
             <label>ऑडियो ट्रैक अपलोड करें (MP3/WAV):</label>
             <input type="file" id="audioUpload" accept="audio/*" multiple onchange="handleAudioUpload(event)">
             <div id="audioList"></div>
@@ -136,15 +134,42 @@
 
         let selfieSegmentation, camera, mediaRecorder;
         let recordedChunks = [], isRecording = false;
-        let activeBgMode = 'image';
+        let activeBgMode = 'anim_rain';
         let layoutMode = 'full';
         let pipScale = 0.4;
         let micAudioStream = null;
 
-        // Web Audio API Configuration
+        // Audio Setup
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         const audioMixDestination = audioCtx.createMediaStreamDestination();
         let loadedAudios = [];
+
+        // Animation Particles
+        let animFrame = 0;
+        let rainDrops = [];
+        let birds = [];
+
+        function initAnimations() {
+            rainDrops = [];
+            for (let i = 0; i < 100; i++) {
+                rainDrops.push({
+                    x: Math.random() * 720,
+                    y: Math.random() * 1280,
+                    speed: Math.random() * 15 + 10,
+                    len: Math.random() * 20 + 10
+                });
+            }
+
+            birds = [];
+            for (let i = 0; i < 4; i++) {
+                birds.push({
+                    x: Math.random() * 300,
+                    y: Math.random() * 200 + 50,
+                    speed: Math.random() * 2 + 1,
+                    wingState: 0
+                });
+            }
+        }
 
         function initAI() {
             selfieSegmentation = new SelfieSegmentation({
@@ -152,9 +177,7 @@
             });
             selfieSegmentation.setOptions({ modelSelection: 1 });
             selfieSegmentation.onResults(onAIResults);
-            
-            // Default Sunset Image Load
-            bgImage.src = "https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=720&q=80";
+            initAnimations();
         }
 
         function changeHDBackground() {
@@ -162,7 +185,9 @@
             document.getElementById('photoUploadGroup').style.display = (val === 'custom_upload') ? 'block' : 'none';
             document.getElementById('videoUploadGroup').style.display = (val === 'custom_video') ? 'block' : 'none';
 
-            if (val === 'custom_upload') {
+            if (val.startsWith('anim_')) {
+                activeBgMode = val;
+            } else if (val === 'custom_upload') {
                 activeBgMode = 'image';
             } else if (val === 'custom_video') {
                 activeBgMode = 'video';
@@ -177,8 +202,82 @@
             pipScale = parseFloat(document.getElementById('pipSizeSelect').value);
         }
 
-        function renderBackground(w, h) {
-            if (activeBgMode === 'image' && bgImage.complete && bgImage.src) {
+        // Draw Animated Backgrounds
+        function drawAnimatedBG(w, h) {
+            animFrame++;
+            ctx.save();
+
+            if (activeBgMode === 'anim_rain') {
+                // Dark Rain Sky & Ground
+                let grad = ctx.createLinearGradient(0, 0, 0, h);
+                grad.addColorStop(0, '#1c2541');
+                grad.addColorStop(1, '#0b132b');
+                ctx.fillStyle = grad;
+                ctx.fillRect(0, 0, w, h);
+
+                // Raindrops Animation
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.6)';
+                ctx.lineWidth = 2;
+                rainDrops.forEach(r => {
+                    r.y += r.speed;
+                    if (r.y > h) r.y = -20;
+                    ctx.beginPath();
+                    ctx.moveTo(r.x * (w/720), r.y * (h/1280));
+                    ctx.lineTo((r.x - 2) * (w/720), (r.y + r.len) * (h/1280));
+                    ctx.stroke();
+                });
+
+            } else if (activeBgMode === 'anim_garden') {
+                // Sky
+                let skyGrad = ctx.createLinearGradient(0, 0, 0, h);
+                skyGrad.addColorStop(0, '#70e000');
+                skyGrad.addColorStop(0.5, '#38b000');
+                skyGrad.addColorStop(1, '#007200');
+                ctx.fillStyle = skyGrad;
+                ctx.fillRect(0, 0, w, h);
+
+                // Swaying Flowers
+                let sway = Math.sin(animFrame * 0.05) * 10;
+                for (let i = 1; i <= 5; i++) {
+                    let fx = (w / 6) * i;
+                    let fy = h - 80;
+
+                    // Stem
+                    ctx.strokeStyle = '#004b23';
+                    ctx.lineWidth = 6;
+                    ctx.beginPath();
+                    ctx.moveTo(fx, h);
+                    ctx.quadraticCurveTo(fx + sway, fy + 40, fx + sway, fy);
+                    ctx.stroke();
+
+                    // Flower Petals
+                    ctx.fillStyle = ['#ff007f', '#ffb703', '#9d4edd', '#00f5d4', '#ff4d6d'][i - 1];
+                    for (let a = 0; a < 6; a++) {
+                        ctx.beginPath();
+                        let angle = (Math.PI / 3) * a;
+                        ctx.arc(fx + sway + Math.cos(angle) * 18, fy + Math.sin(angle) * 18, 12, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                    ctx.fillStyle = '#fff';
+                    ctx.beginPath();
+                    ctx.arc(fx + sway, fy, 10, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+
+                // Flying Birds Animation
+                ctx.strokeStyle = '#111';
+                ctx.lineWidth = 3;
+                birds.forEach(b => {
+                    b.x += b.speed;
+                    if (b.x > w + 20) b.x = -20;
+                    let wing = Math.sin(animFrame * 0.2) * 12;
+                    ctx.beginPath();
+                    ctx.moveTo(b.x, b.y);
+                    ctx.quadraticCurveTo(b.x + 10, b.y - wing, b.x + 20, b.y);
+                    ctx.quadraticCurveTo(b.x + 30, b.y - wing, b.x + 40, b.y);
+                    ctx.stroke();
+                });
+            } else if (activeBgMode === 'image' && bgImage.complete && bgImage.src) {
                 ctx.drawImage(bgImage, 0, 0, w, h);
             } else if (activeBgMode === 'video' && bgVideo.readyState >= 2) {
                 ctx.drawImage(bgVideo, 0, 0, w, h);
@@ -186,6 +285,8 @@
                 ctx.fillStyle = '#000';
                 ctx.fillRect(0, 0, w, h);
             }
+
+            ctx.restore();
         }
 
         function onAIResults(results) {
@@ -199,26 +300,33 @@
             const w = canvas.width;
             const h = canvas.height;
 
-            // Crystal Clear Boundary Thresholding (Zero Hair Blur)
+            // Step 1: Crystal Clear Crisp Edge Masking (Removes White Edge/Halo Blur)
             bufferCtx.save();
             bufferCtx.clearRect(0, 0, w, h);
-            bufferCtx.filter = 'contrast(500%) threshold(48%)';
+            
+            // Mirroring Correct Fix for Buffer
+            bufferCtx.translate(w, 0);
+            bufferCtx.scale(-1, 1);
+
+            // High Contrast Sharp Cut
+            bufferCtx.filter = 'contrast(1000%) brightness(100%)';
             bufferCtx.drawImage(results.segmentationMask, 0, 0, w, h);
             
+            // Mask Source Composite
             bufferCtx.globalCompositeOperation = 'source-in';
             bufferCtx.filter = 'none';
             bufferCtx.drawImage(results.image, 0, 0, w, h);
             bufferCtx.restore();
 
-            // Render
+            // Step 2: Main Canvas Drawing
             ctx.save();
             ctx.clearRect(0, 0, w, h);
 
             if (layoutMode === 'full') {
-                renderBackground(w, h);
+                drawAnimatedBG(w, h);
                 ctx.drawImage(bufferCanvas, 0, 0, w, h);
             } else {
-                renderBackground(w, h);
+                drawAnimatedBG(w, h);
 
                 let thumbW = w * pipScale;
                 let thumbH = h * pipScale;
@@ -241,7 +349,7 @@
                 let micSource = audioCtx.createMediaStreamSource(micAudioStream);
                 micSource.connect(audioMixDestination);
             } catch (err) {
-                console.warn("माइक एक्सेस अनुमति नहीं मिली:", err);
+                console.warn("माइक एक्सेस नहीं मिला:", err);
             }
 
             camera = new Camera(inputVideo, {
@@ -264,7 +372,7 @@
             statusText.innerText = "कैमरा बंद है";
         }
 
-        // Audio Mixing Controls
+        // Audio Mixing Logic
         function handleAudioUpload(e) {
             const files = e.target.files;
             const audioList = document.getElementById('audioList');
@@ -300,7 +408,7 @@
         }
 
         function pauseAudio(index) {
-            loadedAudios[index].audioEl.pause();
+            loadedAudios[index].pause();
         }
 
         function setAudioVolume(index, val) {
