@@ -1,248 +1,479 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="hi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rox AI Magic Studio</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <title>Rox INTEN STUDIO - Pro Live Camera</title>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation/selfie_segmentation.js" crossorigin="anonymous"></script>
     <style>
-        body { margin: 0; background: #0b0c10; color: white; font-family: sans-serif; display: flex; justify-content: center; padding: 20px; }
-        .mobile-frame { width: 360px; height: 740px; background: #15161e; border: 8px solid #252836; border-radius: 40px; position: relative; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.8); }
-        .notch { width: 140px; height: 25px; background: #252836; border-bottom-left-radius: 15px; border-bottom-right-radius: 15px; position: absolute; top: 0; left: 50%; transform: translateX(-50%); z-index: 10; }
-        .app-content { padding: 25px 15px; height: 100%; box-sizing: border-box; overflow-y: auto; }
-        
-        .header-studio { display: flex; justify-content: space-between; align-items: center; margin-top: 15px; border-bottom: 1px solid #2d3142; padding-bottom: 10px; }
-        .back-btn { color: #ff007f; text-decoration: none; font-size: 18px; font-weight: bold; }
-        
-        #ai-timer-banner { background: #1f2232; padding: 10px; border-radius: 10px; text-align: center; font-size: 14px; color: #ffcc00; font-weight: bold; margin-top: 15px; border: 1px solid #2d3142; }
-        
-        /* 📸 एआई कैमरा स्टेज */
-        .canvas-container { position: relative; width: 100%; height: 230px; background: #000; border-radius: 15px; overflow: hidden; border: 2px solid #ff007f; margin: 15px 0; }
-        #webcam { width: 100%; height: 100%; object-fit: cover; position: absolute; z-index: 1; }
-        #bg-overlay { position: absolute; width: 100%; height: 100%; z-index: 0; background-size: cover; background-position: center; }
-        #sticker-zone { position: absolute; width: 100%; height: 100%; z-index: 2; pointer-events: none; }
-        
-        .disabled-ai { opacity: 0.15; pointer-events: none; }
-        .tool-block { background: #1f2232; border: 1px solid #2d3142; border-radius: 12px; padding: 12px; margin-bottom: 12px; }
-        .tool-block h4 { margin: 0 0 8px 0; color: #78ffd6; font-size: 13px; }
-        
-        .age-grid { display: flex; flex-wrap: wrap; gap: 5px; }
-        .age-btn { background: #2d3142; color: white; border: none; padding: 6px 10px; border-radius: 6px; font-size: 11px; cursor: pointer; font-weight: bold; }
-        
-        input[type="text"], select, input[type="file"] { background: #15161e; color: #fff; border: 1px solid #2d3142; padding: 8px; border-radius: 6px; width: 100%; box-sizing: border-box; margin-top: 5px; }
-        .action-btn { background: linear-gradient(135deg, #ff007f, #7f00ff); color: white; border: none; padding: 10px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 8px; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Arial, sans-serif; }
+        body { background: #0c0c14; color: #fff; min-height: 100vh; display: flex; flex-direction: column; }
 
-        /* 🔥 10 प्रकार के टेक्स्ट डिज़ाइन */
-        .style1 { font-family: monospace; color: #00ffcc; text-shadow: 0 0 10px #00ffcc; font-weight: bold; }
-        .style2 { font-family: sans-serif; font-weight: 900; color: #ff0055; text-transform: uppercase; }
-        .style3 { font-family: serif; color: #ff9900; letter-spacing: 2px; font-style: italic; }
-        .style4 { font-family: Impact; color: #fff; text-shadow: 2px 2px 0px #000; }
-        .style5 { font-family: 'Times New Roman'; color: #d4af37; font-weight: bold; }
-        .style6 { font-family: 'Comic Sans MS'; color: #00ff00; }
-        .style7 { font-family: Helvetica; font-weight: 100; color: #eee; }
-        .style8 { font-family: sans-serif; background: linear-gradient(45deg, #ff007f, #7f00ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: bold; }
-        .style9 { font-family: Courier; color: #a8ff78; text-decoration: underline; }
-        .style10 { font-family: Arial; color: #007bff; border: 1px solid #007bff; padding: 2px; }
+        .top-navbar { background: #161625; padding: 10px 15px; border-bottom: 2px solid #28283d; display: flex; justify-content: space-between; align-items: center; }
+        .logo-area h1 { color: #00e5ff; font-size: 20px; }
 
-        .share-grid { display: flex; justify-content: space-between; gap: 4px; margin-top: 8px; }
-        .share-btn { width: 32%; padding: 8px; border: none; border-radius: 6px; color: white; font-size: 11px; font-weight: bold; cursor: pointer; text-align: center; }
-        .fb { background: #3b5998; } .insta { background: #e1306c; } .yt { background: #ff0000; }
+        .studio-body { display: flex; flex-direction: column; flex: 1; padding: 15px; align-items: center; }
+        
+        .camera-container { position: relative; width: 100%; max-width: 360px; aspect-ratio: 9/16; background: #000; border: 2px solid #00e5ff; border-radius: 10px; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+        canvas { width: 100%; height: 100%; object-fit: cover; }
+        video.hidden-elem, img.hidden-elem { display: none; }
+
+        .tools-panel { width: 100%; max-width: 360px; background: #1a1a2b; border: 1px solid #2e2e48; padding: 12px; border-radius: 8px; margin-top: 12px; }
+        .tools-panel h3 { font-size: 12px; color: #00e5ff; margin-bottom: 8px; text-transform: uppercase; }
+
+        label { font-size: 11px; color: #aaa; margin-top: 6px; display: flex; justify-content: space-between; align-items: center; }
+        input, button, select { width: 100%; padding: 8px; margin-top: 4px; background: #25253b; color: #fff; border: 1px solid #3e3e5e; border-radius: 5px; cursor: pointer; font-size: 12px; }
+        button:hover, select:hover { background: #00e5ff; color: #000; font-weight: bold; }
+        
+        .btn-green { background: #00c853; border: none; font-weight: bold; color: #000; }
+        .btn-blue { background: #00e5ff; border: none; font-weight: bold; color: #000; }
+        .btn-rec { background: #ff007f; border: none; font-weight: bold; }
+        .btn-rec.recording { background: #ff1744; animation: pulse 1s infinite; }
+
+        .audio-item { background: #12121c; padding: 6px; border-radius: 4px; margin-top: 6px; border: 1px solid #333; }
+        .audio-controls { display: flex; gap: 5px; margin-top: 4px; }
+
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
+        #statusText { position: absolute; top: 10px; left: 10px; font-size: 11px; background: rgba(0,0,0,0.85); padding: 4px 8px; border-radius: 4px; color: #00e5ff; z-index: 10; border: 1px solid #00e5ff; }
     </style>
 </head>
 <body>
 
-    <div class="mobile-frame">
-        <div class="notch"></div>
-        <div class="app-content">
-            
-            <div class="header-studio">
-                <a href="index.html" class="back-btn"><i class="fa-solid fa-arrow-left"></i> Back</a>
-                <h3 style="margin: 0; font-size: 16px; color: #fff;">🪄 AI Magic Studio</h3>
-                <div></div>
-            </div>
+    <div class="top-navbar">
+        <div class="logo-area"><h1>Rox Studio HD</h1></div>
+        <a href="index.html" style="color: #00e5ff; text-decoration: none; font-size: 13px;">🏠 Home</a>
+    </div>
 
-            <div id="ai-timer-banner">
-                ⏳ AI Access Timer: <span id="time-left">05:00</span>
-            </div>
-
-            <div id="studio-work-area" class="disabled-ai">
-                <div class="canvas-container">
-                    <video id="webcam" autoplay playsinline></video>
-                    <div id="bg-overlay"></div>
-                    <div id="sticker-zone"></div>
-                </div>
-
-                <div class="tool-block">
-                    <h4><i class="fa-solid fa-face-smile"></i> 1. AI लुक बदलें (Age View)</h4>
-                    <div class="age-grid">
-                        <button class="age-btn" data-age="5">5 Years (बालक)</button>
-                        <button class="age-btn" data-age="15">15 Years (किशोर)</button>
-                        <button class="age-btn" data-age="25">25 Years (युवा)</button>
-                        <button class="age-btn" data-age="45">45 Years (मैच्योर)</button>
-                        <button class="age-btn" data-age="70">70 Years (बुजुर्ग)</button>
-                    </div>
-                </div>
-
-                <div class="tool-block">
-                    <h4><i class="fa-solid fa-photo-film"></i> 2. चेंज बैकग्राउंड टेंपलेट</h4>
-                    <input type="file" id="bg-upload" accept="image/*,video/*">
-                </div>
-
-                <div class="tool-block">
-                    <h4><i class="fa-solid fa-font"></i> 3. टेक्स्ट डिज़ाइन (10 Styles) & स्टिकर्स</h4>
-                    <input type="text" id="custom-text" placeholder="यहाँ अपना टेक्स्ट लिखें...">
-                    <select id="text-style">
-                        <option value="style1">Style 1: Neon Glow</option>
-                        <option value="style2">Style 2: Bold Techno</option>
-                        <option value="style3">Style 3: Retro Gold</option>
-                        <option value="style4">Style 4: 3D Pop</option>
-                        <option value="style5">Style 5: Royal King</option>
-                        <option value="style6">Style 6: Comic Fun</option>
-                        <option value="style7">Style 7: Minimal Light</option>
-                        <option value="style8">Style 8: Magic Gradient</option>
-                        <option value="style9">Style 9: Cyberpunk</option>
-                        <option value="style10">Style 10: Video Title Box</option>
-                    </select>
-                    <button id="add-text-btn" class="action-btn">✍️ फ्रेम में टेक्स्ट जोड़ें</button>
-                    
-                    <div style="margin-top: 10px; display: flex; justify-content: space-around;">
-                        <button class="sticker-btn age-btn" data-emoji="🔥">🔥</button>
-                        <button class="sticker-btn age-btn" data-emoji="👑">👑</button>
-                        <button class="sticker-btn age-btn" data-emoji="😂">😂</button>
-                        <button class="sticker-btn age-btn" data-emoji="❤️">❤️</button>
-                    </div>
-                </div>
-
-                <div class="tool-block" style="background:none; border:none; padding:0;">
-                    <button id="capture-btn" class="action-btn" style="background: #28a745; font-size:15px;"><i class="fa-solid fa-floppy-disk"></i> गैलरी में सुरक्षित करें (Save)</button>
-                    <div class="share-grid">
-                        <button class="share-btn fb" id="share-fb"><i class="fa-brands fa-facebook"></i> Facebook</button>
-                        <button class="share-btn insta" id="share-insta"><i class="fa-brands fa-instagram"></i> Instagram</button>
-                        <button class="share-btn yt" id="share-yt"><i class="fa-brands fa-youtube"></i> YouTube</button>
-                    </div>
-                </div>
-
-                <div class="tool-block" style="border-left: 4px solid #ffcc00; background: #1a1c29;">
-                    <h5 style="margin:0; color:#ffcc00;"><i class="fa-solid fa-chart-line"></i> AI वायरल कंटेंट गाइडेंस</h5>
-                    <p style="font-size:11px; color:#a0a5b5; margin:5px 0;">एआई एनालिसिस: आपका फेस-इंडेक्स और बैकग्राउंड रेंडरिंग रील्स/शॉर्ट्स पर वायरल होने के लिए 95% परफेक्ट है!</p>
-                    <button id="save-viral-btn" class="action-btn" style="background:#ff5500; padding:6px; margin:0; font-size:12px;">📁 वायरल फोल्डर में अलग सेव करें</button>
-                </div>
-            </div>
-
+    <div class="studio-body">
+        
+        <div class="camera-container">
+            <canvas id="outputCanvas"></canvas>
+            <div id="statusText">कैमरा ऑन करें</div>
         </div>
+
+        <video id="inputVideo" class="hidden-elem" playsinline muted></video>
+        <video id="bgVideo" class="hidden-elem" playsinline loop></video>
+        <img id="bgImage" class="hidden-elem" crossorigin="anonymous">
+
+        <!-- Animated Background Selector -->
+        <div class="tools-panel">
+            <h3>🎨 1. एनीमेशन बैकग्राउंड चुनें</h3>
+            <label>बैकग्राउंड मोड:</label>
+            <select id="bgAnimSelect" onchange="changeBgAnimation()">
+                <option value="nature">1. 🌿 प्राकृतिक सुंदरता (Nature & Leaves)</option>
+                <option value="custom_photo">2. 🖼️ मूविंग फोटो डिज़ाइन (Dynamic Photo)</option>
+                <option value="flowers">3. 🌸 फूलों की वर्षा (Falling Flowers)</option>
+                <option value="bubbles">4. 🫧 शाइनिंग बबल्स (Floating Bubbles)</option>
+                <option value="mountain_rain">5. 🏔️ पहाड़, झरना एवं बारिश (Mountain Rain)</option>
+                <option value="uploaded_image">6. 📷 अपनी फोटो अपलोड करें</option>
+                <option value="uploaded_video">7. 🎬 अपना वीडियो अपलोड करें</option>
+            </select>
+
+            <div id="photoUploadGroup" style="display:none; margin-top:6px;">
+                <label>कस्टम फोटो अपलोड करें:</label>
+                <input type="file" id="bgImageUpload" accept="image/*">
+            </div>
+
+            <div id="videoUploadGroup" style="display:none; margin-top:6px;">
+                <label>कस्टम वीडियो अपलोड करें:</label>
+                <input type="file" id="bgVideoUpload" accept="video/*">
+            </div>
+        </div>
+
+        <!-- Layout Controls -->
+        <div class="tools-panel">
+            <h3>📐 2. लेआउट एवं थंबनेल</h3>
+            <label>कैमरा लेआउट:</label>
+            <select id="layoutModeSelect" onchange="updateLayoutMode()">
+                <option value="full">1. Full Camera Cutout (सॉलिड बैकग्राउंड)</option>
+                <option value="pip_bottom_right">2. Thumbnail Mode (नीचे दाएँ)</option>
+                <option value="pip_top_right">3. Thumbnail Mode (ऊपर दाएँ)</option>
+            </select>
+
+            <label>थंबनेल आकार:</label>
+            <select id="pipSizeSelect" onchange="updateLayoutMode()">
+                <option value="0.3">Small (छोटा)</option>
+                <option value="0.4" selected>Medium (मध्यम)</option>
+                <option value="0.5">Large (बड़ा)</option>
+            </select>
+        </div>
+
+        <!-- Audio Mixer Panel -->
+        <div class="tools-panel">
+            <h3>🎵 3. ऑडियो मिक्सर एवं कटर</h3>
+            <label>ऑडियो ट्रैक अपलोड करें (MP3/WAV):</label>
+            <input type="file" id="audioUpload" accept="audio/*" multiple onchange="handleAudioUpload(event)">
+            
+            <div id="audioList"></div>
+        </div>
+
+        <!-- Camera Actions -->
+        <div class="tools-panel">
+            <h3>📹 4. कैमरा कंट्रोल</h3>
+            <button onclick="startLiveCamera()" class="btn-green">▶️ कैमरा ऑन करें</button>
+            <button onclick="capturePhoto()" style="margin-top:8px;">📸 HD फोटो खींचें</button>
+            <button id="recBtn" onclick="toggleRecording()" class="btn-rec" style="margin-top:8px;">🎥 HD वीडियो रिकॉर्ड करें</button>
+            <button onclick="stopLiveCamera()" style="background:#333; margin-top:8px;">⏹️ कैमरा बंद करें</button>
+        </div>
+
     </div>
 
     <script>
-        const studioWorkArea = document.getElementById('studio-work-area');
-        const webcam = document.getElementById('webcam');
-        const bgOverlay = document.getElementById('bg-overlay');
-        const timeLeftSpan = document.getElementById('time-left');
-        let timerInterval;
-        let localStream = null;
+        const inputVideo = document.getElementById('inputVideo');
+        const bgVideo = document.getElementById('bgVideo');
+        const bgImage = document.getElementById('bgImage');
+        const bgImageUpload = document.getElementById('bgImageUpload');
+        const bgVideoUpload = document.getElementById('bgVideoUpload');
+        const canvas = document.getElementById('outputCanvas');
+        const ctx = canvas.getContext('2d');
+        const statusText = document.getElementById('statusText');
+        const recBtn = document.getElementById('recBtn');
 
-        // पेज लोड होते ही चेक करेगा कि प्रो एक्टिवेटेड है या नहीं
-        window.addEventListener('DOMContentLoaded', () => {
-            let isUnlocked = localStorage.getItem("unlock_time") && new Date().getTime() < localStorage.getItem("unlock_time");
-            
-            if (isUnlocked) {
-                // एक्टिवेटेड होने पर रिस्ट्रिक्शन हटेगा और कैमरा ऑन होगा
-                studioWorkArea.classList.remove('disabled-ai');
-                startCamera();
-                startTimer(300); // 5 मिनट टाइमर
-            } else {
-                alert("एक्सेस डिनाइड! कृपया पहले मुख्य स्क्रीन पर जाकर 'Unlock Pro (watch 3 Ads)' बटन से एड्स पूरा देखें।");
-                window.location.href = "index.html";
-            }
-        });
+        const bufferCanvas = document.createElement('canvas');
+        const bufferCtx = bufferCanvas.getContext('2d');
 
-        async function startCamera() {
-            try {
-                localStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" }, audio: false });
-                webcam.srcObject = localStream;
-            } catch (err) {
-                alert("कैमरा रेंडरिंग के लिए हार्डवेयर परमिशन आवश्यक है!");
+        let selfieSegmentation, camera, mediaRecorder;
+        let recordedChunks = [], isRecording = false;
+        let activeBgMode = 'nature';
+        let layoutMode = 'full';
+        let pipScale = 0.4;
+        let micAudioStream = null;
+
+        // Web Audio API for mixing
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const audioMixDestination = audioCtx.createMediaStreamDestination();
+        let loadedAudios = [];
+
+        // Animation Particles Setup
+        let animFrame = 0;
+        let particles = [];
+
+        function initParticles(type) {
+            particles = [];
+            let count = type === 'rain' ? 80 : 30;
+            for(let i = 0; i < count; i++) {
+                particles.push({
+                    x: Math.random() * 360,
+                    y: Math.random() * 640,
+                    size: Math.random() * 5 + 2,
+                    speedY: Math.random() * 3 + 1,
+                    speedX: Math.random() * 2 - 1,
+                    angle: Math.random() * 360
+                });
             }
         }
 
-        function startTimer(seconds) {
-            let timeLeft = seconds;
-            timerInterval = setInterval(() => {
-                let mins = Math.floor(timeLeft / 60);
-                let secs = timeLeft % 60;
-                timeLeftSpan.textContent = `${mins < 10 ? '0' : ''}${mins}:${secs < 10 ? '0' : ''}${secs}`;
+        function initAI() {
+            selfieSegmentation = new SelfieSegmentation({
+                locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation/${file}`
+            });
+            selfieSegmentation.setOptions({ modelSelection: 1 });
+            selfieSegmentation.onResults(onAIResults);
+            initParticles('nature');
+        }
 
-                if (timeLeft <= 0) {
-                    clearInterval(timerInterval);
-                    studioWorkArea.classList.add('disabled-ai');
-                    if (webcam.srcObject) { localStream.getTracks().forEach(t => t.stop()); }
-                    alert("एआई सत्र का समय समाप्त हो गया! दोबारा एक्सेस के लिए फिर से प्रो एक्टिवेट करें।");
-                    window.location.href = "index.html";
+        function changeBgAnimation() {
+            activeBgMode = document.getElementById('bgAnimSelect').value;
+            document.getElementById('photoUploadGroup').style.display = (activeBgMode === 'uploaded_image' || activeBgMode === 'custom_photo') ? 'block' : 'none';
+            document.getElementById('videoUploadGroup').style.display = (activeBgMode === 'uploaded_video') ? 'block' : 'none';
+            initParticles(activeBgMode);
+        }
+
+        function updateLayoutMode() {
+            layoutMode = document.getElementById('layoutModeSelect').value;
+            pipScale = parseFloat(document.getElementById('pipSizeSelect').value);
+        }
+
+        function renderProceduralBackground(w, h) {
+            animFrame++;
+            ctx.save();
+
+            if (activeBgMode === 'nature') {
+                let grad = ctx.createLinearGradient(0, 0, 0, h);
+                grad.addColorStop(0, '#87CEEB');
+                grad.addColorStop(1, '#2E8B57');
+                ctx.fillStyle = grad;
+                ctx.fillRect(0, 0, w, h);
+
+                // Flying Leaves
+                ctx.fillStyle = '#228B22';
+                particles.forEach(p => {
+                    p.y += p.speedY * 0.5;
+                    p.x += Math.sin(animFrame * 0.05 + p.angle);
+                    if (p.y > h) p.y = -10;
+                    ctx.beginPath();
+                    ctx.arc(p.x * (w/360), p.y * (h/640), p.size, 0, Math.PI * 2);
+                    ctx.fill();
+                });
+
+            } else if (activeBgMode === 'custom_photo') {
+                ctx.fillStyle = '#111';
+                ctx.fillRect(0, 0, w, h);
+                if (bgImage.complete && bgImage.src) {
+                    let scale = 1 + Math.sin(animFrame * 0.03) * 0.1;
+                    let angle = Math.sin(animFrame * 0.02) * 0.05;
+                    ctx.save();
+                    ctx.translate(w / 2, h / 2);
+                    ctx.rotate(angle);
+                    ctx.scale(scale, scale);
+                    ctx.drawImage(bgImage, -w / 2, -h / 2, w, h);
+                    ctx.restore();
+                } else {
+                    ctx.fillStyle = '#00e5ff';
+                    ctx.font = '16px Arial';
+                    ctx.fillText('कृपया फोटो अपलोड करें', 20, h/2);
                 }
-                timeLeft--;
-            }, 1000);
+
+            } else if (activeBgMode === 'flowers') {
+                ctx.fillStyle = '#2c162e';
+                ctx.fillRect(0, 0, w, h);
+                ctx.fillStyle = '#ff69b4';
+                particles.forEach(p => {
+                    p.y += p.speedY;
+                    if (p.y > h) p.y = -10;
+                    ctx.beginPath();
+                    ctx.arc(p.x * (w/360), p.y * (h/640), p.size + 2, 0, Math.PI * 2);
+                    ctx.fill();
+                });
+
+            } else if (activeBgMode === 'bubbles') {
+                let grad = ctx.createLinearGradient(0, 0, w, h);
+                grad.addColorStop(0, '#0f2027');
+                grad.addColorStop(1, '#2c5364');
+                ctx.fillStyle = grad;
+                ctx.fillRect(0, 0, w, h);
+
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.6)';
+                ctx.lineWidth = 2;
+                particles.forEach(p => {
+                    p.y -= p.speedY * 0.8;
+                    if (p.y < -10) p.y = h + 10;
+                    ctx.beginPath();
+                    ctx.arc(p.x * (w/360), p.y * (h/640), p.size * 2, 0, Math.PI * 2);
+                    ctx.stroke();
+                });
+
+            } else if (activeBgMode === 'mountain_rain') {
+                // Sky & Mountain
+                let grad = ctx.createLinearGradient(0, 0, 0, h);
+                grad.addColorStop(0, '#232526');
+                grad.addColorStop(1, '#414345');
+                ctx.fillStyle = grad;
+                ctx.fillRect(0, 0, w, h);
+
+                // Mountain Shape
+                ctx.fillStyle = '#1c1d1f';
+                ctx.beginPath();
+                ctx.moveTo(0, h);
+                ctx.lineTo(w * 0.3, h * 0.5);
+                ctx.lineTo(w * 0.7, h * 0.7);
+                ctx.lineTo(w, h);
+                ctx.fill();
+
+                // Waterfall
+                ctx.fillStyle = 'rgba(173, 216, 230, 0.8)';
+                ctx.fillRect(w * 0.28, h * 0.5, 12, h * 0.5);
+
+                // Rain
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+                ctx.lineWidth = 1;
+                particles.forEach(p => {
+                    p.y += p.speedY * 2.5;
+                    if (p.y > h) p.y = -10;
+                    ctx.beginPath();
+                    ctx.moveTo(p.x * (w/360), p.y * (h/640));
+                    ctx.lineTo(p.x * (w/360) - 2, p.y * (h/640) + 10);
+                    ctx.stroke();
+                });
+
+            } else if (activeBgMode === 'uploaded_image' && bgImage.complete && bgImage.src) {
+                ctx.drawImage(bgImage, 0, 0, w, h);
+            } else if (activeBgMode === 'uploaded_video' && bgVideo.readyState >= 2) {
+                ctx.drawImage(bgVideo, 0, 0, w, h);
+            } else {
+                ctx.fillStyle = '#000';
+                ctx.fillRect(0, 0, w, h);
+            }
+
+            ctx.restore();
         }
 
-        // ऐज लुक्स फ़िल्टर कोडिंग
-        document.querySelectorAll('.age-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const age = e.target.getAttribute('data-age');
-                if(!age) return;
-                alert(`AI रेंडरिंग: आपका चेहरा अब ${age} वर्ष की उम्र में कस्टमाइज़ किया जा रहा है।`);
-                if(age == '5') webcam.style.filter = 'saturate(1.6) contrast(1.1) brightness(1.05)';
-                if(age == '15') webcam.style.filter = 'saturate(1.2) contrast(1.05)';
-                if(age == '25') webcam.style.filter = 'none';
-                if(age == '45') webcam.style.filter = 'contrast(0.9) sepia(0.2)';
-                if(age == '70') webcam.style.filter = 'grayscale(0.75) contrast(0.9) blur(0.2px)';
-            });
-        });
+        function onAIResults(results) {
+            if (canvas.width !== results.image.width) {
+                canvas.width = results.image.width;
+                canvas.height = results.image.height;
+                bufferCanvas.width = results.image.width;
+                bufferCanvas.height = results.image.height;
+            }
 
-        // बैकग्राउंड लोड
-        document.getElementById('bg-upload').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file) {
-                bgOverlay.style.backgroundImage = `url('${URL.createObjectURL(file)}')`;
-                webcam.style.opacity = "0.65";
-                alert("कस्टम टेम्पलेट/बैकग्राउंड सफलतापूर्वक लागू हो गया!");
+            const w = canvas.width;
+            const h = canvas.height;
+
+            // Crystal Clear Edge Sharpness Masking
+            bufferCtx.save();
+            bufferCtx.clearRect(0, 0, w, h);
+            bufferCtx.filter = 'contrast(400%) threshold(45%)';
+            bufferCtx.drawImage(results.segmentationMask, 0, 0, w, h);
+            
+            bufferCtx.globalCompositeOperation = 'source-in';
+            bufferCtx.filter = 'none';
+            bufferCtx.drawImage(results.image, 0, 0, w, h);
+            bufferCtx.restore();
+
+            // Main Canvas Render
+            ctx.save();
+            ctx.clearRect(0, 0, w, h);
+
+            if (layoutMode === 'full') {
+                renderProceduralBackground(w, h);
+                ctx.drawImage(bufferCanvas, 0, 0, w, h);
+            } else {
+                renderProceduralBackground(w, h);
+
+                let thumbW = w * pipScale;
+                let thumbH = h * pipScale;
+                let posX = w - thumbW - 20;
+                let posY = (layoutMode === 'pip_bottom_right') ? (h - thumbH - 20) : 20;
+
+                ctx.fillStyle = '#00e5ff';
+                ctx.fillRect(posX - 4, posY - 4, thumbW + 8, thumbH + 8);
+                ctx.drawImage(bufferCanvas, posX, posY, thumbW, thumbH);
+            }
+
+            ctx.restore();
+        }
+
+        async function startLiveCamera() {
+            statusText.innerText = "⏳ HD AI कैमरा ऑन हो रहा है...";
+            
+            try {
+                micAudioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                let micSource = audioCtx.createMediaStreamSource(micAudioStream);
+                micSource.connect(audioMixDestination);
+            } catch (err) {
+                console.warn("माइक एक्सेस नहीं मिला:", err);
+            }
+
+            camera = new Camera(inputVideo, {
+                onFrame: async () => { await selfieSegmentation.send({ image: inputVideo }); },
+                width: 1280, 
+                height: 720
+            });
+            camera.start();
+            if (activeBgMode === 'uploaded_video') bgVideo.play();
+            statusText.innerText = "🔴 Live Active";
+        }
+
+        function stopLiveCamera() {
+            if (camera) camera.stop();
+            if (bgVideo) bgVideo.pause();
+            if (micAudioStream) {
+                micAudioStream.getTracks().forEach(track => track.stop());
+            }
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            statusText.innerText = "कैमरा बंद है";
+        }
+
+        // Audio Mixer Logic
+        function handleAudioUpload(e) {
+            const files = e.target.files;
+            const audioList = document.getElementById('audioList');
+            
+            Array.from(files).forEach((file, idx) => {
+                const audioEl = new Audio(URL.createObjectURL(file));
+                const audioSource = audioCtx.createMediaElementSource(audioEl);
+                const gainNode = audioCtx.createGain();
+                
+                audioSource.connect(gainNode);
+                gainNode.connect(audioMixDestination);
+                gainNode.connect(audioCtx.destination);
+
+                loadedAudios.push({ audioEl, gainNode });
+
+                const item = document.createElement('div');
+                item.className = 'audio-item';
+                item.innerHTML = `
+                    <p style="font-size:10px; color:#00e5ff;">🎵 ${file.name}</p>
+                    <div class="audio-controls">
+                        <button onclick="playAudio(${loadedAudios.length - 1})" style="padding:4px;">▶️ प्ले</button>
+                        <button onclick="pauseAudio(${loadedAudios.length - 1})" style="padding:4px;">⏸️ पॉज़</button>
+                        <input type="range" min="0" max="1" step="0.1" value="0.8" oninput="setAudioVolume(${loadedAudios.length - 1}, this.value)">
+                    </div>
+                `;
+                audioList.appendChild(item);
+            });
+        }
+
+        function playAudio(index) {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            loadedAudios[index].audioEl.play();
+        }
+
+        function pauseAudio(index) {
+            loadedAudios[index].audioEl.pause();
+        }
+
+        function setAudioVolume(index, val) {
+            loadedAudios[index].gainNode.gain.value = parseFloat(val);
+        }
+
+        bgImageUpload.addEventListener('change', (e) => {
+            if (e.target.files[0]) {
+                bgImage.src = URL.createObjectURL(e.target.files[0]);
             }
         });
 
-        // 10 टेक्स्ट स्टाइल जनरेटर
-        document.getElementById('add-text-btn').addEventListener('click', () => {
-            const textVal = document.getElementById('custom-text').value;
-            const styleClass = document.getElementById('text-style').value;
-            if(!textVal) return;
-            
-            const div = document.createElement('div');
-            div.innerText = textVal;
-            div.className = styleClass;
-            div.style.position = 'absolute';
-            div.style.top = '40%';
-            div.style.left = '15%';
-            div.style.fontSize = '20px';
-            document.getElementById('sticker-zone').appendChild(div);
-            document.getElementById('custom-text').value = '';
+        bgVideoUpload.addEventListener('change', (e) => {
+            if (e.target.files[0]) {
+                bgVideo.src = URL.createObjectURL(e.target.files[0]);
+                bgVideo.play();
+            }
         });
 
-        // स्टिकर्स लोड
-        document.querySelectorAll('.sticker-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const stk = document.createElement('div');
-                stk.innerText = btn.getAttribute('data-emoji');
-                stk.style.position = 'absolute';
-                stk.style.top = '50%';
-                stk.style.left = '40%';
-                stk.style.fontSize = '32px';
-                document.getElementById('sticker-zone').appendChild(stk);
-            });
-        });
+        function capturePhoto() {
+            const link = document.createElement('a');
+            link.download = "Rox_HD_Live_Photo.png";
+            link.href = canvas.toDataURL("image/png");
+            link.click();
+            statusText.innerText = "📸 HD फोटो सेव हो गई!";
+        }
 
-        // गैलरी एवं सोशल एक्सपोर्ट्स
-        document.getElementById('capture-btn').addEventListener('click', () => { alert("📸 सक्सेस! रेंडर किया हुआ मीडिया फ़ाइल आपकी स्थानीय गैलरी में सुरक्षित कर दिया गया है।"); });
-        document.getElementById('save-viral-btn').addEventListener('click', () => { alert("📁 कंटेंट 'Rox_Viral_Vault' डायरेक्टरी में सफलतापूर्वक एक्सपोर्ट हो गया है।"); });
-        document.getElementById('share-fb').addEventListener('click', () => { window.open('https://www.facebook.com'); });
-        document.getElementById('share-insta').addEventListener('click', () => { window.open('https://www.instagram.com'); });
-        document.getElementById('share-yt').addEventListener('click', () => { window.open('https://www.youtube.com'); });
+        function toggleRecording() {
+            if (!isRecording) {
+                recordedChunks = [];
+                const canvasStream = canvas.captureStream(30);
+                const combinedStream = new MediaStream();
+
+                canvasStream.getVideoTracks().forEach(track => combinedStream.addTrack(track));
+
+                // Add Mixed Audio Tracks
+                audioMixDestination.stream.getAudioTracks().forEach(track => combinedStream.addTrack(track));
+
+                mediaRecorder = new MediaRecorder(combinedStream, { mimeType: 'video/webm' });
+                mediaRecorder.ondataavailable = (e) => { if (e.data.size > 0) recordedChunks.push(e.data); };
+                mediaRecorder.onstop = () => {
+                    const blob = new Blob(recordedChunks, { type: 'video/webm' });
+                    const a = document.createElement('a');
+                    a.href = URL.createObjectURL(blob);
+                    a.download = 'Rox_Studio_Animated_Video.webm';
+                    a.click();
+                };
+                
+                mediaRecorder.start();
+                isRecording = true;
+                recBtn.innerText = "⏹️ रिकॉर्डिंग रोकें";
+                recBtn.classList.add('recording');
+            } else {
+                mediaRecorder.stop();
+                isRecording = false;
+                recBtn.innerText = "🎥 HD वीडियो रिकॉर्ड करें";
+                recBtn.classList.remove('recording');
+                statusText.innerText = "✅ वीडियो डाउनलोड हो गया!";
+            }
+        }
+
+        window.onload = initAI;
     </script>
 </body>
 </html>
