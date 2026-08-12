@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rox INTEN STUDIO - Live AI Video/Photo BG Camera</title>
+    <title>Rox INTEN STUDIO - Advanced Live AI Camera</title>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation/selfie_segmentation.js" crossorigin="anonymous"></script>
     <style>
@@ -19,14 +19,15 @@
         canvas { width: 100%; height: 100%; object-fit: cover; }
         video.hidden-elem, img.hidden-elem { display: none; }
 
-        .tools-panel { width: 100%; max-width: 360px; background: #1a1a2b; border: 1px solid #2e2e48; padding: 12px; border-radius: 8px; margin-top: 15px; }
+        .tools-panel { width: 100%; max-width: 360px; background: #1a1a2b; border: 1px solid #2e2e48; padding: 12px; border-radius: 8px; margin-top: 12px; }
         .tools-panel h3 { font-size: 12px; color: #00e5ff; margin-bottom: 8px; text-transform: uppercase; }
 
         label { font-size: 11px; color: #aaa; margin-top: 5px; display: block; }
-        input, button { width: 100%; padding: 10px; margin-top: 5px; background: #25253b; color: #fff; border: 1px solid #3e3e5e; border-radius: 5px; cursor: pointer; font-size: 12px; }
-        button:hover { background: #00e5ff; color: #000; font-weight: bold; }
+        input, button, select { width: 100%; padding: 10px; margin-top: 5px; background: #25253b; color: #fff; border: 1px solid #3e3e5e; border-radius: 5px; cursor: pointer; font-size: 12px; }
+        button:hover, select:hover { background: #00e5ff; color: #000; font-weight: bold; }
         
         .btn-green { background: #00c853; border: none; font-weight: bold; color: #000; }
+        .btn-pink { background: linear-gradient(90deg, #ff007f, #7f00ff); border: none; font-weight: bold; }
         .btn-rec { background: #ff007f; border: none; font-weight: bold; }
         .btn-rec.recording { background: #ff1744; animation: pulse 1s infinite; }
 
@@ -37,8 +38,8 @@
 <body>
 
     <div class="top-navbar">
-        <div class="logo-area"><h1>Rox</h1></div>
-        <a href="index.html" style="color: #00e5ff; text-decoration: none; font-size: 13px;">🏠 Home Studio</a>
+        <div class="logo-area"><h1>Rox Studio</h1></div>
+        <a href="index.html" style="color: #00e5ff; text-decoration: none; font-size: 13px;">🏠 Home</a>
     </div>
 
     <div class="studio-body">
@@ -52,22 +53,40 @@
         <video id="bgVideo" class="hidden-elem" playsinline muted loop></video>
         <img id="bgImage" class="hidden-elem" crossorigin="anonymous">
 
+        <!-- Display Layout Controls -->
         <div class="tools-panel">
-            <h3>🖼️ 1. बैकग्राउंड चुनें (फोटो / वीडियो)</h3>
-            <label>1. नया रंग सेट करें:</label>
+            <h3>📐 Layout & Thumbnail Setup</h3>
+            <label>कैमरा लेआउट मोड चुनें:</label>
+            <select id="layoutModeSelect" onchange="updateLayoutMode()">
+                <option value="full">1. Full Camera Cutout (पीछे बैकग्राउंड)</option>
+                <option value="pip_bottom_right">2. Thumbnail Mode (निचे दाएँ कोने में)</option>
+                <option value="pip_top_right">3. Thumbnail Mode (ऊपर दाएँ कोने में)</option>
+            </select>
+
+            <label>थंबनेल साइज़ (Thumbnail Size):</label>
+            <select id="pipSizeSelect" onchange="updateLayoutMode()">
+                <option value="0.3">Small (छोटा)</option>
+                <option value="0.4" selected>Medium (मध्यम)</option>
+                <option value="0.5">Large (बड़ा)</option>
+            </select>
+        </div>
+
+        <div class="tools-panel">
+            <h3>🖼️ Background Selection</h3>
+            <label>1. बैकग्राउंड रंग:</label>
             <input type="color" id="bgColorPicker" value="#00e5ff">
             
-            <label>2. बैकग्राउंड फोटो अपलोड करें:</label>
+            <label>2. फोटो अपलोड करें:</label>
             <input type="file" id="bgImageUpload" accept="image/*">
 
-            <label>3. 🎬 बैकग्राउंड वीडियो (MP4/WebM) अपलोड करें:</label>
+            <label>3. 🎬 वीडियो (MP4) अपलोड करें:</label>
             <input type="file" id="bgVideoUpload" accept="video/*">
         </div>
 
         <div class="tools-panel">
-            <h3>📹 2. कैमरा व रिकॉर्डिंग टूल</h3>
+            <h3>📹 Control Actions</h3>
             <button onclick="startLiveCamera()" class="btn-green">▶️ कैमरा ऑन करें</button>
-            <button onclick="capturePhoto()" style="margin-top:8px;">📸 AI फोटो खींचें</button>
+            <button onclick="capturePhoto()" style="margin-top:8px;">📸 फोटो खींचें</button>
             <button id="recBtn" onclick="toggleRecording()" class="btn-rec" style="margin-top:8px;">🎥 वीडियो रिकॉर्ड करें</button>
             <button onclick="stopLiveCamera()" style="background:#333; margin-top:8px;">⏹️ कैमरा बंद करें</button>
         </div>
@@ -87,7 +106,9 @@
 
         let selfieSegmentation, camera, mediaRecorder;
         let recordedChunks = [], isRecording = false;
-        let activeBgMode = 'color'; // Mode: 'color', 'image', 'video'
+        let activeBgMode = 'color';
+        let layoutMode = 'full';
+        let pipScale = 0.4;
 
         function initAI() {
             selfieSegmentation = new SelfieSegmentation({
@@ -95,6 +116,11 @@
             });
             selfieSegmentation.setOptions({ modelSelection: 1 });
             selfieSegmentation.onResults(onAIResults);
+        }
+
+        function updateLayoutMode() {
+            layoutMode = document.getElementById('layoutModeSelect').value;
+            pipScale = parseFloat(document.getElementById('pipSizeSelect').value);
         }
 
         function onAIResults(results) {
@@ -106,35 +132,64 @@
             ctx.save();
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            // 1. Cutout Person
-            ctx.drawImage(results.segmentationMask, 0, 0, canvas.width, canvas.height);
-            ctx.globalCompositeOperation = 'source-in';
-            ctx.drawImage(results.image, 0, 0, canvas.width, canvas.height);
+            if (layoutMode === 'full') {
+                // Mode 1: Full AI Cutout
+                ctx.drawImage(results.segmentationMask, 0, 0, canvas.width, canvas.height);
+                ctx.globalCompositeOperation = 'source-in';
+                ctx.drawImage(results.image, 0, 0, canvas.width, canvas.height);
+                ctx.globalCompositeOperation = 'destination-over';
+                drawBackgroundLayer(0, 0, canvas.width, canvas.height);
 
-            // 2. Render Background Layer (Video, Photo or Color)
-            ctx.globalCompositeOperation = 'destination-over';
-
-            if (activeBgMode === 'video' && bgVideo.readyState >= 2) {
-                ctx.drawImage(bgVideo, 0, 0, canvas.width, canvas.height);
-            } else if (activeBgMode === 'image' && bgImage.complete && bgImage.src) {
-                ctx.drawImage(bgImage, 0, 0, canvas.width, canvas.height);
             } else {
-                ctx.fillStyle = document.getElementById('bgColorPicker').value;
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                // Mode 2 & 3: Thumbnail / PiP Mode
+                // Draw Full Background First
+                drawBackgroundLayer(0, 0, canvas.width, canvas.height);
+
+                // Calculate Thumbnail Box Dimension
+                let thumbW = canvas.width * pipScale;
+                let thumbH = canvas.height * pipScale;
+                let posX = canvas.width - thumbW - 20;
+                let posY = (layoutMode === 'pip_bottom_right') ? (canvas.height - thumbH - 20) : 20;
+
+                // Draw Thumbnail Border & Shadow
+                ctx.fillStyle = '#00e5ff';
+                ctx.fillRect(posX - 4, posY - 4, thumbW + 8, thumbH + 8);
+
+                // Draw Cutout inside Thumbnail
+                ctx.save();
+                ctx.beginPath();
+                ctx.rect(posX, posY, thumbW, thumbH);
+                ctx.clip();
+
+                ctx.drawImage(results.segmentationMask, posX, posY, thumbW, thumbH);
+                ctx.globalCompositeOperation = 'source-in';
+                ctx.drawImage(results.image, posX, posY, thumbW, thumbH);
+                ctx.restore();
             }
 
             ctx.restore();
         }
 
+        function drawBackgroundLayer(x, y, w, h) {
+            if (activeBgMode === 'video' && bgVideo.readyState >= 2) {
+                ctx.drawImage(bgVideo, x, y, w, h);
+            } else if (activeBgMode === 'image' && bgImage.complete && bgImage.src) {
+                ctx.drawImage(bgImage, x, y, w, h);
+            } else {
+                ctx.fillStyle = document.getElementById('bgColorPicker').value;
+                ctx.fillRect(x, y, w, h);
+            }
+        }
+
         function startLiveCamera() {
-            statusText.innerText = "⏳ AI कैमरा स्टार्ट हो रहा है...";
+            statusText.innerText = "⏳ AI कैमरा चालू हो रहा है...";
             camera = new Camera(inputVideo, {
                 onFrame: async () => { await selfieSegmentation.send({ image: inputVideo }); },
                 width: 640, height: 480
             });
             camera.start();
             if (activeBgMode === 'video') bgVideo.play();
-            statusText.innerText = "🔴 लाइव AI बैकग्राउंड एक्टिव";
+            statusText.innerText = "🔴 लाइव AI एक्टिव";
         }
 
         function stopLiveCamera() {
@@ -144,7 +199,6 @@
             statusText.innerText = "कैमरा बंद है";
         }
 
-        // Image Selection Handler
         bgImageUpload.addEventListener('change', (e) => {
             if (e.target.files[0]) {
                 bgImage.src = URL.createObjectURL(e.target.files[0]);
@@ -153,7 +207,6 @@
             }
         });
 
-        // Video Selection Handler
         bgVideoUpload.addEventListener('change', (e) => {
             if (e.target.files[0]) {
                 bgVideo.src = URL.createObjectURL(e.target.files[0]);
@@ -162,7 +215,6 @@
             }
         });
 
-        // Color Picker Handler
         document.getElementById('bgColorPicker').addEventListener('input', () => {
             activeBgMode = 'color';
             if (bgVideo) bgVideo.pause();
