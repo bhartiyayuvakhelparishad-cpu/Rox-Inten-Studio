@@ -56,18 +56,20 @@
         <video id="bgVideo" class="hidden-elem" playsinline loop></video>
         <img id="bgImage" class="hidden-elem" crossorigin="anonymous">
 
-        <!-- Animated Background Selector -->
+        <!-- HD Realistic Backgrounds -->
         <div class="tools-panel">
-            <h3>🎨 1. एनीमेशन बैकग्राउंड चुनें</h3>
-            <label>बैकग्राउंड मोड:</label>
-            <select id="bgAnimSelect" onchange="changeBgAnimation()">
-                <option value="nature">1. 🌿 प्राकृतिक सुंदरता (Nature & Leaves)</option>
-                <option value="custom_photo">2. 🖼️ मूविंग फोटो डिज़ाइन (Dynamic Photo)</option>
-                <option value="flowers">3. 🌸 फूलों की वर्षा (Falling Flowers)</option>
-                <option value="bubbles">4. 🫧 शाइनिंग बबल्स (Floating Bubbles)</option>
-                <option value="mountain_rain">5. 🏔️ पहाड़, झरना एवं बारिश (Mountain Rain)</option>
-                <option value="uploaded_image">6. 📷 अपनी फोटो अपलोड करें</option>
-                <option value="uploaded_video">7. 🎬 अपना वीडियो अपलोड करें</option>
+            <h3>🌄 1. HD प्राकृतिक बैकग्राउंड्स (Realistic Landscapes)</h3>
+            <label>बैकग्राउंड चुनें:</label>
+            <select id="bgSelect" onchange="changeHDBackground()">
+                <option value="https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=720&q=80">1. 🌅 Sunset Mountain & River (सूर्यास्त और पहाड़)</option>
+                <option value="https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=720&q=80">2. 🏔️ Misty Mountains & Valley (धुंध भरे पहाड़)</option>
+                <option value="https://images.unsplash.com/photo-1433086966358-54859d0ed716?w=720&q=80">3. 🌊 Waterfall & Green Bridge (झरना और पुल)</option>
+                <option value="https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=720&q=80">4. 🌲 Deep Forest Sunshine (जंगल और धूप)</option>
+                <option value="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=720&q=80">5. 🏖️ Tropical Beach & Sea (समुद्र तट)</option>
+                <option value="https://images.unsplash.com/photo-1518837695005-2083093ee35b?w=720&q=80">6. 🌸 Cherry Blossom Flowers (गुलाबी फूल)</option>
+                <option value="https://images.unsplash.com/photo-1519681393784-d120267933ba?w=720&q=80">7. 🌌 Night Starry Sky (तारे और रात)</option>
+                <option value="custom_upload">8. 📁 अपनी खुद की फोटो अपलोड करें</option>
+                <option value="custom_video">9. 🎬 अपना खुद का वीडियो अपलोड करें</option>
             </select>
 
             <div id="photoUploadGroup" style="display:none; margin-top:6px;">
@@ -86,7 +88,7 @@
             <h3>📐 2. लेआउट एवं थंबनेल</h3>
             <label>कैमरा लेआउट:</label>
             <select id="layoutModeSelect" onchange="updateLayoutMode()">
-                <option value="full">1. Full Camera Cutout (सॉलिड बैकग्राउंड)</option>
+                <option value="full">1. Full Camera Cutout (पीछे बैकग्राउंड)</option>
                 <option value="pip_bottom_right">2. Thumbnail Mode (नीचे दाएँ)</option>
                 <option value="pip_top_right">3. Thumbnail Mode (ऊपर दाएँ)</option>
             </select>
@@ -104,7 +106,6 @@
             <h3>🎵 3. ऑडियो मिक्सर एवं कटर</h3>
             <label>ऑडियो ट्रैक अपलोड करें (MP3/WAV):</label>
             <input type="file" id="audioUpload" accept="audio/*" multiple onchange="handleAudioUpload(event)">
-            
             <div id="audioList"></div>
         </div>
 
@@ -135,34 +136,15 @@
 
         let selfieSegmentation, camera, mediaRecorder;
         let recordedChunks = [], isRecording = false;
-        let activeBgMode = 'nature';
+        let activeBgMode = 'image';
         let layoutMode = 'full';
         let pipScale = 0.4;
         let micAudioStream = null;
 
-        // Web Audio API for mixing
+        // Web Audio API Configuration
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         const audioMixDestination = audioCtx.createMediaStreamDestination();
         let loadedAudios = [];
-
-        // Animation Particles Setup
-        let animFrame = 0;
-        let particles = [];
-
-        function initParticles(type) {
-            particles = [];
-            let count = type === 'rain' ? 80 : 30;
-            for(let i = 0; i < count; i++) {
-                particles.push({
-                    x: Math.random() * 360,
-                    y: Math.random() * 640,
-                    size: Math.random() * 5 + 2,
-                    speedY: Math.random() * 3 + 1,
-                    speedX: Math.random() * 2 - 1,
-                    angle: Math.random() * 360
-                });
-            }
-        }
 
         function initAI() {
             selfieSegmentation = new SelfieSegmentation({
@@ -170,14 +152,24 @@
             });
             selfieSegmentation.setOptions({ modelSelection: 1 });
             selfieSegmentation.onResults(onAIResults);
-            initParticles('nature');
+            
+            // Default Sunset Image Load
+            bgImage.src = "https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=720&q=80";
         }
 
-        function changeBgAnimation() {
-            activeBgMode = document.getElementById('bgAnimSelect').value;
-            document.getElementById('photoUploadGroup').style.display = (activeBgMode === 'uploaded_image' || activeBgMode === 'custom_photo') ? 'block' : 'none';
-            document.getElementById('videoUploadGroup').style.display = (activeBgMode === 'uploaded_video') ? 'block' : 'none';
-            initParticles(activeBgMode);
+        function changeHDBackground() {
+            const val = document.getElementById('bgSelect').value;
+            document.getElementById('photoUploadGroup').style.display = (val === 'custom_upload') ? 'block' : 'none';
+            document.getElementById('videoUploadGroup').style.display = (val === 'custom_video') ? 'block' : 'none';
+
+            if (val === 'custom_upload') {
+                activeBgMode = 'image';
+            } else if (val === 'custom_video') {
+                activeBgMode = 'video';
+            } else {
+                activeBgMode = 'image';
+                bgImage.src = val;
+            }
         }
 
         function updateLayoutMode() {
@@ -185,118 +177,15 @@
             pipScale = parseFloat(document.getElementById('pipSizeSelect').value);
         }
 
-        function renderProceduralBackground(w, h) {
-            animFrame++;
-            ctx.save();
-
-            if (activeBgMode === 'nature') {
-                let grad = ctx.createLinearGradient(0, 0, 0, h);
-                grad.addColorStop(0, '#87CEEB');
-                grad.addColorStop(1, '#2E8B57');
-                ctx.fillStyle = grad;
-                ctx.fillRect(0, 0, w, h);
-
-                // Flying Leaves
-                ctx.fillStyle = '#228B22';
-                particles.forEach(p => {
-                    p.y += p.speedY * 0.5;
-                    p.x += Math.sin(animFrame * 0.05 + p.angle);
-                    if (p.y > h) p.y = -10;
-                    ctx.beginPath();
-                    ctx.arc(p.x * (w/360), p.y * (h/640), p.size, 0, Math.PI * 2);
-                    ctx.fill();
-                });
-
-            } else if (activeBgMode === 'custom_photo') {
-                ctx.fillStyle = '#111';
-                ctx.fillRect(0, 0, w, h);
-                if (bgImage.complete && bgImage.src) {
-                    let scale = 1 + Math.sin(animFrame * 0.03) * 0.1;
-                    let angle = Math.sin(animFrame * 0.02) * 0.05;
-                    ctx.save();
-                    ctx.translate(w / 2, h / 2);
-                    ctx.rotate(angle);
-                    ctx.scale(scale, scale);
-                    ctx.drawImage(bgImage, -w / 2, -h / 2, w, h);
-                    ctx.restore();
-                } else {
-                    ctx.fillStyle = '#00e5ff';
-                    ctx.font = '16px Arial';
-                    ctx.fillText('कृपया फोटो अपलोड करें', 20, h/2);
-                }
-
-            } else if (activeBgMode === 'flowers') {
-                ctx.fillStyle = '#2c162e';
-                ctx.fillRect(0, 0, w, h);
-                ctx.fillStyle = '#ff69b4';
-                particles.forEach(p => {
-                    p.y += p.speedY;
-                    if (p.y > h) p.y = -10;
-                    ctx.beginPath();
-                    ctx.arc(p.x * (w/360), p.y * (h/640), p.size + 2, 0, Math.PI * 2);
-                    ctx.fill();
-                });
-
-            } else if (activeBgMode === 'bubbles') {
-                let grad = ctx.createLinearGradient(0, 0, w, h);
-                grad.addColorStop(0, '#0f2027');
-                grad.addColorStop(1, '#2c5364');
-                ctx.fillStyle = grad;
-                ctx.fillRect(0, 0, w, h);
-
-                ctx.strokeStyle = 'rgba(255, 255, 255, 0.6)';
-                ctx.lineWidth = 2;
-                particles.forEach(p => {
-                    p.y -= p.speedY * 0.8;
-                    if (p.y < -10) p.y = h + 10;
-                    ctx.beginPath();
-                    ctx.arc(p.x * (w/360), p.y * (h/640), p.size * 2, 0, Math.PI * 2);
-                    ctx.stroke();
-                });
-
-            } else if (activeBgMode === 'mountain_rain') {
-                // Sky & Mountain
-                let grad = ctx.createLinearGradient(0, 0, 0, h);
-                grad.addColorStop(0, '#232526');
-                grad.addColorStop(1, '#414345');
-                ctx.fillStyle = grad;
-                ctx.fillRect(0, 0, w, h);
-
-                // Mountain Shape
-                ctx.fillStyle = '#1c1d1f';
-                ctx.beginPath();
-                ctx.moveTo(0, h);
-                ctx.lineTo(w * 0.3, h * 0.5);
-                ctx.lineTo(w * 0.7, h * 0.7);
-                ctx.lineTo(w, h);
-                ctx.fill();
-
-                // Waterfall
-                ctx.fillStyle = 'rgba(173, 216, 230, 0.8)';
-                ctx.fillRect(w * 0.28, h * 0.5, 12, h * 0.5);
-
-                // Rain
-                ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
-                ctx.lineWidth = 1;
-                particles.forEach(p => {
-                    p.y += p.speedY * 2.5;
-                    if (p.y > h) p.y = -10;
-                    ctx.beginPath();
-                    ctx.moveTo(p.x * (w/360), p.y * (h/640));
-                    ctx.lineTo(p.x * (w/360) - 2, p.y * (h/640) + 10);
-                    ctx.stroke();
-                });
-
-            } else if (activeBgMode === 'uploaded_image' && bgImage.complete && bgImage.src) {
+        function renderBackground(w, h) {
+            if (activeBgMode === 'image' && bgImage.complete && bgImage.src) {
                 ctx.drawImage(bgImage, 0, 0, w, h);
-            } else if (activeBgMode === 'uploaded_video' && bgVideo.readyState >= 2) {
+            } else if (activeBgMode === 'video' && bgVideo.readyState >= 2) {
                 ctx.drawImage(bgVideo, 0, 0, w, h);
             } else {
                 ctx.fillStyle = '#000';
                 ctx.fillRect(0, 0, w, h);
             }
-
-            ctx.restore();
         }
 
         function onAIResults(results) {
@@ -310,10 +199,10 @@
             const w = canvas.width;
             const h = canvas.height;
 
-            // Crystal Clear Edge Sharpness Masking
+            // Crystal Clear Boundary Thresholding (Zero Hair Blur)
             bufferCtx.save();
             bufferCtx.clearRect(0, 0, w, h);
-            bufferCtx.filter = 'contrast(400%) threshold(45%)';
+            bufferCtx.filter = 'contrast(500%) threshold(48%)';
             bufferCtx.drawImage(results.segmentationMask, 0, 0, w, h);
             
             bufferCtx.globalCompositeOperation = 'source-in';
@@ -321,15 +210,15 @@
             bufferCtx.drawImage(results.image, 0, 0, w, h);
             bufferCtx.restore();
 
-            // Main Canvas Render
+            // Render
             ctx.save();
             ctx.clearRect(0, 0, w, h);
 
             if (layoutMode === 'full') {
-                renderProceduralBackground(w, h);
+                renderBackground(w, h);
                 ctx.drawImage(bufferCanvas, 0, 0, w, h);
             } else {
-                renderProceduralBackground(w, h);
+                renderBackground(w, h);
 
                 let thumbW = w * pipScale;
                 let thumbH = h * pipScale;
@@ -352,7 +241,7 @@
                 let micSource = audioCtx.createMediaStreamSource(micAudioStream);
                 micSource.connect(audioMixDestination);
             } catch (err) {
-                console.warn("माइक एक्सेस नहीं मिला:", err);
+                console.warn("माइक एक्सेस अनुमति नहीं मिली:", err);
             }
 
             camera = new Camera(inputVideo, {
@@ -361,8 +250,8 @@
                 height: 720
             });
             camera.start();
-            if (activeBgMode === 'uploaded_video') bgVideo.play();
-            statusText.innerText = "🔴 Live Active";
+            if (activeBgMode === 'video') bgVideo.play();
+            statusText.innerText = "🔴 Live Crystal Clear HD Active";
         }
 
         function stopLiveCamera() {
@@ -375,12 +264,12 @@
             statusText.innerText = "कैमरा बंद है";
         }
 
-        // Audio Mixer Logic
+        // Audio Mixing Controls
         function handleAudioUpload(e) {
             const files = e.target.files;
             const audioList = document.getElementById('audioList');
             
-            Array.from(files).forEach((file, idx) => {
+            Array.from(files).forEach((file) => {
                 const audioEl = new Audio(URL.createObjectURL(file));
                 const audioSource = audioCtx.createMediaElementSource(audioEl);
                 const gainNode = audioCtx.createGain();
@@ -421,12 +310,14 @@
         bgImageUpload.addEventListener('change', (e) => {
             if (e.target.files[0]) {
                 bgImage.src = URL.createObjectURL(e.target.files[0]);
+                activeBgMode = 'image';
             }
         });
 
         bgVideoUpload.addEventListener('change', (e) => {
             if (e.target.files[0]) {
                 bgVideo.src = URL.createObjectURL(e.target.files[0]);
+                activeBgMode = 'video';
                 bgVideo.play();
             }
         });
@@ -446,8 +337,6 @@
                 const combinedStream = new MediaStream();
 
                 canvasStream.getVideoTracks().forEach(track => combinedStream.addTrack(track));
-
-                // Add Mixed Audio Tracks
                 audioMixDestination.stream.getAudioTracks().forEach(track => combinedStream.addTrack(track));
 
                 mediaRecorder = new MediaRecorder(combinedStream, { mimeType: 'video/webm' });
@@ -456,7 +345,7 @@
                     const blob = new Blob(recordedChunks, { type: 'video/webm' });
                     const a = document.createElement('a');
                     a.href = URL.createObjectURL(blob);
-                    a.download = 'Rox_Studio_Animated_Video.webm';
+                    a.download = 'Rox_Studio_HD_Video.webm';
                     a.click();
                 };
                 
