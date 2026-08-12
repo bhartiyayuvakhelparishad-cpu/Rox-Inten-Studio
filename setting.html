@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rox INTEN STUDIO - Advanced Live AI Camera</title>
+    <title>Rox INTEN STUDIO - Pro Live Camera</title>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation/selfie_segmentation.js" crossorigin="anonymous"></script>
     <style>
@@ -22,12 +22,13 @@
         .tools-panel { width: 100%; max-width: 360px; background: #1a1a2b; border: 1px solid #2e2e48; padding: 12px; border-radius: 8px; margin-top: 12px; }
         .tools-panel h3 { font-size: 12px; color: #00e5ff; margin-bottom: 8px; text-transform: uppercase; }
 
-        label { font-size: 11px; color: #aaa; margin-top: 5px; display: block; }
-        input, button, select { width: 100%; padding: 10px; margin-top: 5px; background: #25253b; color: #fff; border: 1px solid #3e3e5e; border-radius: 5px; cursor: pointer; font-size: 12px; }
+        label { font-size: 11px; color: #aaa; margin-top: 6px; display: flex; justify-content: space-between; align-items: center; }
+        input, button, select { width: 100%; padding: 8px; margin-top: 4px; background: #25253b; color: #fff; border: 1px solid #3e3e5e; border-radius: 5px; cursor: pointer; font-size: 12px; }
+        input[type="range"] { accent-color: #00e5ff; }
         button:hover, select:hover { background: #00e5ff; color: #000; font-weight: bold; }
         
         .btn-green { background: #00c853; border: none; font-weight: bold; color: #000; }
-        .btn-pink { background: linear-gradient(90deg, #ff007f, #7f00ff); border: none; font-weight: bold; }
+        .btn-blue { background: #00e5ff; border: none; font-weight: bold; color: #000; }
         .btn-rec { background: #ff007f; border: none; font-weight: bold; }
         .btn-rec.recording { background: #ff1744; animation: pulse 1s infinite; }
 
@@ -38,7 +39,7 @@
 <body>
 
     <div class="top-navbar">
-        <div class="logo-area"><h1>Rox Studio</h1></div>
+        <div class="logo-area"><h1>Rox Studio HD</h1></div>
         <a href="index.html" style="color: #00e5ff; text-decoration: none; font-size: 13px;">🏠 Home</a>
     </div>
 
@@ -50,20 +51,33 @@
         </div>
 
         <video id="inputVideo" class="hidden-elem" playsinline muted></video>
-        <video id="bgVideo" class="hidden-elem" playsinline muted loop></video>
+        <video id="bgVideo" class="hidden-elem" playsinline loop></video>
         <img id="bgImage" class="hidden-elem" crossorigin="anonymous">
+
+        <!-- Camera Filters & Customization -->
+        <div class="tools-panel">
+            <h3>🎛️ 1. कैमरा एडजस्टमेंट (Brightness / Blur)</h3>
+            <label>Brightness (चमक): <span id="brightVal">100%</span></label>
+            <input type="range" id="brightRange" min="50" max="200" value="100">
+
+            <label>Contrast (कंट्रास्ट): <span id="contrastVal">100%</span></label>
+            <input type="range" id="contrastRange" min="50" max="200" value="100">
+
+            <label>Camera Blur (स्मूथ/धुंधला): <span id="blurVal">0px</span></label>
+            <input type="range" id="blurRange" min="0" max="10" value="0">
+        </div>
 
         <!-- Display Layout Controls -->
         <div class="tools-panel">
-            <h3>📐 Layout & Thumbnail Setup</h3>
-            <label>कैमरा लेआउट मोड चुनें:</label>
+            <h3>📐 2. लेआउट और थंबनेल</h3>
+            <label>कैमरा लेआउट चुनें:</label>
             <select id="layoutModeSelect" onchange="updateLayoutMode()">
                 <option value="full">1. Full Camera Cutout (पीछे बैकग्राउंड)</option>
-                <option value="pip_bottom_right">2. Thumbnail Mode (निचे दाएँ कोने में)</option>
-                <option value="pip_top_right">3. Thumbnail Mode (ऊपर दाएँ कोने में)</option>
+                <option value="pip_bottom_right">2. Thumbnail Mode (नीचे दाएँ)</option>
+                <option value="pip_top_right">3. Thumbnail Mode (ऊपर दाएँ)</option>
             </select>
 
-            <label>थंबनेल साइज़ (Thumbnail Size):</label>
+            <label>थंबनेल साइज़ (Size):</label>
             <select id="pipSizeSelect" onchange="updateLayoutMode()">
                 <option value="0.3">Small (छोटा)</option>
                 <option value="0.4" selected>Medium (मध्यम)</option>
@@ -71,8 +85,9 @@
             </select>
         </div>
 
+        <!-- Background Options -->
         <div class="tools-panel">
-            <h3>🖼️ Background Selection</h3>
+            <h3>🖼️ 3. बैकग्राउंड एवं ऑडियो</h3>
             <label>1. बैकग्राउंड रंग:</label>
             <input type="color" id="bgColorPicker" value="#00e5ff">
             
@@ -81,13 +96,15 @@
 
             <label>3. 🎬 वीडियो (MP4) अपलोड करें:</label>
             <input type="file" id="bgVideoUpload" accept="video/*">
+
+            <button id="audioToggleBtn" onclick="toggleBgAudio()" class="btn-blue" style="margin-top:8px;">🔊 वीडियो ऑडियो: ON</button>
         </div>
 
         <div class="tools-panel">
-            <h3>📹 Control Actions</h3>
+            <h3>📹 4. कैमरा कंट्रोल</h3>
             <button onclick="startLiveCamera()" class="btn-green">▶️ कैमरा ऑन करें</button>
-            <button onclick="capturePhoto()" style="margin-top:8px;">📸 फोटो खींचें</button>
-            <button id="recBtn" onclick="toggleRecording()" class="btn-rec" style="margin-top:8px;">🎥 वीडियो रिकॉर्ड करें</button>
+            <button onclick="capturePhoto()" style="margin-top:8px;">📸 HD फोटो खींचें</button>
+            <button id="recBtn" onclick="toggleRecording()" class="btn-rec" style="margin-top:8px;">🎥 HD वीडियो रिकॉर्ड करें</button>
             <button onclick="stopLiveCamera()" style="background:#333; margin-top:8px;">⏹️ कैमरा बंद करें</button>
         </div>
 
@@ -103,12 +120,22 @@
         const ctx = canvas.getContext('2d');
         const statusText = document.getElementById('statusText');
         const recBtn = document.getElementById('recBtn');
+        const audioToggleBtn = document.getElementById('audioToggleBtn');
 
         let selfieSegmentation, camera, mediaRecorder;
         let recordedChunks = [], isRecording = false;
         let activeBgMode = 'color';
         let layoutMode = 'full';
         let pipScale = 0.4;
+
+        // Sliders
+        const brightRange = document.getElementById('brightRange');
+        const contrastRange = document.getElementById('contrastRange');
+        const blurRange = document.getElementById('blurRange');
+
+        brightRange.oninput = () => document.getElementById('brightVal').innerText = brightRange.value + '%';
+        contrastRange.oninput = () => document.getElementById('contrastVal').innerText = contrastRange.value + '%';
+        blurRange.oninput = () => document.getElementById('blurVal').innerText = blurRange.value + 'px';
 
         function initAI() {
             selfieSegmentation = new SelfieSegmentation({
@@ -132,30 +159,29 @@
             ctx.save();
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+            // Apply Custom Camera Filters
+            const filterStr = `brightness(${brightRange.value}%) contrast(${contrastRange.value}%) blur(${blurRange.value}px)`;
+
             if (layoutMode === 'full') {
-                // Mode 1: Full AI Cutout
                 ctx.drawImage(results.segmentationMask, 0, 0, canvas.width, canvas.height);
                 ctx.globalCompositeOperation = 'source-in';
+                ctx.filter = filterStr;
                 ctx.drawImage(results.image, 0, 0, canvas.width, canvas.height);
+                ctx.filter = 'none';
                 ctx.globalCompositeOperation = 'destination-over';
                 drawBackgroundLayer(0, 0, canvas.width, canvas.height);
 
             } else {
-                // Mode 2 & 3: Thumbnail / PiP Mode
-                // Draw Full Background First
                 drawBackgroundLayer(0, 0, canvas.width, canvas.height);
 
-                // Calculate Thumbnail Box Dimension
                 let thumbW = canvas.width * pipScale;
                 let thumbH = canvas.height * pipScale;
                 let posX = canvas.width - thumbW - 20;
                 let posY = (layoutMode === 'pip_bottom_right') ? (canvas.height - thumbH - 20) : 20;
 
-                // Draw Thumbnail Border & Shadow
                 ctx.fillStyle = '#00e5ff';
                 ctx.fillRect(posX - 4, posY - 4, thumbW + 8, thumbH + 8);
 
-                // Draw Cutout inside Thumbnail
                 ctx.save();
                 ctx.beginPath();
                 ctx.rect(posX, posY, thumbW, thumbH);
@@ -163,6 +189,7 @@
 
                 ctx.drawImage(results.segmentationMask, posX, posY, thumbW, thumbH);
                 ctx.globalCompositeOperation = 'source-in';
+                ctx.filter = filterStr;
                 ctx.drawImage(results.image, posX, posY, thumbW, thumbH);
                 ctx.restore();
             }
@@ -182,14 +209,14 @@
         }
 
         function startLiveCamera() {
-            statusText.innerText = "⏳ AI कैमरा चालू हो रहा है...";
+            statusText.innerText = "⏳ HD AI कैमरा ऑन हो रहा है...";
             camera = new Camera(inputVideo, {
                 onFrame: async () => { await selfieSegmentation.send({ image: inputVideo }); },
-                width: 640, height: 480
+                width: 1920, height: 1080
             });
             camera.start();
             if (activeBgMode === 'video') bgVideo.play();
-            statusText.innerText = "🔴 लाइव AI एक्टिव";
+            statusText.innerText = "🔴 Crystal Clear HD Live Active";
         }
 
         function stopLiveCamera() {
@@ -197,6 +224,18 @@
             if (bgVideo) bgVideo.pause();
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             statusText.innerText = "कैमरा बंद है";
+        }
+
+        function toggleBgAudio() {
+            if (bgVideo.muted) {
+                bgVideo.muted = false;
+                audioToggleBtn.innerText = "🔊 वीडियो ऑडियो: ON";
+                audioToggleBtn.className = "btn-blue";
+            } else {
+                bgVideo.muted = true;
+                audioToggleBtn.innerText = "🔇 वीडियो ऑडियो: Mute";
+                audioToggleBtn.className = "btn-rec";
+            }
         }
 
         bgImageUpload.addEventListener('change', (e) => {
@@ -210,6 +249,7 @@
         bgVideoUpload.addEventListener('change', (e) => {
             if (e.target.files[0]) {
                 bgVideo.src = URL.createObjectURL(e.target.files[0]);
+                bgVideo.muted = false;
                 activeBgMode = 'video';
                 bgVideo.play();
             }
@@ -222,10 +262,10 @@
 
         function capturePhoto() {
             const link = document.createElement('a');
-            link.download = "Rox_Live_AI_Photo.png";
+            link.download = "Rox_HD_Live_Photo.png";
             link.href = canvas.toDataURL("image/png");
             link.click();
-            statusText.innerText = "📸 फोटो सेव हो गई!";
+            statusText.innerText = "📸 HD फोटो सेव हो गई!";
         }
 
         function toggleRecording() {
@@ -238,7 +278,7 @@
                     const blob = new Blob(recordedChunks, { type: 'video/webm' });
                     const a = document.createElement('a');
                     a.href = URL.createObjectURL(blob);
-                    a.download = 'Rox_Live_AI_Video.webm';
+                    a.download = 'Rox_HD_Live_Video.webm';
                     a.click();
                 };
                 mediaRecorder.start();
@@ -248,7 +288,7 @@
             } else {
                 mediaRecorder.stop();
                 isRecording = false;
-                recBtn.innerText = "🎥 वीडियो रिकॉर्ड करें";
+                recBtn.innerText = "🎥 HD वीडियो रिकॉर्ड करें";
                 recBtn.classList.remove('recording');
                 statusText.innerText = "✅ वीडियो डाउनलोड हो गया!";
             }
