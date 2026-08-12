@@ -56,7 +56,7 @@
         <video id="bgVideo" class="hidden-elem" playsinline loop></video>
         <img id="bgImage" class="hidden-elem" crossorigin="anonymous">
 
-        <!-- Background Options with GIF URL Option -->
+        <!-- Background Options -->
         <div class="tools-panel">
             <h3>🌄 1. बैकग्राउंड चुनें (HD Landscapes & GIF Link)</h3>
             <label>बैकग्राउंड मोड:</label>
@@ -71,7 +71,6 @@
                 <option value="custom_video">🎬 8. अपना खुद का वीडियो अपलोड करें</option>
             </select>
 
-            <!-- Online GIF / Image URL Box -->
             <div id="urlInputGroup" style="display:none; margin-top:6px;">
                 <label>GIF / Photo URL का डायरेक्ट लिंक पेस्ट करें:</label>
                 <div style="display:flex; gap:5px;">
@@ -91,7 +90,7 @@
             </div>
         </div>
 
-        <!-- Camera Actions with Back/Front Camera Options -->
+        <!-- Camera Controls -->
         <div class="tools-panel">
             <h3>📹 2. कैमरा कंट्रोल (Front / Back Camera)</h3>
             <label>कैमरा चुनें:</label>
@@ -124,7 +123,7 @@
             </select>
         </div>
 
-        <!-- Audio Mixer Panel -->
+        <!-- Audio Mixer -->
         <div class="tools-panel">
             <h3>🎵 4. ऑडियो मिक्सर</h3>
             <label>ऑडियो ट्रैक अपलोड करें (MP3/WAV):</label>
@@ -148,7 +147,7 @@
         const bufferCanvas = document.createElement('canvas');
         const bufferCtx = bufferCanvas.getContext('2d');
 
-        let selfieSegmentation, camera, mediaRecorder;
+        let selfieSegmentation, mediaRecorder, animFrameId;
         let recordedChunks = [], isRecording = false;
         let activeBgMode = 'image';
         let layoutMode = 'pip_top_right';
@@ -156,7 +155,6 @@
         let micAudioStream = null;
         let currentFacingMode = 'user';
 
-        // Audio Setup
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         const audioMixDestination = audioCtx.createMediaStreamDestination();
         let loadedAudios = [];
@@ -168,7 +166,6 @@
             selfieSegmentation.setOptions({ modelSelection: 1 });
             selfieSegmentation.onResults(onAIResults);
             
-            // Default Garden HD Image
             bgImage.src = "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?w=720&q=80";
         }
 
@@ -195,7 +192,7 @@
                 activeBgMode = 'image';
                 statusText.innerText = "✅ GIF/URL लिंक लोड हो गया!";
             } else {
-                alert("कृपया एक वैध GIF या इमेज का URL डालें!");
+                alert("कृपया एक वैध URL डालें!");
             }
         }
 
@@ -273,8 +270,12 @@
         }
 
         async function startLiveCamera() {
-            if (camera) { camera.stop(); }
-            
+            // Stop active camera stream
+            if (inputVideo.srcObject) {
+                inputVideo.srcObject.getTracks().forEach(track => track.stop());
+            }
+            if (animFrameId) cancelAnimationFrame(animFrameId);
+
             currentFacingMode = document.getElementById('cameraModeSelect').value;
             statusText.innerText = "⏳ कैमरा कनेक्ट हो रहा है...";
 
@@ -285,31 +286,54 @@
                     micSource.connect(audioMixDestination);
                 }
             } catch (err) {
-                console.warn("माइक अनुमति नहीं मिली:", err);
+                console.warn("माइक एक्सेस नहीं मिला:", err);
             }
 
-            // Custom MediaStream constraint for Front/Back Selection
+            // Enhanced Constraints Logic for Back Camera Fix
+            let videoConstraints = {
+                width: { ideal: 1280 },
+                height: { ideal: 720 }
+            };
+
+            if (currentFacingMode === 'environment') {
+                videoConstraints.facingMode = { exact: "environment" };
+            } else {
+                videoConstraints.facingMode = "user";
+            }
+
             try {
-                const stream = await navigator.mediaDevices.getUserMedia({
-                    video: { facingMode: currentFacingMode, width: 1280, height: 720 },
-                    audio: false
-                });
+                let stream;
+                try {
+                    stream = await navigator.mediaDevices.getUserMedia({ video: videoConstraints, audio: false });
+                } catch (firstErr) {
+                    // Fallback attempt if exact environment fails on some mobile models
+                    if (currentFacingMode === 'environment') {
+                        stream = await navigator.mediaDevices.getUserMedia({ 
+                            video: { facingMode: "environment", width: { ideal: 1280 }, height: { ideal: 720 } }, 
+                            audio: false 
+                        });
+                    } else {
+                        throw firstErr;
+                    }
+                }
+
                 inputVideo.srcObject = stream;
                 await inputVideo.play();
 
                 async function renderFrame() {
                     if (!inputVideo.paused && !inputVideo.ended) {
                         await selfieSegmentation.send({ image: inputVideo });
-                        requestAnimationFrame(renderFrame);
+                        animFrameId = requestAnimationFrame(renderFrame);
                     }
                 }
                 renderFrame();
 
                 if (activeBgMode === 'video') bgVideo.play();
                 statusText.innerText = currentFacingMode === 'user' ? "🔴 Front Camera Active" : "🔴 Back Camera Active";
+
             } catch (e) {
-                alert("कैमरा ऑन नहीं हो सका: " + e.message);
-                statusText.innerText = "कैमरा त्रुटि";
+                alert("कैमरा एक्सेस त्रुटि: कृपया सुनिश्चित करें कि आपने ब्राउज़र में कैमरा Permission अलाउ (Allow) की है।");
+                statusText.innerText = "कैमरा एरर!";
             }
         }
 
@@ -317,6 +341,7 @@
             if (inputVideo.srcObject) {
                 inputVideo.srcObject.getTracks().forEach(track => track.stop());
             }
+            if (animFrameId) cancelAnimationFrame(animFrameId);
             if (bgVideo) bgVideo.pause();
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             statusText.innerText = "कैमरा बंद है";
