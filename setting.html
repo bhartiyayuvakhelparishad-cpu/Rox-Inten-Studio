@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rox INTEN STUDIO - Fixed Live AI Camera</title>
+    <title>Rox INTEN STUDIO - Live AI Video/Photo BG Camera</title>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation/selfie_segmentation.js" crossorigin="anonymous"></script>
     <style>
@@ -17,7 +17,7 @@
         
         .camera-container { position: relative; width: 100%; max-width: 360px; aspect-ratio: 9/16; background: #000; border: 2px solid #00e5ff; border-radius: 10px; overflow: hidden; display: flex; align-items: center; justify-content: center; }
         canvas { width: 100%; height: 100%; object-fit: cover; }
-        video, img { display: none; }
+        video.hidden-elem, img.hidden-elem { display: none; }
 
         .tools-panel { width: 100%; max-width: 360px; background: #1a1a2b; border: 1px solid #2e2e48; padding: 12px; border-radius: 8px; margin-top: 15px; }
         .tools-panel h3 { font-size: 12px; color: #00e5ff; margin-bottom: 8px; text-transform: uppercase; }
@@ -48,16 +48,20 @@
             <div id="statusText">कैमरा ऑन करें</div>
         </div>
 
-        <video id="inputVideo" playsinline muted></video>
-        <img id="bgImage" crossorigin="anonymous">
+        <video id="inputVideo" class="hidden-elem" playsinline muted></video>
+        <video id="bgVideo" class="hidden-elem" playsinline muted loop></video>
+        <img id="bgImage" class="hidden-elem" crossorigin="anonymous">
 
         <div class="tools-panel">
-            <h3>🖼️ 1. बैकग्राउंड चुनें</h3>
-            <label>नया रंग सेट करें:</label>
+            <h3>🖼️ 1. बैकग्राउंड चुनें (फोटो / वीडियो)</h3>
+            <label>1. नया रंग सेट करें:</label>
             <input type="color" id="bgColorPicker" value="#00e5ff">
             
-            <label>या बैकग्राउंड फोटो अपलोड करें:</label>
+            <label>2. बैकग्राउंड फोटो अपलोड करें:</label>
             <input type="file" id="bgImageUpload" accept="image/*">
+
+            <label>3. 🎬 बैकग्राउंड वीडियो (MP4/WebM) अपलोड करें:</label>
+            <input type="file" id="bgVideoUpload" accept="video/*">
         </div>
 
         <div class="tools-panel">
@@ -72,8 +76,10 @@
 
     <script>
         const inputVideo = document.getElementById('inputVideo');
-        const bgImageUpload = document.getElementById('bgImageUpload');
+        const bgVideo = document.getElementById('bgVideo');
         const bgImage = document.getElementById('bgImage');
+        const bgImageUpload = document.getElementById('bgImageUpload');
+        const bgVideoUpload = document.getElementById('bgVideoUpload');
         const canvas = document.getElementById('outputCanvas');
         const ctx = canvas.getContext('2d');
         const statusText = document.getElementById('statusText');
@@ -81,6 +87,7 @@
 
         let selfieSegmentation, camera, mediaRecorder;
         let recordedChunks = [], isRecording = false;
+        let activeBgMode = 'color'; // Mode: 'color', 'image', 'video'
 
         function initAI() {
             selfieSegmentation = new SelfieSegmentation({
@@ -90,9 +97,7 @@
             selfieSegmentation.onResults(onAIResults);
         }
 
-        // Live Natural Proportional Rendering
         function onAIResults(results) {
-            // Dynamic dimensions match
             if (canvas.width !== results.image.width) {
                 canvas.width = results.image.width;
                 canvas.height = results.image.height;
@@ -101,16 +106,17 @@
             ctx.save();
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            // 1. Draw Mask Cutout
+            // 1. Cutout Person
             ctx.drawImage(results.segmentationMask, 0, 0, canvas.width, canvas.height);
             ctx.globalCompositeOperation = 'source-in';
-
-            // 2. Draw Live Stream with Exact Natural Aspect Ratio
             ctx.drawImage(results.image, 0, 0, canvas.width, canvas.height);
 
-            // 3. Render Background Layer behind
+            // 2. Render Background Layer (Video, Photo or Color)
             ctx.globalCompositeOperation = 'destination-over';
-            if (bgImage.src && bgImage.complete) {
+
+            if (activeBgMode === 'video' && bgVideo.readyState >= 2) {
+                ctx.drawImage(bgVideo, 0, 0, canvas.width, canvas.height);
+            } else if (activeBgMode === 'image' && bgImage.complete && bgImage.src) {
                 ctx.drawImage(bgImage, 0, 0, canvas.width, canvas.height);
             } else {
                 ctx.fillStyle = document.getElementById('bgColorPicker').value;
@@ -127,17 +133,39 @@
                 width: 640, height: 480
             });
             camera.start();
-            statusText.innerText = "🔴 लाइव AI एक्टिव";
+            if (activeBgMode === 'video') bgVideo.play();
+            statusText.innerText = "🔴 लाइव AI बैकग्राउंड एक्टिव";
         }
 
         function stopLiveCamera() {
             if (camera) camera.stop();
+            if (bgVideo) bgVideo.pause();
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             statusText.innerText = "कैमरा बंद है";
         }
 
+        // Image Selection Handler
         bgImageUpload.addEventListener('change', (e) => {
-            if (e.target.files[0]) bgImage.src = URL.createObjectURL(e.target.files[0]);
+            if (e.target.files[0]) {
+                bgImage.src = URL.createObjectURL(e.target.files[0]);
+                activeBgMode = 'image';
+                if (bgVideo) bgVideo.pause();
+            }
+        });
+
+        // Video Selection Handler
+        bgVideoUpload.addEventListener('change', (e) => {
+            if (e.target.files[0]) {
+                bgVideo.src = URL.createObjectURL(e.target.files[0]);
+                activeBgMode = 'video';
+                bgVideo.play();
+            }
+        });
+
+        // Color Picker Handler
+        document.getElementById('bgColorPicker').addEventListener('input', () => {
+            activeBgMode = 'color';
+            if (bgVideo) bgVideo.pause();
         });
 
         function capturePhoto() {
