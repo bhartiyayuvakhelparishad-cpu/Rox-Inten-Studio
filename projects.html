@@ -2,7 +2,7 @@
 <html lang="hi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Rox Photo Studio - Cutout, Drag & GIF Animator</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Arial, sans-serif; }
@@ -18,25 +18,26 @@
         .panel h3 { font-size: 14px; color: #00e5ff; margin-bottom: 10px; border-bottom: 1px solid #333; padding-bottom: 5px; }
 
         .editor-box { position: relative; width: 100%; aspect-ratio: 4/3; background: #000; border: 1px dashed #444; border-radius: 8px; overflow: hidden; display: flex; align-items: center; justify-content: center; }
-        canvas { max-width: 100%; max-height: 100%; touch-action: none; }
+        canvas { width: 100%; height: 100%; object-fit: contain; touch-action: none; }
 
         .tools { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
         button, label.btn-upload { background: #252545; color: #fff; border: 1px solid #3d3d66; padding: 8px 12px; border-radius: 6px; font-size: 12px; cursor: pointer; transition: 0.2s; }
         button:hover, label.btn-upload:hover { background: #00e5ff; color: #000; font-weight: bold; }
         button.active { background: #00e5ff; color: #000; font-weight: bold; }
 
-        .drop-zone { position: relative; width: 100%; aspect-ratio: 4/3; background: #111122; border: 2px dashed #00e5ff; border-radius: 8px; overflow: hidden; }
+        .drop-zone { position: relative; width: 100%; aspect-ratio: 4/3; background: #111122; border: 2px dashed #00e5ff; border-radius: 8px; overflow: hidden; touch-action: none; }
 
-        .cutout-item { position: absolute; cursor: move; border: 1px dashed transparent; user-select: none; }
+        .cutout-item { position: absolute; cursor: move; border: 1px dashed transparent; user-select: none; touch-action: none; }
         .cutout-item:hover { border-color: #00e5ff; }
         .cutout-item img { width: 100%; height: 100%; pointer-events: none; }
 
         .cutout-gallery { display: flex; gap: 10px; overflow-x: auto; padding: 8px; background: #121220; border-radius: 8px; margin-top: 10px; min-height: 80px; align-items: center; }
-        .cutout-thumb { width: 60px; height: 60px; border: 1px solid #00e5ff; border-radius: 6px; cursor: grab; object-fit: contain; background: #000; flex-shrink: 0; }
+        .cutout-thumb { width: 60px; height: 60px; border: 1px solid #00e5ff; border-radius: 6px; cursor: pointer; object-fit: contain; background: #000; flex-shrink: 0; }
 
-        /* Animation Frames Strip */
         .frame-strip { display: flex; gap: 8px; overflow-x: auto; padding: 6px; background: #090910; border-radius: 6px; margin-top: 8px; min-height: 60px; align-items: center; }
         .frame-thumb { width: 50px; height: 40px; background: #222; border: 1px solid #ff007f; border-radius: 4px; font-size: 10px; display: flex; align-items: center; justify-content: center; color: #fff; cursor: pointer; }
+
+        #toastMsg { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #00e5ff; color: #000; padding: 8px 16px; border-radius: 20px; font-weight: bold; font-size: 12px; display: none; z-index: 1000; }
     </style>
 </head>
 <body>
@@ -45,10 +46,11 @@
         <h1>✂️ Rox Studio Pro - Cutout, Drag & GIF Animator</h1>
     </div>
 
+    <div id="toastMsg"></div>
+
     <div class="app-container">
         <div class="work-area">
             
-            <!-- Cutout Studio -->
             <div class="panel">
                 <h3>1. फोटो कटिंग टूल (Cutout Studio)</h3>
                 <div class="editor-box">
@@ -57,38 +59,33 @@
 
                 <div class="tools">
                     <label class="btn-upload">📁 फोटो अपलोड करें <input type="file" id="imgUpload" accept="image/*" style="display:none;"></label>
-                    <button id="btnPencil" onclick="setMode('pencil')">✏️ 1. पेंसिल कट (Manual Cut)</button>
-                    <button id="btnMagic" onclick="setMode('magic')">🪄 2. मैजिक वैंड (Auto Cut)</button>
-                    <button onclick="cutSelectedArea()" style="background:#00c853; color:#000; font-weight:bold;">✂️ कट करें (Extract)</button>
+                    <button id="btnPencil" class="active" onclick="setMode('pencil')">✏️ 1. पेंसिल कट</button>
+                    <button id="btnMagic" onclick="setMode('magic')">🪄 2. मैजिक वैंड</button>
+                    <button onclick="cutSelectedArea()" style="background:#00c853; color:#000; font-weight:bold;">✂️ कट करें</button>
                     <button onclick="resetCanvas()" style="background:#ff1744;">🔄 रीसेट</button>
                 </div>
             </div>
 
-            <!-- Drag, Drop & GIF Animation Studio -->
             <div class="panel">
                 <h3>2. एनीमेशन एवं ड्रैग-ड्रॉप बोर्ड (GIF Maker)</h3>
-                <div class="drop-zone" id="dropZone">
-                    <!-- Cutout objects rendered here -->
-                </div>
+                <div class="drop-zone" id="dropZone"></div>
 
-                <!-- Frame Timeline -->
                 <div class="frame-strip" id="frameStrip">
                     <span style="font-size:10px; color:#aaa;">फ्रेम टाइमलाइन: </span>
                 </div>
 
                 <div class="tools">
-                    <button onclick="addAnimationFrame()" style="background:#ff007f; color:#fff; font-weight:bold;">➕ नया फ्रेम जोड़ें (Add Step)</button>
-                    <button onclick="playGIFAnimation()" style="background:#00e5ff; color:#000; font-weight:bold;">▶️ एनीमेशन चलाएं (Play GIF)</button>
+                    <button onclick="addAnimationFrame()" style="background:#ff007f; color:#fff; font-weight:bold;">➕ नया फ्रेम जोड़ें</button>
+                    <button onclick="playGIFAnimation()" style="background:#00e5ff; color:#000; font-weight:bold;">▶️ एनीमेशन चलाएं</button>
                     <button onclick="clearCollage()" style="background:#333;">🗑️ बोर्ड साफ़ करें</button>
                 </div>
-                <p style="font-size:10px; color:#aaa; margin-top:5px;">* हर फ्रेम में फोटो को थोड़ा खिसकाएं (Move) और 'नया फ्रेम जोड़ें' दबाएं। फिर Play दबाकर GIF देखें!</p>
+                <p style="font-size:10px; color:#aaa; margin-top:5px;">* गैलरी से कटआउट पर टैप करके बोर्ड पर लाएँ, उंगली से खिसकाएं और 'नया फ्रेम' दबाएं।</p>
             </div>
 
         </div>
 
-        <!-- Cutout Gallery -->
         <div class="panel" style="max-width: 100%;">
-            <h3>📦 कटे हुए टुकड़ों की गैलरी (Drag into Board above)</h3>
+            <h3>📦 कटे हुए टुकड़ों की गैलरी (टैप करके बोर्ड पर लाएँ)</h3>
             <div class="cutout-gallery" id="cutoutGallery">
                 <span style="font-size:12px; color:#666;">अभी कोई कटआउट नहीं है। बाएं ओर से फोटो काटें!</span>
             </div>
@@ -110,7 +107,13 @@
         let animationFrames = [];
         let isPlaying = false;
 
-        // Image Upload
+        function showToast(msg) {
+            const toast = document.getElementById('toastMsg');
+            toast.innerText = msg;
+            toast.style.display = 'block';
+            setTimeout(() => { toast.style.display = 'none'; }, 2000);
+        }
+
         imgUpload.addEventListener('change', (e) => {
             if (e.target.files[0]) {
                 const reader = new FileReader();
@@ -120,6 +123,7 @@
                         mainCanvas.width = currentImg.width;
                         mainCanvas.height = currentImg.height;
                         resetCanvas();
+                        showToast("फोटो अपलोड हो गई!");
                     };
                     currentImg.src = event.target.result;
                 };
@@ -140,38 +144,44 @@
             document.getElementById('btnMagic').classList.toggle('active', mode === 'magic');
         }
 
-        // Pencil Cutout Selection
-        mainCanvas.addEventListener('mousedown', (e) => {
-            if (!currentImg) return;
+        function getCanvasCoords(e) {
             const rect = mainCanvas.getBoundingClientRect();
-            const scaleX = mainCanvas.width / rect.width;
-            const scaleY = mainCanvas.height / rect.height;
-            const x = (e.clientX - rect.left) * scaleX;
-            const y = (e.clientY - rect.top) * scaleY;
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            return {
+                x: (clientX - rect.left) * (mainCanvas.width / rect.width),
+                y: (clientY - rect.top) * (mainCanvas.height / rect.height)
+            };
+        }
 
+        function startDrawing(e) {
+            if (!currentImg) return showToast("पहले फोटो अपलोड करें!");
+            isDrawing = true;
+            const coords = getCanvasCoords(e);
             if (mode === 'pencil') {
-                isDrawing = true;
-                points.push({ x, y });
+                points.push(coords);
                 drawPath();
             } else if (mode === 'magic') {
-                magicWandCut(Math.floor(x), Math.floor(y));
+                magicWandCut(Math.floor(coords.x), Math.floor(coords.y));
             }
-        });
+        }
 
-        mainCanvas.addEventListener('mousemove', (e) => {
-            if (isDrawing && mode === 'pencil') {
-                const rect = mainCanvas.getBoundingClientRect();
-                const scaleX = mainCanvas.width / rect.width;
-                const scaleY = mainCanvas.height / rect.height;
-                points.push({
-                    x: (e.clientX - rect.left) * scaleX,
-                    y: (e.clientY - rect.top) * scaleY
-                });
-                drawPath();
-            }
-        });
+        function drawMove(e) {
+            if (!isDrawing || mode !== 'pencil') return;
+            e.preventDefault();
+            points.push(getCanvasCoords(e));
+            drawPath();
+        }
 
-        window.addEventListener('mouseup', () => { isDrawing = false; });
+        function stopDrawing() { isDrawing = false; }
+
+        mainCanvas.addEventListener('mousedown', startDrawing);
+        mainCanvas.addEventListener('mousemove', drawMove);
+        window.addEventListener('mouseup', stopDrawing);
+
+        mainCanvas.addEventListener('touchstart', startDrawing, { passive: false });
+        mainCanvas.addEventListener('touchmove', drawMove, { passive: false });
+        window.addEventListener('touchend', stopDrawing);
 
         function drawPath() {
             ctx.clearRect(0, 0, mainCanvas.width, mainCanvas.height);
@@ -180,18 +190,17 @@
             if (points.length < 2) return;
             ctx.beginPath();
             ctx.strokeStyle = '#00e5ff';
-            ctx.lineWidth = 3;
-            ctx.setLineDash([6, 6]);
+            ctx.lineWidth = 4;
             ctx.moveTo(points[0].x, points[0].y);
             for (let i = 1; i < points.length; i++) {
                 ctx.lineTo(points[i].x, points[i].y);
             }
             ctx.stroke();
-            ctx.setLineDash([]);
         }
 
         function cutSelectedArea() {
-            if (points.length < 3) return alert('कृपया पेंसिल से एरिया मार्क करें!');
+            if (!currentImg) return showToast("पहले फोटो अपलोड करें!");
+            if (points.length < 3) return showToast("पेंसिल से एरिया मार्क करें!");
 
             const tempCanvas = document.createElement('canvas');
             tempCanvas.width = mainCanvas.width;
@@ -223,6 +232,7 @@
 
             addCutoutToGallery(finalCanvas.toDataURL('image/png'));
             resetCanvas();
+            showToast("कटआउट बन गया!");
         }
 
         function magicWandCut(startX, startY) {
@@ -264,24 +274,13 @@
             const img = document.createElement('img');
             img.src = dataUrl;
             img.className = 'cutout-thumb';
-            img.draggable = true;
-
-            img.addEventListener('dragstart', (e) => {
-                e.dataTransfer.setData('text/plain', dataUrl);
-            });
+            
+            img.onclick = () => {
+                createMovableCutout(dataUrl, 30, 30);
+                showToast("बोर्ड पर जोड़ा गया!");
+            };
             cutoutGallery.appendChild(img);
         }
-
-        dropZone.addEventListener('dragover', (e) => e.preventDefault());
-
-        dropZone.addEventListener('drop', (e) => {
-            e.preventDefault();
-            const dataUrl = e.dataTransfer.getData('text/plain');
-            if (!dataUrl) return;
-
-            const rect = dropZone.getBoundingClientRect();
-            createMovableCutout(dataUrl, e.clientX - rect.left - 40, e.clientY - rect.top - 40);
-        });
 
         function createMovableCutout(src, x, y) {
             const container = document.createElement('div');
@@ -295,25 +294,38 @@
             container.appendChild(img);
             dropZone.appendChild(container);
 
-            let isDragging = false, offsetStartX, offsetStartY;
+            let isDragging = false, startX, startY, initialL, initialT;
 
-            container.addEventListener('mousedown', (e) => {
+            function dragStart(e) {
                 isDragging = true;
-                offsetStartX = e.clientX - container.offsetLeft;
-                offsetStartY = e.clientY - container.offsetTop;
-            });
+                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                startX = clientX;
+                startY = clientY;
+                initialL = container.offsetLeft;
+                initialT = container.offsetTop;
+            }
 
-            window.addEventListener('mousemove', (e) => {
-                if (isDragging) {
-                    container.style.left = `${e.clientX - offsetStartX}px`;
-                    container.style.top = `${e.clientY - offsetStartY}px`;
-                }
-            });
+            function dragMove(e) {
+                if (!isDragging) return;
+                e.preventDefault();
+                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                container.style.left = `${initialL + (clientX - startX)}px`;
+                container.style.top = `${initialT + (clientY - startY)}px`;
+            }
 
-            window.addEventListener('mouseup', () => isDragging = false);
+            function dragEnd() { isDragging = false; }
+
+            container.addEventListener('mousedown', dragStart);
+            window.addEventListener('mousemove', dragMove);
+            window.addEventListener('mouseup', dragEnd);
+
+            container.addEventListener('touchstart', dragStart, { passive: false });
+            window.addEventListener('touchmove', dragMove, { passive: false });
+            window.addEventListener('touchend', dragEnd);
         }
 
-        // GIF Animation System Logic
         function addAnimationFrame() {
             const frameItems = [];
             const items = dropZone.querySelectorAll('.cutout-item');
@@ -326,16 +338,19 @@
                 });
             });
 
+            if (frameItems.length === 0) return showToast("बोर्ड खाली है!");
+
             animationFrames.push(frameItems);
 
             const thumb = document.createElement('div');
             thumb.className = 'frame-thumb';
             thumb.innerText = `F-${animationFrames.length}`;
             frameStrip.appendChild(thumb);
+            showToast(`फ्रेम ${animationFrames.length} सेव हुआ!`);
         }
 
         function playGIFAnimation() {
-            if (animationFrames.length === 0) return alert('पहले कम से कम 2 फ्रेम्स जोड़ें!');
+            if (animationFrames.length < 2) return showToast("कम से कम 2 फ्रेम बनाएं!");
             
             let frameIdx = 0;
             isPlaying = true;
@@ -355,13 +370,14 @@
                 });
 
                 frameIdx = (frameIdx + 1) % animationFrames.length;
-            }, 300); // 300ms speed for GIF motion
+            }, 300);
         }
 
         function clearCollage() {
             dropZone.innerHTML = '';
             animationFrames = [];
             frameStrip.innerHTML = '<span style="font-size:10px; color:#aaa;">फ्रेम टाइमलाइन: </span>';
+            showToast("बोर्ड साफ़ कर दिया गया!");
         }
     </script>
 </body>
