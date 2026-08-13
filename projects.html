@@ -1,39 +1,368 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="hi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Projects</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <title>Rox Photo Studio - Cutout, Drag & GIF Animator</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Arial, sans-serif; }
+        body { background: #0f0f1a; color: #fff; display: flex; flex-direction: column; min-height: 100vh; }
+
+        .navbar { background: #18182b; padding: 12px 20px; border-bottom: 2px solid #282845; display: flex; justify-content: space-between; align-items: center; }
+        .navbar h1 { font-size: 18px; color: #00e5ff; }
+
+        .app-container { display: flex; flex-direction: column; gap: 15px; padding: 15px; max-width: 1200px; margin: 0 auto; width: 100%; }
+        .work-area { display: flex; flex-wrap: wrap; gap: 15px; justify-content: center; }
+        
+        .panel { background: #1a1a2e; border: 1px solid #2e2e50; border-radius: 10px; padding: 12px; flex: 1; min-width: 320px; max-width: 550px; }
+        .panel h3 { font-size: 14px; color: #00e5ff; margin-bottom: 10px; border-bottom: 1px solid #333; padding-bottom: 5px; }
+
+        .editor-box { position: relative; width: 100%; aspect-ratio: 4/3; background: #000; border: 1px dashed #444; border-radius: 8px; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+        canvas { max-width: 100%; max-height: 100%; touch-action: none; }
+
+        .tools { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+        button, label.btn-upload { background: #252545; color: #fff; border: 1px solid #3d3d66; padding: 8px 12px; border-radius: 6px; font-size: 12px; cursor: pointer; transition: 0.2s; }
+        button:hover, label.btn-upload:hover { background: #00e5ff; color: #000; font-weight: bold; }
+        button.active { background: #00e5ff; color: #000; font-weight: bold; }
+
+        .drop-zone { position: relative; width: 100%; aspect-ratio: 4/3; background: #111122; border: 2px dashed #00e5ff; border-radius: 8px; overflow: hidden; }
+
+        .cutout-item { position: absolute; cursor: move; border: 1px dashed transparent; user-select: none; }
+        .cutout-item:hover { border-color: #00e5ff; }
+        .cutout-item img { width: 100%; height: 100%; pointer-events: none; }
+
+        .cutout-gallery { display: flex; gap: 10px; overflow-x: auto; padding: 8px; background: #121220; border-radius: 8px; margin-top: 10px; min-height: 80px; align-items: center; }
+        .cutout-thumb { width: 60px; height: 60px; border: 1px solid #00e5ff; border-radius: 6px; cursor: grab; object-fit: contain; background: #000; flex-shrink: 0; }
+
+        /* Animation Frames Strip */
+        .frame-strip { display: flex; gap: 8px; overflow-x: auto; padding: 6px; background: #090910; border-radius: 6px; margin-top: 8px; min-height: 60px; align-items: center; }
+        .frame-thumb { width: 50px; height: 40px; background: #222; border: 1px solid #ff007f; border-radius: 4px; font-size: 10px; display: flex; align-items: center; justify-content: center; color: #fff; cursor: pointer; }
+    </style>
 </head>
 <body>
-    <div class="mobile-frame">
-        <div class="notch"></div>
-        <div class="app-content">
-            <div class="header">
-                <a href="index.html" class="back-link"><i class="fa-solid fa-arrow-left"></i> Home</a>
-                <h2 style="margin-top: 10px;"><i class="fa-solid fa-folder-open" style="color: #ff9800;"></i> Projects</h2>
+
+    <div class="navbar">
+        <h1>✂️ Rox Studio Pro - Cutout, Drag & GIF Animator</h1>
+    </div>
+
+    <div class="app-container">
+        <div class="work-area">
+            
+            <!-- Cutout Studio -->
+            <div class="panel">
+                <h3>1. फोटो कटिंग टूल (Cutout Studio)</h3>
+                <div class="editor-box">
+                    <canvas id="mainCanvas"></canvas>
+                </div>
+
+                <div class="tools">
+                    <label class="btn-upload">📁 फोटो अपलोड करें <input type="file" id="imgUpload" accept="image/*" style="display:none;"></label>
+                    <button id="btnPencil" onclick="setMode('pencil')">✏️ 1. पेंसिल कट (Manual Cut)</button>
+                    <button id="btnMagic" onclick="setMode('magic')">🪄 2. मैजिक वैंड (Auto Cut)</button>
+                    <button onclick="cutSelectedArea()" style="background:#00c853; color:#000; font-weight:bold;">✂️ कट करें (Extract)</button>
+                    <button onclick="resetCanvas()" style="background:#ff1744;">🔄 रीसेट</button>
+                </div>
             </div>
 
-            <!-- प्रोजेक्ट्स की लिस्ट -->
-            <div class="list-container">
-                <div class="item-card">
-                    <i class="fa-solid fa-file-video"></i>
-                    <div>
-                        <h4>Nature_Edit_Final.mp4</h4>
-                        <p>Size: 124MB • 2 days ago</p>
-                    </div>
+            <!-- Drag, Drop & GIF Animation Studio -->
+            <div class="panel">
+                <h3>2. एनीमेशन एवं ड्रैग-ड्रॉप बोर्ड (GIF Maker)</h3>
+                <div class="drop-zone" id="dropZone">
+                    <!-- Cutout objects rendered here -->
                 </div>
-                <div class="item-card">
-                    <i class="fa-solid fa-file-video"></i>
-                    <div>
-                        <h4>Vlog_Travel_01.mp4</h4>
-                        <p>Size: 85MB • 1 week ago</p>
-                    </div>
+
+                <!-- Frame Timeline -->
+                <div class="frame-strip" id="frameStrip">
+                    <span style="font-size:10px; color:#aaa;">फ्रेम टाइमलाइन: </span>
                 </div>
+
+                <div class="tools">
+                    <button onclick="addAnimationFrame()" style="background:#ff007f; color:#fff; font-weight:bold;">➕ नया फ्रेम जोड़ें (Add Step)</button>
+                    <button onclick="playGIFAnimation()" style="background:#00e5ff; color:#000; font-weight:bold;">▶️ एनीमेशन चलाएं (Play GIF)</button>
+                    <button onclick="clearCollage()" style="background:#333;">🗑️ बोर्ड साफ़ करें</button>
+                </div>
+                <p style="font-size:10px; color:#aaa; margin-top:5px;">* हर फ्रेम में फोटो को थोड़ा खिसकाएं (Move) और 'नया फ्रेम जोड़ें' दबाएं। फिर Play दबाकर GIF देखें!</p>
+            </div>
+
+        </div>
+
+        <!-- Cutout Gallery -->
+        <div class="panel" style="max-width: 100%;">
+            <h3>📦 कटे हुए टुकड़ों की गैलरी (Drag into Board above)</h3>
+            <div class="cutout-gallery" id="cutoutGallery">
+                <span style="font-size:12px; color:#666;">अभी कोई कटआउट नहीं है। बाएं ओर से फोटो काटें!</span>
             </div>
         </div>
     </div>
+
+    <script>
+        const imgUpload = document.getElementById('imgUpload');
+        const mainCanvas = document.getElementById('mainCanvas');
+        const ctx = mainCanvas.getContext('2d');
+        const dropZone = document.getElementById('dropZone');
+        const cutoutGallery = document.getElementById('cutoutGallery');
+        const frameStrip = document.getElementById('frameStrip');
+
+        let currentImg = null;
+        let mode = 'pencil';
+        let points = [];
+        let isDrawing = false;
+        let animationFrames = [];
+        let isPlaying = false;
+
+        // Image Upload
+        imgUpload.addEventListener('change', (e) => {
+            if (e.target.files[0]) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    currentImg = new Image();
+                    currentImg.onload = () => {
+                        mainCanvas.width = currentImg.width;
+                        mainCanvas.height = currentImg.height;
+                        resetCanvas();
+                    };
+                    currentImg.src = event.target.result;
+                };
+                reader.readAsDataURL(e.target.files[0]);
+            }
+        });
+
+        function resetCanvas() {
+            if (!currentImg) return;
+            ctx.clearRect(0, 0, mainCanvas.width, mainCanvas.height);
+            ctx.drawImage(currentImg, 0, 0);
+            points = [];
+        }
+
+        function setMode(newMode) {
+            mode = newMode;
+            document.getElementById('btnPencil').classList.toggle('active', mode === 'pencil');
+            document.getElementById('btnMagic').classList.toggle('active', mode === 'magic');
+        }
+
+        // Pencil Cutout Selection
+        mainCanvas.addEventListener('mousedown', (e) => {
+            if (!currentImg) return;
+            const rect = mainCanvas.getBoundingClientRect();
+            const scaleX = mainCanvas.width / rect.width;
+            const scaleY = mainCanvas.height / rect.height;
+            const x = (e.clientX - rect.left) * scaleX;
+            const y = (e.clientY - rect.top) * scaleY;
+
+            if (mode === 'pencil') {
+                isDrawing = true;
+                points.push({ x, y });
+                drawPath();
+            } else if (mode === 'magic') {
+                magicWandCut(Math.floor(x), Math.floor(y));
+            }
+        });
+
+        mainCanvas.addEventListener('mousemove', (e) => {
+            if (isDrawing && mode === 'pencil') {
+                const rect = mainCanvas.getBoundingClientRect();
+                const scaleX = mainCanvas.width / rect.width;
+                const scaleY = mainCanvas.height / rect.height;
+                points.push({
+                    x: (e.clientX - rect.left) * scaleX,
+                    y: (e.clientY - rect.top) * scaleY
+                });
+                drawPath();
+            }
+        });
+
+        window.addEventListener('mouseup', () => { isDrawing = false; });
+
+        function drawPath() {
+            ctx.clearRect(0, 0, mainCanvas.width, mainCanvas.height);
+            ctx.drawImage(currentImg, 0, 0);
+
+            if (points.length < 2) return;
+            ctx.beginPath();
+            ctx.strokeStyle = '#00e5ff';
+            ctx.lineWidth = 3;
+            ctx.setLineDash([6, 6]);
+            ctx.moveTo(points[0].x, points[0].y);
+            for (let i = 1; i < points.length; i++) {
+                ctx.lineTo(points[i].x, points[i].y);
+            }
+            ctx.stroke();
+            ctx.setLineDash([]);
+        }
+
+        function cutSelectedArea() {
+            if (points.length < 3) return alert('कृपया पेंसिल से एरिया मार्क करें!');
+
+            const tempCanvas = document.createElement('canvas');
+            tempCanvas.width = mainCanvas.width;
+            tempCanvas.height = mainCanvas.height;
+            const tempCtx = tempCanvas.getContext('2d');
+
+            tempCtx.beginPath();
+            tempCtx.moveTo(points[0].x, points[0].y);
+            for (let i = 1; i < points.length; i++) {
+                tempCtx.lineTo(points[i].x, points[i].y);
+            }
+            tempCtx.closePath();
+            tempCtx.clip();
+            tempCtx.drawImage(currentImg, 0, 0);
+
+            let minX = mainCanvas.width, minY = mainCanvas.height, maxX = 0, maxY = 0;
+            points.forEach(p => {
+                if (p.x < minX) minX = p.x;
+                if (p.y < minY) minY = p.y;
+                if (p.x > maxX) maxX = p.x;
+                if (p.y > maxY) maxY = p.y;
+            });
+
+            const cropW = maxX - minX, cropH = maxY - minY;
+            const finalCanvas = document.createElement('canvas');
+            finalCanvas.width = cropW;
+            finalCanvas.height = cropH;
+            finalCanvas.getContext('2d').drawImage(tempCanvas, minX, minY, cropW, cropH, 0, 0, cropW, cropH);
+
+            addCutoutToGallery(finalCanvas.toDataURL('image/png'));
+            resetCanvas();
+        }
+
+        function magicWandCut(startX, startY) {
+            const imgData = ctx.getImageData(0, 0, mainCanvas.width, mainCanvas.height);
+            const data = imgData.data;
+            const targetPos = (startY * mainCanvas.width + startX) * 4;
+            const targetR = data[targetPos], targetG = data[targetPos + 1], targetB = data[targetPos + 2];
+
+            const tolerance = 40;
+            const visited = new Uint8Array(mainCanvas.width * mainCanvas.height);
+            const queue = [[startX, startY]];
+
+            while (queue.length > 0) {
+                const [x, y] = queue.pop();
+                const idx = y * mainCanvas.width + x;
+                if (visited[idx]) continue;
+                visited[idx] = 1;
+
+                const pos = idx * 4;
+                if (Math.abs(data[pos] - targetR) < tolerance && Math.abs(data[pos+1] - targetG) < tolerance && Math.abs(data[pos+2] - targetB) < tolerance) {
+                    data[pos + 3] = 0;
+                    if (x > 0) queue.push([x - 1, y]);
+                    if (x < mainCanvas.width - 1) queue.push([x + 1, y]);
+                    if (y > 0) queue.push([x, y - 1]);
+                    if (y < mainCanvas.height - 1) queue.push([x, y + 1]);
+                }
+            }
+
+            ctx.putImageData(imgData, 0, 0);
+            const tempCanvas = document.createElement('canvas');
+            tempCanvas.width = mainCanvas.width;
+            tempCanvas.height = mainCanvas.height;
+            tempCanvas.getContext('2d').putImageData(imgData, 0, 0);
+            addCutoutToGallery(tempCanvas.toDataURL('image/png'));
+        }
+
+        function addCutoutToGallery(dataUrl) {
+            if (cutoutGallery.querySelector('span')) cutoutGallery.innerHTML = '';
+            const img = document.createElement('img');
+            img.src = dataUrl;
+            img.className = 'cutout-thumb';
+            img.draggable = true;
+
+            img.addEventListener('dragstart', (e) => {
+                e.dataTransfer.setData('text/plain', dataUrl);
+            });
+            cutoutGallery.appendChild(img);
+        }
+
+        dropZone.addEventListener('dragover', (e) => e.preventDefault());
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            const dataUrl = e.dataTransfer.getData('text/plain');
+            if (!dataUrl) return;
+
+            const rect = dropZone.getBoundingClientRect();
+            createMovableCutout(dataUrl, e.clientX - rect.left - 40, e.clientY - rect.top - 40);
+        });
+
+        function createMovableCutout(src, x, y) {
+            const container = document.createElement('div');
+            container.className = 'cutout-item';
+            container.style.left = `${x}px`;
+            container.style.top = `${y}px`;
+            container.style.width = '90px';
+
+            const img = document.createElement('img');
+            img.src = src;
+            container.appendChild(img);
+            dropZone.appendChild(container);
+
+            let isDragging = false, offsetStartX, offsetStartY;
+
+            container.addEventListener('mousedown', (e) => {
+                isDragging = true;
+                offsetStartX = e.clientX - container.offsetLeft;
+                offsetStartY = e.clientY - container.offsetTop;
+            });
+
+            window.addEventListener('mousemove', (e) => {
+                if (isDragging) {
+                    container.style.left = `${e.clientX - offsetStartX}px`;
+                    container.style.top = `${e.clientY - offsetStartY}px`;
+                }
+            });
+
+            window.addEventListener('mouseup', () => isDragging = false);
+        }
+
+        // GIF Animation System Logic
+        function addAnimationFrame() {
+            const frameItems = [];
+            const items = dropZone.querySelectorAll('.cutout-item');
+            
+            items.forEach(item => {
+                frameItems.push({
+                    src: item.querySelector('img').src,
+                    left: item.style.left,
+                    top: item.style.top
+                });
+            });
+
+            animationFrames.push(frameItems);
+
+            const thumb = document.createElement('div');
+            thumb.className = 'frame-thumb';
+            thumb.innerText = `F-${animationFrames.length}`;
+            frameStrip.appendChild(thumb);
+        }
+
+        function playGIFAnimation() {
+            if (animationFrames.length === 0) return alert('पहले कम से कम 2 फ्रेम्स जोड़ें!');
+            
+            let frameIdx = 0;
+            isPlaying = true;
+
+            const timer = setInterval(() => {
+                if (!isPlaying || frameIdx >= animationFrames.length) {
+                    clearInterval(timer);
+                    isPlaying = false;
+                    return;
+                }
+
+                dropZone.innerHTML = '';
+                const currentFrame = animationFrames[frameIdx];
+                
+                currentFrame.forEach(obj => {
+                    createMovableCutout(obj.src, parseInt(obj.left), parseInt(obj.top));
+                });
+
+                frameIdx = (frameIdx + 1) % animationFrames.length;
+            }, 300); // 300ms speed for GIF motion
+        }
+
+        function clearCollage() {
+            dropZone.innerHTML = '';
+            animationFrames = [];
+            frameStrip.innerHTML = '<span style="font-size:10px; color:#aaa;">फ्रेम टाइमलाइन: </span>';
+        }
+    </script>
 </body>
 </html>
