@@ -2,11 +2,11 @@
 <html lang="hi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Rox Photo Studio - Cutout, Drag & GIF Animator</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Rox Photo Studio - Hand Touch Optimized</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Arial, sans-serif; }
-        body { background: #0f0f1a; color: #fff; display: flex; flex-direction: column; min-height: 100vh; }
+        body { background: #0f0f1a; color: #fff; display: flex; flex-direction: column; min-height: 100vh; touch-action: manipulation; }
 
         .navbar { background: #18182b; padding: 12px 20px; border-bottom: 2px solid #282845; display: flex; justify-content: space-between; align-items: center; }
         .navbar h1 { font-size: 18px; color: #00e5ff; }
@@ -17,13 +17,13 @@
         .panel { background: #1a1a2e; border: 1px solid #2e2e50; border-radius: 10px; padding: 12px; flex: 1; min-width: 320px; max-width: 550px; }
         .panel h3 { font-size: 14px; color: #00e5ff; margin-bottom: 10px; border-bottom: 1px solid #333; padding-bottom: 5px; }
 
-        /* Zoom support के लिए Overflow Scrollable Box */
-        .editor-box { position: relative; width: 100%; aspect-ratio: 4/3; background: #000; border: 1px dashed #444; border-radius: 8px; overflow: auto; display: block; }
+        /* टच स्क्रॉल रोकने के लिए touch-action: none */
+        .editor-box { position: relative; width: 100%; aspect-ratio: 4/3; background: #000; border: 1px dashed #444; border-radius: 8px; overflow: auto; display: block; touch-action: none; }
         canvas { width: 100%; height: 100%; object-fit: contain; touch-action: none; transform-origin: top left; }
 
         .tools { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
         .zoom-tools { display: flex; align-items: center; gap: 5px; background: #121220; padding: 5px 10px; border-radius: 6px; border: 1px solid #282845; width: 100%; }
-        button, label.btn-upload { background: #252545; color: #fff; border: 1px solid #3d3d66; padding: 8px 12px; border-radius: 6px; font-size: 12px; cursor: pointer; transition: 0.2s; }
+        button, label.btn-upload { background: #252545; color: #fff; border: 1px solid #3d3d66; padding: 10px 14px; border-radius: 6px; font-size: 13px; cursor: pointer; transition: 0.2s; -webkit-tap-highlight-color: transparent; }
         button:hover, label.btn-upload:hover { background: #00e5ff; color: #000; font-weight: bold; }
         button.active { background: #00e5ff; color: #000; font-weight: bold; }
 
@@ -45,7 +45,7 @@
 <body>
 
     <div class="navbar">
-        <h1>✂️ Rox Studio Pro - Cutout, Drag & GIF Animator</h1>
+        <h1>✂️ Rox Studio Pro - Touch & Finger Cutout</h1>
     </div>
 
     <div id="toastMsg"></div>
@@ -54,15 +54,14 @@
         <div class="work-area">
             
             <div class="panel">
-                <h3>1. फोटो कटिंग टूल (Cutout Studio)</h3>
+                <h3>1. फोटो कटिंग टूल (उंगली से काटें)</h3>
                 <div class="editor-box">
                     <canvas id="mainCanvas"></canvas>
                 </div>
 
-                <!-- Zoom Controls -->
                 <div class="tools">
                     <div class="zoom-tools">
-                        <span style="font-size:11px; color:#00e5ff;">🔍 ज़ूम करें:</span>
+                        <span style="font-size:11px; color:#00e5ff;">🔍 ज़ूम:</span>
                         <button onclick="setZoom(1)" class="btn-zoom active" id="z1">1x</button>
                         <button onclick="setZoom(1.5)" class="btn-zoom" id="z15">1.5x</button>
                         <button onclick="setZoom(2)" class="btn-zoom" id="z2">2x</button>
@@ -78,7 +77,7 @@
             </div>
 
             <div class="panel">
-                <h3>2. एनीमेशन एवं ड्रैग-ड्रॉप बोर्ड (GIF Maker)</h3>
+                <h3>2. एनीमेशन एवं ड्रैग-ड्रॉप बोर्ड</h3>
                 <div class="drop-zone" id="dropZone"></div>
 
                 <div class="frame-strip" id="frameStrip">
@@ -86,19 +85,18 @@
                 </div>
 
                 <div class="tools">
-                    <button onclick="addAnimationFrame()" style="background:#ff007f; color:#fff; font-weight:bold;">➕ नया फ्रेम जोड़ें</button>
-                    <button onclick="playGIFAnimation()" style="background:#00e5ff; color:#000; font-weight:bold;">▶️ एनीमेशन चलाएं</button>
-                    <button onclick="clearCollage()" style="background:#333;">🗑️ बोर्ड साफ़ करें</button>
+                    <button onclick="addAnimationFrame()" style="background:#ff007f; color:#fff; font-weight:bold;">➕ नया फ्रेम</button>
+                    <button onclick="playGIFAnimation()" id="btnPlay" style="background:#00e5ff; color:#000; font-weight:bold;">▶️ एनीमेशन चलाएं</button>
+                    <button onclick="clearCollage()" style="background:#333;">🗑️ साफ़ करें</button>
                 </div>
-                <p style="font-size:10px; color:#aaa; margin-top:5px;">* गैलरी से कटआउट पर टैप करके बोर्ड पर लाएँ, उंगली से खिसकाएं और 'नया फ्रेम' दबाएं।</p>
             </div>
 
         </div>
 
         <div class="panel" style="max-width: 100%;">
-            <h3>📦 कटे हुए टुकड़ों की गैलरी (टैप करके बोर्ड पर लाएँ)</h3>
+            <h3>📦 कटे हुए टुकड़ों की गैलरी</h3>
             <div class="cutout-gallery" id="cutoutGallery">
-                <span style="font-size:12px; color:#666;">अभी कोई कटआउट नहीं है। बाएं ओर से फोटो काटें!</span>
+                <span style="font-size:12px; color:#666;">अभी कोई कटआउट नहीं है।</span>
             </div>
         </div>
     </div>
@@ -116,8 +114,8 @@
         let points = [];
         let isDrawing = false;
         let animationFrames = [];
-        let isPlaying = false;
-        let currentZoom = 1; // Zoom multiplier
+        let animTimer = null;
+        let currentZoom = 1;
 
         function showToast(msg) {
             const toast = document.getElementById('toastMsg');
@@ -126,7 +124,6 @@
             setTimeout(() => { toast.style.display = 'none'; }, 2000);
         }
 
-        // --- Zoom Control Logic ---
         function setZoom(zoomValue) {
             currentZoom = zoomValue;
             mainCanvas.style.transform = `scale(${currentZoom})`;
@@ -169,26 +166,34 @@
             document.getElementById('btnMagic').classList.toggle('active', mode === 'magic');
         }
 
-        // --- Accurate Canvas Coordinate Calculation (Fixes Zoom offset) ---
+        // --- उंगली (Hand/Touch) के लिए सटीक कोऑर्डिनेट्स ---
         function getCanvasCoords(e) {
             const rect = mainCanvas.getBoundingClientRect();
-            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-            
-            // Scaled BoundingRect Adjustments
-            const scaleX = mainCanvas.width / (rect.width / currentZoom);
-            const scaleY = mainCanvas.height / (rect.height / currentZoom);
+            let clientX = e.clientX;
+            let clientY = e.clientY;
 
+            // अगर हाथ/उंगली से टच किया गया है:
+            if (e.touches && e.touches.length > 0) {
+                clientX = e.touches[0].clientX;
+                clientY = e.touches[0].clientY;
+            } else if (e.changedTouches && e.changedTouches.length > 0) {
+                clientX = e.changedTouches[0].clientX;
+                clientY = e.changedTouches[0].clientY;
+            }
+            
             return {
-                x: (clientX - rect.left) * scaleX / currentZoom,
-                y: (clientY - rect.top) * scaleY / currentZoom
+                x: (clientX - rect.left) * (mainCanvas.width / rect.width),
+                y: (clientY - rect.top) * (mainCanvas.height / rect.height)
             };
         }
 
         function startDrawing(e) {
+            if (e.cancelable) e.preventDefault(); // उंगली लगाने पर पेज स्क्रॉल होने से रोकेगा
             if (!currentImg) return showToast("पहले फोटो अपलोड करें!");
+            
             isDrawing = true;
             const coords = getCanvasCoords(e);
+            
             if (mode === 'pencil') {
                 points.push(coords);
                 drawPath();
@@ -199,17 +204,22 @@
 
         function drawMove(e) {
             if (!isDrawing || mode !== 'pencil') return;
-            e.preventDefault();
+            if (e.cancelable) e.preventDefault(); // उंगली घुमाते समय स्क्रीन रुक कर केवल ड्रॉ होगी
+            
             points.push(getCanvasCoords(e));
             drawPath();
         }
 
-        function stopDrawing() { isDrawing = false; }
+        function stopDrawing(e) { 
+            isDrawing = false; 
+        }
 
+        // माउस इवेंट्स
         mainCanvas.addEventListener('mousedown', startDrawing);
         mainCanvas.addEventListener('mousemove', drawMove);
         window.addEventListener('mouseup', stopDrawing);
 
+        // हाथ/उंगली (Touch) इवेंट्स
         mainCanvas.addEventListener('touchstart', startDrawing, { passive: false });
         mainCanvas.addEventListener('touchmove', drawMove, { passive: false });
         window.addEventListener('touchend', stopDrawing);
@@ -221,7 +231,10 @@
             if (points.length < 2) return;
             ctx.beginPath();
             ctx.strokeStyle = '#00e5ff';
-            ctx.lineWidth = Math.max(3, mainCanvas.width / 200); // Scale line width proportionally
+            ctx.lineWidth = Math.max(4, mainCanvas.width / 150); // उंगली से साफ़ दिखने के लिए थोड़ा मोटा स्ट्रोक
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            
             ctx.moveTo(points[0].x, points[0].y);
             for (let i = 1; i < points.length; i++) {
                 ctx.lineTo(points[i].x, points[i].y);
@@ -231,7 +244,7 @@
 
         function cutSelectedArea() {
             if (!currentImg) return showToast("पहले फोटो अपलोड करें!");
-            if (points.length < 3) return showToast("पेंसिल से एरिया मार्क करें!");
+            if (points.length < 3) return showToast("उंगली से एरिया मार्क करें!");
 
             const tempCanvas = document.createElement('canvas');
             tempCanvas.width = mainCanvas.width;
@@ -288,7 +301,7 @@
                     if (x > 0) queue.push([x - 1, y]);
                     if (x < mainCanvas.width - 1) queue.push([x + 1, y]);
                     if (y > 0) queue.push([x, y - 1]);
-                    if (y < mainCanvas.height - 1) queue.push([x, y + 1]);
+                    if (y < mainCanvas.height - 1) queue.push([x + 1, y]);
                 }
             }
 
@@ -313,7 +326,7 @@
             cutoutGallery.appendChild(img);
         }
 
-        // --- Improved & Ultra-Smooth Dragging Logic ---
+        // --- हाथ/उंगली से Smooth Drag & Drop ---
         function createMovableCutout(src, x, y) {
             const container = document.createElement('div');
             container.className = 'cutout-item';
@@ -326,22 +339,25 @@
             container.appendChild(img);
             dropZone.appendChild(container);
 
-            let isDragging = false;
             let offset = { x: 0, y: 0 };
 
             function dragStart(e) {
-                isDragging = true;
+                if (e.cancelable) e.preventDefault();
                 const clientX = e.touches ? e.touches[0].clientX : e.clientX;
                 const clientY = e.touches ? e.touches[0].clientY : e.clientY;
                 
                 const itemRect = container.getBoundingClientRect();
                 offset.x = clientX - itemRect.left;
                 offset.y = clientY - itemRect.top;
+
+                document.addEventListener('mousemove', dragMove);
+                document.addEventListener('mouseup', dragEnd);
+                document.addEventListener('touchmove', dragMove, { passive: false });
+                document.addEventListener('touchend', dragEnd);
             }
 
             function dragMove(e) {
-                if (!isDragging) return;
-                e.preventDefault();
+                if (e.cancelable) e.preventDefault();
                 const clientX = e.touches ? e.touches[0].clientX : e.clientX;
                 const clientY = e.touches ? e.touches[0].clientY : e.clientY;
 
@@ -353,15 +369,15 @@
                 container.style.top = `${newY}px`;
             }
 
-            function dragEnd() { isDragging = false; }
+            function dragEnd() {
+                document.removeEventListener('mousemove', dragMove);
+                document.removeEventListener('mouseup', dragEnd);
+                document.removeEventListener('touchmove', dragMove);
+                document.removeEventListener('touchend', dragEnd);
+            }
 
             container.addEventListener('mousedown', dragStart);
-            document.addEventListener('mousemove', dragMove);
-            document.addEventListener('mouseup', dragEnd);
-
             container.addEventListener('touchstart', dragStart, { passive: false });
-            document.addEventListener('touchmove', dragMove, { passive: false });
-            document.addEventListener('touchend', dragEnd);
         }
 
         function addAnimationFrame() {
@@ -390,16 +406,17 @@
         function playGIFAnimation() {
             if (animationFrames.length < 2) return showToast("कम से कम 2 फ्रेम बनाएं!");
             
+            if (animTimer) {
+                clearInterval(animTimer);
+                animTimer = null;
+                document.getElementById('btnPlay').innerText = "▶️ एनीमेशन चलाएं";
+                return;
+            }
+
+            document.getElementById('btnPlay').innerText = "⏹️ एनीमेशन रोकें";
             let frameIdx = 0;
-            isPlaying = true;
 
-            const timer = setInterval(() => {
-                if (!isPlaying || frameIdx >= animationFrames.length) {
-                    clearInterval(timer);
-                    isPlaying = false;
-                    return;
-                }
-
+            animTimer = setInterval(() => {
                 dropZone.innerHTML = '';
                 const currentFrame = animationFrames[frameIdx];
                 
@@ -412,6 +429,11 @@
         }
 
         function clearCollage() {
+            if (animTimer) {
+                clearInterval(animTimer);
+                animTimer = null;
+                document.getElementById('btnPlay').innerText = "▶️ एनीमेशन चलाएं";
+            }
             dropZone.innerHTML = '';
             animationFrames = [];
             frameStrip.innerHTML = '<span style="font-size:10px; color:#aaa;">फ्रेम टाइमलाइन: </span>';
