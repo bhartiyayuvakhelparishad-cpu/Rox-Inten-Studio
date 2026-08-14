@@ -17,10 +17,12 @@
         .panel { background: #1a1a2e; border: 1px solid #2e2e50; border-radius: 10px; padding: 12px; flex: 1; min-width: 320px; max-width: 550px; }
         .panel h3 { font-size: 14px; color: #00e5ff; margin-bottom: 10px; border-bottom: 1px solid #333; padding-bottom: 5px; }
 
-        .editor-box { position: relative; width: 100%; aspect-ratio: 4/3; background: #000; border: 1px dashed #444; border-radius: 8px; overflow: hidden; display: flex; align-items: center; justify-content: center; }
-        canvas { width: 100%; height: 100%; object-fit: contain; touch-action: none; }
+        /* Zoom support के लिए Overflow Scrollable Box */
+        .editor-box { position: relative; width: 100%; aspect-ratio: 4/3; background: #000; border: 1px dashed #444; border-radius: 8px; overflow: auto; display: block; }
+        canvas { width: 100%; height: 100%; object-fit: contain; touch-action: none; transform-origin: top left; }
 
         .tools { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+        .zoom-tools { display: flex; align-items: center; gap: 5px; background: #121220; padding: 5px 10px; border-radius: 6px; border: 1px solid #282845; width: 100%; }
         button, label.btn-upload { background: #252545; color: #fff; border: 1px solid #3d3d66; padding: 8px 12px; border-radius: 6px; font-size: 12px; cursor: pointer; transition: 0.2s; }
         button:hover, label.btn-upload:hover { background: #00e5ff; color: #000; font-weight: bold; }
         button.active { background: #00e5ff; color: #000; font-weight: bold; }
@@ -57,10 +59,19 @@
                     <canvas id="mainCanvas"></canvas>
                 </div>
 
+                <!-- Zoom Controls -->
                 <div class="tools">
-                    <label class="btn-upload">📁 फोटो अपलोड करें <input type="file" id="imgUpload" accept="image/*" style="display:none;"></label>
-                    <button id="btnPencil" class="active" onclick="setMode('pencil')">✏️ 1. पेंसिल कट</button>
-                    <button id="btnMagic" onclick="setMode('magic')">🪄 2. मैजिक वैंड</button>
+                    <div class="zoom-tools">
+                        <span style="font-size:11px; color:#00e5ff;">🔍 ज़ूम करें:</span>
+                        <button onclick="setZoom(1)" class="btn-zoom active" id="z1">1x</button>
+                        <button onclick="setZoom(1.5)" class="btn-zoom" id="z15">1.5x</button>
+                        <button onclick="setZoom(2)" class="btn-zoom" id="z2">2x</button>
+                        <button onclick="setZoom(3)" class="btn-zoom" id="z3">3x</button>
+                    </div>
+
+                    <label class="btn-upload">📁 अपलोड <input type="file" id="imgUpload" accept="image/*" style="display:none;"></label>
+                    <button id="btnPencil" class="active" onclick="setMode('pencil')">✏️ पेंसिल कट</button>
+                    <button id="btnMagic" onclick="setMode('magic')">🪄 मैजिक वैंड</button>
                     <button onclick="cutSelectedArea()" style="background:#00c853; color:#000; font-weight:bold;">✂️ कट करें</button>
                     <button onclick="resetCanvas()" style="background:#ff1744;">🔄 रीसेट</button>
                 </div>
@@ -106,12 +117,25 @@
         let isDrawing = false;
         let animationFrames = [];
         let isPlaying = false;
+        let currentZoom = 1; // Zoom multiplier
 
         function showToast(msg) {
             const toast = document.getElementById('toastMsg');
             toast.innerText = msg;
             toast.style.display = 'block';
             setTimeout(() => { toast.style.display = 'none'; }, 2000);
+        }
+
+        // --- Zoom Control Logic ---
+        function setZoom(zoomValue) {
+            currentZoom = zoomValue;
+            mainCanvas.style.transform = `scale(${currentZoom})`;
+
+            document.querySelectorAll('.btn-zoom').forEach(b => b.classList.remove('active'));
+            if(zoomValue === 1) document.getElementById('z1').classList.add('active');
+            if(zoomValue === 1.5) document.getElementById('z15').classList.add('active');
+            if(zoomValue === 2) document.getElementById('z2').classList.add('active');
+            if(zoomValue === 3) document.getElementById('z3').classList.add('active');
         }
 
         imgUpload.addEventListener('change', (e) => {
@@ -122,6 +146,7 @@
                     currentImg.onload = () => {
                         mainCanvas.width = currentImg.width;
                         mainCanvas.height = currentImg.height;
+                        setZoom(1);
                         resetCanvas();
                         showToast("फोटो अपलोड हो गई!");
                     };
@@ -144,13 +169,19 @@
             document.getElementById('btnMagic').classList.toggle('active', mode === 'magic');
         }
 
+        // --- Accurate Canvas Coordinate Calculation (Fixes Zoom offset) ---
         function getCanvasCoords(e) {
             const rect = mainCanvas.getBoundingClientRect();
             const clientX = e.touches ? e.touches[0].clientX : e.clientX;
             const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            
+            // Scaled BoundingRect Adjustments
+            const scaleX = mainCanvas.width / (rect.width / currentZoom);
+            const scaleY = mainCanvas.height / (rect.height / currentZoom);
+
             return {
-                x: (clientX - rect.left) * (mainCanvas.width / rect.width),
-                y: (clientY - rect.top) * (mainCanvas.height / rect.height)
+                x: (clientX - rect.left) * scaleX / currentZoom,
+                y: (clientY - rect.top) * scaleY / currentZoom
             };
         }
 
@@ -190,7 +221,7 @@
             if (points.length < 2) return;
             ctx.beginPath();
             ctx.strokeStyle = '#00e5ff';
-            ctx.lineWidth = 4;
+            ctx.lineWidth = Math.max(3, mainCanvas.width / 200); // Scale line width proportionally
             ctx.moveTo(points[0].x, points[0].y);
             for (let i = 1; i < points.length; i++) {
                 ctx.lineTo(points[i].x, points[i].y);
@@ -282,28 +313,30 @@
             cutoutGallery.appendChild(img);
         }
 
+        // --- Improved & Ultra-Smooth Dragging Logic ---
         function createMovableCutout(src, x, y) {
             const container = document.createElement('div');
             container.className = 'cutout-item';
             container.style.left = `${x}px`;
             container.style.top = `${y}px`;
-            container.style.width = '90px';
+            container.style.width = '100px';
 
             const img = document.createElement('img');
             img.src = src;
             container.appendChild(img);
             dropZone.appendChild(container);
 
-            let isDragging = false, startX, startY, initialL, initialT;
+            let isDragging = false;
+            let offset = { x: 0, y: 0 };
 
             function dragStart(e) {
                 isDragging = true;
                 const clientX = e.touches ? e.touches[0].clientX : e.clientX;
                 const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-                startX = clientX;
-                startY = clientY;
-                initialL = container.offsetLeft;
-                initialT = container.offsetTop;
+                
+                const itemRect = container.getBoundingClientRect();
+                offset.x = clientX - itemRect.left;
+                offset.y = clientY - itemRect.top;
             }
 
             function dragMove(e) {
@@ -311,19 +344,24 @@
                 e.preventDefault();
                 const clientX = e.touches ? e.touches[0].clientX : e.clientX;
                 const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-                container.style.left = `${initialL + (clientX - startX)}px`;
-                container.style.top = `${initialT + (clientY - startY)}px`;
+
+                const dropRect = dropZone.getBoundingClientRect();
+                let newX = clientX - dropRect.left - offset.x;
+                let newY = clientY - dropRect.top - offset.y;
+
+                container.style.left = `${newX}px`;
+                container.style.top = `${newY}px`;
             }
 
             function dragEnd() { isDragging = false; }
 
             container.addEventListener('mousedown', dragStart);
-            window.addEventListener('mousemove', dragMove);
-            window.addEventListener('mouseup', dragEnd);
+            document.addEventListener('mousemove', dragMove);
+            document.addEventListener('mouseup', dragEnd);
 
             container.addEventListener('touchstart', dragStart, { passive: false });
-            window.addEventListener('touchmove', dragMove, { passive: false });
-            window.addEventListener('touchend', dragEnd);
+            document.addEventListener('touchmove', dragMove, { passive: false });
+            document.addEventListener('touchend', dragEnd);
         }
 
         function addAnimationFrame() {
