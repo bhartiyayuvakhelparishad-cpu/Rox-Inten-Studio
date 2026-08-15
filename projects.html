@@ -44,7 +44,6 @@
             margin-left: 5px !important;
         }
 
-        /* Full Menu Restored */
         .nav-scroller {
             display: flex !important;
             gap: 8px !important;
@@ -176,6 +175,14 @@
             font-size: 12px !important;
             cursor: pointer !important;
         }
+
+        .slider-container {
+            background: #0a0a12;
+            border: 1px solid #2b2b40;
+            border-radius: 8px;
+            padding: 8px 12px;
+            margin-bottom: 10px;
+        }
     </style>
 </head>
 <body>
@@ -187,7 +194,6 @@
         <div style="color: #00e5ff; font-size: 11px;"><i class="fa-solid fa-bolt"></i> Mobile Engine Active</div>
     </div>
 
-    <!-- Restore Full Navigation Menu -->
     <div class="nav-scroller">
         <a href="index.html" class="nav-item">Home</a>
         <a href="upload.html" class="nav-item">Upload</a>
@@ -209,27 +215,39 @@
         <button id="btnDownload" class="download-btn" onclick="toggleRecordCanvasMP4()"><i class="fa-solid fa-video"></i> 🎬 Record & Download MP4 (With Sound + FX)</button>
     </div>
 
-    <!-- 2. FX Elements & Sticker Panel -->
+    <!-- 2. FX Elements & Controls Panel -->
     <div class="proj-panel">
         <div class="panel-heading"><i class="fa-solid fa-wand-magic-sparkles"></i> 2. ओरिजिनल एलिमेंट्स और लिरिक्स</div>
         
+        <!-- Emoji Buttons (Includes Bubble) -->
         <div class="emoji-grid">
             <span class="emoji-item" style="border-color:#00e5ff;" onclick="toggleRain()">🌧️ असली बारिश</span>
             <span class="emoji-item" style="border-color:#ff007f;" onclick="addBird()">🕊️ उड़ती चिड़िया</span>
             <span class="emoji-item" onclick="addFlower()">🌸 गिरता फूल</span>
             <span class="emoji-item" onclick="addStar()">✨ चमकता तारा</span>
+            <span class="emoji-item" style="border-color:#b500ff;" onclick="addBubble()">💭 थॉट बबल</span>
         </div>
 
-        <!-- NEW: Mobile Sticker / PNG Upload Field -->
-        <label style="color:#00e5ff; font-size:12px; margin-top:8px; display:block;">मोबाइल से स्टिकर/PNG/GIF अपलोड करें:</label>
+        <!-- Speed Control Slider -->
+        <div class="slider-container">
+            <div style="display:flex; justify-content:space-between; font-size:12px; color:#00e5ff; margin-bottom:4px;">
+                <span>⚡ मूविंग स्पीड (कम / ज्यादा):</span>
+                <span id="speedVal">1.0x</span>
+            </div>
+            <input type="range" id="speedRange" min="0.2" max="4.0" step="0.1" value="1.0" style="width:100%; accent-color:#00e5ff;" oninput="changeSpeed(this.value)">
+        </div>
+
+        <!-- Mobile Sticker / PNG Upload Field -->
+        <label style="color:#00e5ff; font-size:12px; margin-top:6px; display:block;">मोबाइल से स्टिकर/PNG अपलोड करें:</label>
         <div style="display:flex; gap:6px; margin-top:4px; margin-bottom:10px;">
             <input type="file" id="stickerInput" class="rox-input" accept="image/*" style="margin:0;">
             <button class="dark-btn" style="background:#ff007f; color:#fff; font-weight:bold; width: 35%;" onclick="addCustomSticker()">➕ Add PNG</button>
         </div>
 
+        <!-- Text/Lyric Input -->
         <div style="display:flex; gap:6px; margin-top:8px;">
             <input type="text" id="txt" placeholder="यहाँ लिरिक्स लिखें..." class="rox-input" style="margin:0;">
-            <button class="dark-btn" style="background:#00e5ff; color:#000; font-weight:bold; width: 30%;" onclick="addText()">➕ Add</button>
+            <button class="dark-btn" style="background:#00e5ff; color:#000; font-weight:bold; width: 30%;" onclick="addText()">➕ Add Text</button>
         </div>
     </div>
 
@@ -258,6 +276,7 @@
     let elements = [];
     let customStickers = [];
     let lyricText = "";
+    let globalSpeedMultiplier = 1.0;
 
     function loadBgPhoto(event) {
         const file = event.target.files[0];
@@ -266,6 +285,11 @@
             img.onload = function() { bgImage = img; };
             img.src = URL.createObjectURL(file);
         }
+    }
+
+    function changeSpeed(val) {
+        globalSpeedMultiplier = parseFloat(val);
+        document.getElementById('speedVal').innerText = globalSpeedMultiplier.toFixed(1) + 'x';
     }
 
     function addCustomSticker() {
@@ -294,22 +318,26 @@
                     x: Math.random() * canvas.width,
                     y: Math.random() * canvas.height,
                     length: Math.random() * 20 + 10,
-                    speed: Math.random() * 10 + 5
+                    baseSpeed: Math.random() * 10 + 5
                 });
             }
         }
     }
 
     function addBird() {
-        elements.push({ type: 'bird', text: '🕊️', x: -50, y: 100 + Math.random() * 200, speed: 2, size: 30 });
+        elements.push({ type: 'bird', text: '🕊️', x: -50, y: 100 + Math.random() * 200, baseSpeed: 2, size: 30 });
     }
 
     function addFlower() {
-        elements.push({ type: 'flower', text: '🌸', x: Math.random() * (canvas.width - 40), y: -40, speed: 2.5, size: 28 });
+        elements.push({ type: 'flower', text: '🌸', x: Math.random() * (canvas.width - 40), y: -40, baseSpeed: 2.5, size: 28 });
     }
 
     function addStar() {
-        elements.push({ type: 'star', text: '✨', x: Math.random() * (canvas.width - 40), y: Math.random() * (canvas.height - 100), size: 26 });
+        elements.push({ type: 'star', text: '✨', x: Math.random() * (canvas.width - 40), y: Math.random() * (canvas.height - 100), baseSpeed: 0, size: 26 });
+    }
+
+    function addBubble() {
+        elements.push({ type: 'bubble', text: '💭', x: Math.random() * (canvas.width - 50), y: canvas.height + 20, baseSpeed: 1.8, size: 32 });
     }
 
     function addText() {
@@ -327,12 +355,12 @@
             ctx.fillRect(0, 0, canvas.width, canvas.height);
         }
 
-        // 2. Draw Custom Stickers/PNG Uploaded from Mobile
+        // 2. Draw Custom Mobile PNG Stickers
         customStickers.forEach(stk => {
             ctx.drawImage(stk.img, stk.x, stk.y, stk.w, stk.h);
         });
 
-        // 3. Draw Rain
+        // 3. Draw Rain (With Speed Control)
         if (rainActive) {
             ctx.strokeStyle = 'rgba(255, 255, 255, 0.7)';
             ctx.lineWidth = 1.5;
@@ -340,7 +368,7 @@
             drops.forEach(drop => {
                 ctx.moveTo(drop.x, drop.y);
                 ctx.lineTo(drop.x - 1, drop.y + drop.length);
-                drop.y += drop.speed;
+                drop.y += drop.baseSpeed * globalSpeedMultiplier;
                 if (drop.y > canvas.height) {
                     drop.y = -20;
                     drop.x = Math.random() * canvas.width;
@@ -349,17 +377,23 @@
             ctx.stroke();
         }
 
-        // 4. Draw Animated Elements
+        // 4. Draw Animated FX Elements (Bird, Flower, Bubble, Star)
         elements.forEach(el => {
             ctx.font = `${el.size}px sans-serif`;
+            const currentSpeed = el.baseSpeed * globalSpeedMultiplier;
+
             if (el.type === 'bird') {
                 ctx.fillText(el.text, el.x, el.y);
-                el.x += el.speed;
+                el.x += currentSpeed;
                 if (el.x > canvas.width + 40) el.x = -40;
             } else if (el.type === 'flower') {
                 ctx.fillText(el.text, el.x, el.y);
-                el.y += el.speed;
+                el.y += currentSpeed;
                 if (el.y > canvas.height + 40) el.y = -40;
+            } else if (el.type === 'bubble') {
+                ctx.fillText(el.text, el.x, el.y);
+                el.y -= currentSpeed; // Moving upwards
+                if (el.y < -40) el.y = canvas.height + 40;
             } else if (el.type === 'star') {
                 ctx.fillText(el.text, el.x, el.y);
             }
@@ -504,6 +538,9 @@
         customStickers = [];
         lyricText = "";
         bgImage = null;
+        globalSpeedMultiplier = 1.0;
+        document.getElementById('speedRange').value = 1.0;
+        document.getElementById('speedVal').innerText = "1.0x";
         document.getElementById('bgPhotoInput').value = '';
         document.getElementById('stickerInput').value = '';
         document.getElementById('audio1').value = '';
