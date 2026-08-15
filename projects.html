@@ -170,7 +170,6 @@
             z-index: 1 !important;
         }
 
-        /* Rain Canvas Layer */
         #rainCanvas {
             position: absolute;
             top: 0;
@@ -218,23 +217,62 @@
             white-space: nowrap;
         }
 
-        /* Realistic Flying Bird Animation */
+        /* --- Realistic Element Animations --- */
+        
+        /* 1. Flying Bird Animation */
         .anim-flying-bird {
-            animation: flyAcross 6s linear infinite, wingFlap 0.4s ease-in-out infinite alternate !important;
+            animation: flyAcross 7s linear infinite, wingFlap 0.4s ease-in-out infinite alternate !important;
         }
-
         @keyframes flyAcross {
             0% { left: -10%; top: 20%; transform: scale(0.6); }
             50% { top: 10%; transform: scale(0.9); }
             100% { left: 110%; top: 30%; transform: scale(0.6); }
         }
-
         @keyframes wingFlap {
             0% { transform: translateY(0px) rotate(0deg); }
             100% { transform: translateY(-8px) rotate(-10deg); }
         }
 
-        /* Basic FX Animations */
+        /* 2. Floating Clouds Animation */
+        .anim-real-cloud {
+            animation: floatCloud 15s linear infinite !important;
+            opacity: 0.8;
+            filter: drop-shadow(0px 5px 8px rgba(255,255,255,0.3));
+        }
+        @keyframes floatCloud {
+            0% { left: -20%; }
+            100% { left: 110%; }
+        }
+
+        /* 3. Falling Flower Petals */
+        .anim-falling-flower {
+            animation: fallFlower 5s ease-in-out infinite !important;
+        }
+        @keyframes fallFlower {
+            0% { top: -10%; transform: rotate(0deg) translateX(0); }
+            50% { transform: rotate(180deg) translateX(25px); }
+            100% { top: 105%; transform: rotate(360deg) translateX(-25px); }
+        }
+
+        /* 4. Twinkling Realistic Stars */
+        .anim-twinkle-star {
+            animation: starGlow 1.2s ease-in-out infinite alternate !important;
+        }
+        @keyframes starGlow {
+            0% { opacity: 0.2; transform: scale(0.8); filter: drop-shadow(0 0 2px #fff); }
+            100% { opacity: 1; transform: scale(1.3); filter: drop-shadow(0 0 10px #00e5ff); }
+        }
+
+        /* 5. 3D Pop Clown Animation */
+        .anim-3d-clown {
+            animation: clownBounce 2s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite alternate !important;
+        }
+        @keyframes clownBounce {
+            0% { transform: scale(0.8) rotate(-10deg); }
+            100% { transform: scale(1.2) rotate(10deg); }
+        }
+
+        /* Speed Adjustments */
         .anim-orbit { animation: orbit var(--speed, 3s) linear infinite; }
         .anim-bubble { animation: bubble var(--speed, 2s) ease-in-out infinite; }
         .anim-shake-emoji { animation: shake var(--speed, 0.2s) infinite; }
@@ -276,18 +314,17 @@
         <button id="btnPlay" class="pink-btn" onclick="togglePlayAll()">⚡ Play Project (Audio + Animations)</button>
     </div>
 
-    <!-- 2. Text, Realistic Rain & Flying Birds Panel -->
+    <!-- 2. Realistic Elements Panel -->
     <div class="proj-panel">
-        <div class="panel-heading"><i class="fa-solid fa-wand-magic-sparkles"></i> 2. लिरिक्स, असली बारिश और उड़ते पक्षी</div>
+        <div class="panel-heading"><i class="fa-solid fa-wand-magic-sparkles"></i> 2. ओरिजिनल एलिमेंट्स और लिरिक्स</div>
         
         <div class="emoji-grid">
-            <span class="emoji-item" style="border-color:#00e5ff;" onclick="toggleRealRain()">🌧️ असली बारिश (On/Off)</span>
+            <span class="emoji-item" style="border-color:#00e5ff;" onclick="toggleRealRain()">🌧️ असली बारिश</span>
             <span class="emoji-item" style="border-color:#ff007f;" onclick="addFlyingBird()">🕊️ उड़ती चिड़िया</span>
-            <span class="emoji-item" onclick="addEmoji('☁️')">☁️ बादल</span>
-            <span class="emoji-item" onclick="addEmoji('🌸')">🌸 फूल</span>
-            <span class="emoji-item" onclick="addEmoji('🤡')">🤡 जोकर</span>
-            <span class="emoji-item" onclick="addEmoji('🔥')">🔥 आग</span>
-            <span class="emoji-item" onclick="addEmoji('✨')">✨ सितारे</span>
+            <span class="emoji-item" onclick="addRealCloud()">☁️ बहते बादल</span>
+            <span class="emoji-item" onclick="addFallingFlower()">🌸 गिरता फूल</span>
+            <span class="emoji-item" onclick="addTwinkleStar()">✨ चमकता तारा</span>
+            <span class="emoji-item" onclick="add3DClown()">🤡 3D जोकर</span>
         </div>
 
         <label style="color:#8a8a9e; font-size:11px; margin-top:4px; display:block;">मोबाइल से स्टिकर/PNG/GIF अपलोड करें:</label>
@@ -376,25 +413,59 @@
         document.getElementById('txt').value = '';
     }
 
-    function addEmoji(emojiStr) {
-        const board = document.getElementById('reelBoard');
-        const el = document.createElement('div');
-        el.className = 'draggable';
-        el.innerText = emojiStr;
-        el.style.fontSize = '32px';
-        el.style.left = '50px';
-        el.style.top = '50px';
-        makeElementDraggable(el);
-        board.appendChild(el);
-    }
-
-    // Flying Bird Effect
+    // --- Special Realistic Handlers ---
     function addFlyingBird() {
         const board = document.getElementById('reelBoard');
         const el = document.createElement('div');
         el.className = 'draggable anim-flying-bird';
         el.innerText = '🕊️';
         el.style.fontSize = '35px';
+        makeElementDraggable(el);
+        board.appendChild(el);
+    }
+
+    function addRealCloud() {
+        const board = document.getElementById('reelBoard');
+        const el = document.createElement('div');
+        el.className = 'draggable anim-real-cloud';
+        el.innerText = '☁️';
+        el.style.fontSize = '45px';
+        el.style.top = '15px';
+        makeElementDraggable(el);
+        board.appendChild(el);
+    }
+
+    function addFallingFlower() {
+        const board = document.getElementById('reelBoard');
+        const el = document.createElement('div');
+        el.className = 'draggable anim-falling-flower';
+        el.innerText = '🌸';
+        el.style.fontSize = '30px';
+        el.style.left = Math.random() * 80 + '%';
+        makeElementDraggable(el);
+        board.appendChild(el);
+    }
+
+    function addTwinkleStar() {
+        const board = document.getElementById('reelBoard');
+        const el = document.createElement('div');
+        el.className = 'draggable anim-twinkle-star';
+        el.innerText = '✨';
+        el.style.fontSize = '28px';
+        el.style.left = Math.random() * 80 + '%';
+        el.style.top = Math.random() * 70 + '%';
+        makeElementDraggable(el);
+        board.appendChild(el);
+    }
+
+    function add3DClown() {
+        const board = document.getElementById('reelBoard');
+        const el = document.createElement('div');
+        el.className = 'draggable anim-3d-clown';
+        el.innerText = '🤡';
+        el.style.fontSize = '38px';
+        el.style.left = '40%';
+        el.style.top = '30%';
         makeElementDraggable(el);
         board.appendChild(el);
     }
@@ -475,7 +546,7 @@
 
     function setFX(fxClass) {
         document.querySelectorAll('.draggable').forEach(el => {
-            if(!el.classList.contains('anim-flying-bird')) {
+            if(!el.className.includes('anim-real') && !el.className.includes('anim-flying') && !el.className.includes('anim-falling') && !el.className.includes('anim-twinkle') && !el.className.includes('anim-3d')) {
                 el.classList.remove('anim-orbit', 'anim-bubble', 'anim-shake-emoji', 'anim-zoom');
                 el.classList.add(fxClass);
             }
