@@ -320,8 +320,7 @@
         </div>
 
         <button id="btnPlay" class="pink-btn" onclick="togglePlayAll()">⚡ Play Project (Audio + Animations)</button>
-        <!-- MP4 VIDEO DOWNLOAD BUTTON -->
-        <button id="btnDownload" class="download-btn" onclick="downloadMP4Video()"><i class="fa-solid fa-video"></i> 🎬 Download MP4 Video (Mobile Gallery)</button>
+        <button id="btnDownload" class="download-btn" onclick="toggleRecordMP4()"><i class="fa-solid fa-video"></i> 🎬 Record & Download MP4 (Audio Supported)</button>
     </div>
 
     <!-- 2. Realistic Elements Panel -->
@@ -570,60 +569,25 @@
         });
     }
 
-    // --- MP4 REAL-TIME VIDEO RECORDING ENGINE ---
-    async function downloadMP4Video() {
-        const btn = document.getElementById('btnDownload');
-        const board = document.getElementById('reelBoard');
-        btn.innerText = "🎥 Recording MP4 (5 Sec)...";
-
-        // Play audio during recording if active
-        if(!isPlaying) togglePlayAll();
-
-        const videoCanvas = document.createElement('canvas');
-        videoCanvas.width = board.clientWidth * 2;
-        videoCanvas.height = board.clientHeight * 2;
-        const vCtx = videoCanvas.getContext('2d');
-
-        const stream = videoCanvas.captureStream(60);
-        let options = { mimeType: 'video/mp4' };
-        if (!MediaRecorder.isTypeSupported('video/mp4')) {
-            options = { mimeType: 'video/webm;codecs=vp9' };
-        }
-
-        const mediaRecorder = new MediaRecorder(stream, options);
-        let chunks = [];
-
-        mediaRecorder.ondataavailable = (e) => chunks.push(e.data);
-        mediaRecorder.onstop = () => {
-            const blob = new Blob(chunks, { type: options.mimeType });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'Rox_Studio_Video_' + Date.now() + '.mp4';
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            btn.innerHTML = '<i class="fa-solid fa-video"></i> 🎬 Download MP4 Video (Mobile Gallery)';
-        };
-
-        mediaRecorder.start();
-
-        let count = 0;
-        const recordInterval = setInterval(async () => {
-            const c = await html2canvas(board, { useCORS: true, scale: 2 });
-            vCtx.drawImage(c, 0, 0, videoCanvas.width, videoCanvas.height);
-            count++;
-            if (count >= 50) { // Records ~5 seconds video
-                clearInterval(recordInterval);
-                mediaRecorder.stop();
-            }
-        }, 100);
-    }
-
+    // --- AUDIO & MP4 RECORDING ENGINE WITH SOUND & LONG DURATION ---
     let audioCtx = null;
+    let audioDestinationNode = null;
     let currentSource1 = null;
     let currentSource2 = null;
     let isPlaying = false;
+    let mediaRecorder = null;
+    let isRecording = false;
+    let recordInterval = null;
+
+    function initAudioContext() {
+        if (!audioCtx) {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            audioDestinationNode = audioCtx.createMediaStreamDestination();
+        }
+        if (audioCtx.state === 'suspended') {
+            audioCtx.resume();
+        }
+    }
 
     async function togglePlayAll() {
         const btn = document.getElementById('btnPlay');
@@ -634,12 +598,10 @@
             btn.style.background = "linear-gradient(90deg, #ff007f, #b500ff)";
             isPlaying = false;
         } else {
+            initAudioContext();
             btn.innerText = "⏹️ Stop Playback";
             btn.style.background = "#ff4757";
             isPlaying = true;
-
-            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            if (audioCtx.state === 'suspended') await audioCtx.resume();
 
             const file1 = document.getElementById('audio1').files[0];
             const file2 = document.getElementById('audio2').files[0];
@@ -651,6 +613,7 @@
                 currentSource1 = audioCtx.createBufferSource();
                 currentSource1.buffer = buf1;
                 currentSource1.connect(audioCtx.destination);
+                currentSource1.connect(audioDestinationNode); // Send to recorder
                 currentSource1.start(0, s1, Math.max(0, e1 - s1));
             }
 
@@ -661,6 +624,7 @@
                 currentSource2 = audioCtx.createBufferSource();
                 currentSource2.buffer = buf2;
                 currentSource2.connect(audioCtx.destination);
+                currentSource2.connect(audioDestinationNode); // Send to recorder
                 currentSource2.start(0, s2, Math.max(0, e2 - s2));
             }
         }
@@ -671,10 +635,89 @@
         if (currentSource2) try { currentSource2.stop(); } catch(e){}
     }
 
+    async function toggleRecordMP4() {
+        const btn = document.getElementById('btnDownload');
+        const board = document.getElementById('reelBoard');
+
+        if (isRecording) {
+            // STOP RECORDING MANUAL
+            clearInterval(recordInterval);
+            if (mediaRecorder) mediaRecorder.stop();
+            stopAudio();
+            isPlaying = false;
+            document.getElementById('btnPlay').innerText = "⚡ Play Project (Audio + Animations)";
+            document.getElementById('btnPlay').style.background = "linear-gradient(90deg, #ff007f, #b500ff)";
+            btn.innerHTML = '<i class="fa-solid fa-video"></i> 🎬 Record & Download MP4 (Audio Supported)';
+            btn.style.background = "linear-gradient(90deg, #00c853, #00e5ff)";
+            isRecording = false;
+        } else {
+            // START RECORDING
+            isRecording = true;
+            btn.innerHTML = "🛑 Recording... Click to Stop & Save MP4";
+            btn.style.background = "#ff4757";
+
+            initAudioContext();
+            if(!isPlaying) await togglePlayAll();
+
+            const videoCanvas = document.createElement('canvas');
+            videoCanvas.width = board.clientWidth * 2;
+            videoCanvas.height = board.clientHeight * 2;
+            const vCtx = videoCanvas.getContext('2d');
+
+            const canvasStream = videoCanvas.captureStream(30); // 30 FPS
+            
+            // COMBINE VIDEO CANVAS STREAM AND AUDIO STREAM
+            const combinedStream = new MediaStream([
+                ...canvasStream.getVideoTracks(),
+                ...audioDestinationNode.stream.getAudioTracks()
+            ]);
+
+            let options = { mimeType: 'video/mp4' };
+            if (!MediaRecorder.isTypeSupported('video/mp4')) {
+                options = { mimeType: 'video/webm;codecs=vp9' };
+            }
+
+            mediaRecorder = new MediaRecorder(combinedStream, options);
+            let chunks = [];
+
+            mediaRecorder.ondataavailable = (e) => {
+                if(e.data.size > 0) chunks.push(e.data);
+            };
+
+            mediaRecorder.onstop = () => {
+                const blob = new Blob(chunks, { type: options.mimeType });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'Rox_Studio_Video_' + Date.now() + '.mp4';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+            };
+
+            mediaRecorder.start();
+
+            // RENDER LOOP FOR UP TO 4 MINUTES (240 SECONDS)
+            let framesCount = 0;
+            const maxFrames = 240 * 10; // Max 4 min limit
+
+            recordInterval = setInterval(async () => {
+                const c = await html2canvas(board, { useCORS: true, scale: 2 });
+                vCtx.drawImage(c, 0, 0, videoCanvas.width, videoCanvas.height);
+                framesCount++;
+
+                if (framesCount >= maxFrames) {
+                    toggleRecordMP4(); // Auto stop at 4 minutes
+                }
+            }, 100);
+        }
+    }
+
     function resetAll() {
         stopAudio();
         isPlaying = false;
-        if(rainActive) toggleRealRain();
+        if (isRecording) toggleRecordMP4();
+        if (rainActive) toggleRealRain();
 
         document.getElementById('btnPlay').innerText = "⚡ Play Project (Audio + Animations)";
         document.getElementById('btnPlay').style.background = "linear-gradient(90deg, #ff007f, #b500ff)";
