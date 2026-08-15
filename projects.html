@@ -161,9 +161,10 @@
             box-sizing: border-box !important;
         }
 
+        /* --- UPDATED REEL BOARD (BIGGER SIZE) --- */
         .reel-board {
             width: 100% !important;
-            height: 240px !important;
+            height: 420px !important; /* हाइट 240px से बढ़ाकर 420px की गई */
             background: #000 !important;
             border: 1px solid #00e5ff !important;
             border-radius: 10px !important;
@@ -177,7 +178,7 @@
         .bg-display-img {
             width: 100% !important;
             height: 100% !important;
-            object-fit: cover !important;
+            object-fit: contain !important; /* पूरा फोटो बिना कटे दिखेगा */
             display: none;
             position: absolute !important;
             top: 0 !important;
@@ -290,7 +291,6 @@
         @keyframes shake { 0% { transform: translate(2px, 2px); } 50% { transform: translate(-2px, -2px); } 100% { transform: translate(2px, 2px); } }
         @keyframes zoomFx { 0% { transform: scale(1); } 100% { transform: scale(1.18); } }
     </style>
-    <!-- HTML5 Canvas Capture library for Downloading -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
 <body>
@@ -321,7 +321,6 @@
         </div>
 
         <button id="btnPlay" class="pink-btn" onclick="togglePlayAll()">⚡ Play Project (Audio + Animations)</button>
-        <!-- DOWNLOAD BUTTON -->
         <button id="btnDownload" class="download-btn" onclick="downloadProject()"><i class="fa-solid fa-download"></i> 📥 Download File (Mobile Gallery)</button>
     </div>
 
@@ -480,7 +479,6 @@
         board.appendChild(el);
     }
 
-    // Realistic Rain Canvas Code
     let rainActive = false;
     let rainInterval = null;
     const canvas = document.getElementById('rainCanvas');
@@ -572,7 +570,6 @@
         });
     }
 
-    // --- DOWNLOAD FUNCTION FOR MOBILE ---
     function downloadProject() {
         const board = document.getElementById('reelBoard');
         const btn = document.getElementById('btnDownload');
