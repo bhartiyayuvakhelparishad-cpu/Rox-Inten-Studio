@@ -7,153 +7,176 @@
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        /* Base Dark Layout matching Rox UI */
-        body {
-            background-color: #0b0b14;
-            color: #fff;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
-            padding: 10px;
+        /* CSS Fix to Override Flexbox Layout Collision */
+        html, body {
+            background-color: #0b0b14 !important;
+            color: #fff !important;
+            font-family: 'Segoe UI', sans-serif !important;
+            margin: 0 !important;
+            padding: 10px !important;
+            width: 100% !important;
+            box-sizing: border-box !important;
+            display: block !important;
+        }
+
+        .main-container {
+            display: flex !important;
+            flex-direction: column !important;
+            width: 100% !important;
+            max-width: 500px !important;
+            margin: 0 auto !important;
         }
 
         /* Top Bar Styling */
         .top-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 5px 0 10px 0;
+            display: flex !important;
+            justify-content: space-between !important;
+            align-items: center !important;
+            padding: 5px 0 10px 0 !important;
+            width: 100% !important;
         }
         .brand-title {
-            font-size: 20px;
-            font-weight: bold;
-            color: #00e5ff;
+            font-size: 20px !important;
+            font-weight: bold !important;
+            color: #00e5ff !important;
         }
         .brand-title span {
-            color: #ff007f;
-            font-size: 11px;
-            margin-left: 5px;
+            color: #ff007f !important;
+            font-size: 11px !important;
+            margin-left: 5px !important;
         }
         .ai-status {
-            color: #00e5ff;
-            font-size: 11px;
+            color: #00e5ff !important;
+            font-size: 11px !important;
         }
 
-        /* Menu Navigation Scrollable */
+        /* Nav Scrollable Bar */
         .nav-scroller {
-            display: flex;
-            gap: 8px;
-            overflow-x: auto;
-            padding-bottom: 12px;
-            margin-bottom: 10px;
-            white-space: nowrap;
+            display: flex !important;
+            gap: 8px !important;
+            overflow-x: auto !important;
+            padding-bottom: 12px !important;
+            margin-bottom: 10px !important;
+            white-space: nowrap !important;
+            width: 100% !important;
         }
         .nav-scroller::-webkit-scrollbar { display: none; }
         .nav-item {
-            background: #161625;
-            color: #00e5ff;
-            border: 1px solid #28283d;
-            padding: 8px 16px;
-            border-radius: 8px;
-            text-decoration: none;
-            font-size: 13px;
-            font-weight: 500;
+            background: #161625 !important;
+            color: #00e5ff !important;
+            border: 1px solid #28283d !important;
+            padding: 8px 16px !important;
+            border-radius: 8px !important;
+            text-decoration: none !important;
+            font-size: 13px !important;
+            font-weight: 500 !important;
+            display: inline-block !important;
         }
         .nav-item.active {
-            background: #00e5ff;
-            color: #000;
-            font-weight: bold;
+            background: #00e5ff !important;
+            color: #000 !important;
+            font-weight: bold !important;
         }
         .nav-item.setting-btn {
-            background: #ff007f;
-            color: #fff;
+            background: #ff007f !important;
+            color: #fff !important;
         }
 
-        /* Rox Studio Panels */
-        .panel {
-            background: #121220;
-            border: 1px solid #232338;
-            border-radius: 12px;
-            padding: 14px;
-            margin-bottom: 14px;
+        /* Panel Block Normalization */
+        .proj-panel {
+            background: #121220 !important;
+            border: 1px solid #232338 !important;
+            border-radius: 12px !important;
+            padding: 14px !important;
+            margin-bottom: 14px !important;
+            width: 100% !important;
+            box-sizing: border-box !important;
+            display: block !important;
+            float: none !important;
+            clear: both !important;
         }
         .panel-heading {
-            color: #00e5ff;
-            font-size: 14px;
-            margin: 0 0 12px 0;
-            display: flex;
-            align-items: center;
-            gap: 8px;
+            color: #00e5ff !important;
+            font-size: 14px !important;
+            margin: 0 0 12px 0 !important;
+            display: flex !important;
+            align-items: center !important;
+            gap: 8px !important;
         }
         
         .rox-input {
-            background: #0a0a12;
-            border: 1px solid #2b2b40;
-            color: #fff;
-            padding: 10px;
-            border-radius: 8px;
-            width: 100%;
-            box-sizing: border-box;
-            font-size: 13px;
-            margin-bottom: 8px;
+            background: #0a0a12 !important;
+            border: 1px solid #2b2b40 !important;
+            color: #fff !important;
+            padding: 10px !important;
+            border-radius: 8px !important;
+            width: 100% !important;
+            box-sizing: border-box !important;
+            font-size: 13px !important;
+            margin-bottom: 8px !important;
+            display: block !important;
         }
         .rox-input-half {
-            width: 48%;
-            display: inline-block;
+            width: 48% !important;
+            display: inline-block !important;
         }
 
-        /* Buttons */
         .pink-btn {
-            background: linear-gradient(90deg, #ff007f, #b500ff);
-            color: #fff;
-            border: none;
-            padding: 12px;
-            border-radius: 8px;
-            font-weight: bold;
-            width: 100%;
-            font-size: 13px;
-            cursor: pointer;
-            margin-top: 5px;
+            background: linear-gradient(90deg, #ff007f, #b500ff) !important;
+            color: #fff !important;
+            border: none !important;
+            padding: 12px !important;
+            border-radius: 8px !important;
+            font-weight: bold !important;
+            width: 100% !important;
+            font-size: 13px !important;
+            cursor: pointer !important;
+            margin-top: 5px !important;
+            display: block !important;
         }
         .action-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 8px;
-            margin-top: 8px;
+            display: grid !important;
+            grid-template-columns: repeat(2, 1fr) !important;
+            gap: 8px !important;
+            margin-top: 8px !important;
         }
         .dark-btn {
-            background: #1a1a2e;
-            color: #fff;
-            border: 1px solid #32324e;
-            padding: 10px;
-            border-radius: 8px;
-            font-size: 12px;
-            cursor: pointer;
+            background: #1a1a2e !important;
+            color: #fff !important;
+            border: 1px solid #32324e !important;
+            padding: 10px !important;
+            border-radius: 8px !important;
+            font-size: 12px !important;
+            cursor: pointer !important;
+            width: 100% !important;
+            box-sizing: border-box !important;
         }
 
-        /* Canvas Board */
+        /* Reel Board Canvas */
         .reel-board {
-            width: 100%;
-            height: 240px;
-            background: #000;
-            border: 1px solid #00e5ff;
-            border-radius: 10px;
-            position: relative;
-            overflow: hidden;
-            background-size: cover;
-            background-position: center;
-            touch-action: none;
-            margin-bottom: 10px;
+            width: 100% !important;
+            height: 240px !important;
+            background: #000 !important;
+            border: 1px solid #00e5ff !important;
+            border-radius: 10px !important;
+            position: relative !important;
+            overflow: hidden !important;
+            background-size: cover !important;
+            background-position: center !important;
+            touch-action: none !important;
+            margin-bottom: 10px !important;
+            box-sizing: border-box !important;
         }
         .draggable {
-            position: absolute;
-            cursor: move;
-            color: #ffffff;
-            font-size: 20px;
-            font-weight: bold;
-            text-shadow: 0 0 8px #000, 2px 2px 4px #000;
-            padding: 5px;
-            user-select: none;
-            touch-action: none;
+            position: absolute !important;
+            cursor: move !important;
+            color: #ffffff !important;
+            font-size: 20px !important;
+            font-weight: bold !important;
+            text-shadow: 0 0 8px #000, 2px 2px 4px #000 !important;
+            padding: 5px !important;
+            user-select: none !important;
+            touch-action: none !important;
         }
 
         /* FX Animations */
@@ -170,13 +193,15 @@
 </head>
 <body>
 
+<div class="main-container">
+
     <!-- Header Section -->
     <div class="top-header">
         <div class="brand-title">Rox <span>INTEN STUDIO</span></div>
         <div class="ai-status"><i class="fa-solid fa-hourglass-half"></i> AI Engine: Active</div>
     </div>
 
-    <!-- Navigation Bar (Matching UI) -->
+    <!-- Navigation Bar -->
     <div class="nav-scroller">
         <a href="index.html" class="nav-item">Home</a>
         <a href="upload.html" class="nav-item">Upload</a>
@@ -185,8 +210,8 @@
         <a href="#" class="nav-item setting-btn"><i class="fa-solid fa-gear"></i> Setting</a>
     </div>
 
-    <!-- 1. Background Photo & Canvas Panel -->
-    <div class="panel">
+    <!-- 1. Background Photo Panel -->
+    <div class="proj-panel">
         <div class="panel-heading"><i class="fa-solid fa-image"></i> 1. बैकग्राउंड फोटो चुनें</div>
         <input type="file" id="bgPhotoInput" class="rox-input" accept="image/*" onchange="loadBgPhoto(this)">
         
@@ -196,11 +221,11 @@
     </div>
 
     <!-- 2. Text & FX Panel -->
-    <div class="panel">
+    <div class="proj-panel">
         <div class="panel-heading"><i class="fa-solid fa-wand-magic-sparkles"></i> 2. लिरिक्स टेक्स्ट और इफेक्ट्स</div>
         <div style="display:flex; gap:6px;">
             <input type="text" id="txt" placeholder="यहाँ लिरिक्स लिखें..." class="rox-input" style="margin:0;">
-            <button class="dark-btn" style="background:#00e5ff; color:#000; font-weight:bold;" onclick="addText()">➕ Add</button>
+            <button class="dark-btn" style="background:#00e5ff; color:#000; font-weight:bold; width: 30%;" onclick="addText()">➕ Add</button>
         </div>
 
         <label style="color:#8a8a9e; font-size:11px; margin-top:10px; display:block;">⚡ स्पीड कंट्रोल (Slow ↔ Fast):</label>
@@ -215,19 +240,19 @@
     </div>
 
     <!-- 3. Audio Cut & Mixer Panel -->
-    <div class="panel">
+    <div class="proj-panel">
         <div class="panel-heading"><i class="fa-solid fa-music"></i> 3. ऑडियो कट और मिक्सर</div>
         
         <label style="color:#8a8a9e; font-size:11px;">Track 1 (File / Cut Sec):</label>
         <input type="file" id="audio1" class="rox-input" accept="audio/*">
-        <div>
+        <div style="display:flex; justify-content:space-between;">
             <input type="number" id="start1" placeholder="Start (sec)" class="rox-input rox-input-half">
             <input type="number" id="end1" placeholder="End (sec)" class="rox-input rox-input-half">
         </div>
 
         <label style="color:#8a8a9e; font-size:11px; margin-top:4px; display:block;">Track 2 (File / Cut Sec):</label>
         <input type="file" id="audio2" class="rox-input" accept="audio/*">
-        <div>
+        <div style="display:flex; justify-content:space-between;">
             <input type="number" id="start2" placeholder="Start (sec)" class="rox-input rox-input-half">
             <input type="number" id="end2" placeholder="End (sec)" class="rox-input rox-input-half">
         </div>
@@ -235,8 +260,9 @@
         <button class="dark-btn" style="background:#ff4757; color:#fff; width:100%; margin-top:8px;" onclick="resetAll()">🗑️ Reset Everything</button>
     </div>
 
+</div>
+
 <script>
-    // Background Image Engine
     function loadBgPhoto(input) {
         if (input.files && input.files[0]) {
             const reader = new FileReader();
@@ -247,7 +273,6 @@
         }
     }
 
-    // Touch Dragging Logic for Text
     function addText() {
         let text = document.getElementById('txt').value || "Rox Studio";
         const board = document.getElementById('reelBoard');
@@ -275,7 +300,6 @@
         document.getElementById('txt').value = '';
     }
 
-    // FX Animation and Speed
     function setFX(fxClass) {
         document.querySelectorAll('.draggable').forEach(el => {
             el.classList.remove('anim-orbit', 'anim-bubble', 'anim-shake-emoji', 'anim-zoom');
@@ -296,7 +320,6 @@
         });
     }
 
-    // Audio Engine
     let audioCtx = null;
     let currentSource1 = null;
     let currentSource2 = null;
