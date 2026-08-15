@@ -170,6 +170,18 @@
             z-index: 1 !important;
         }
 
+        /* Rain Canvas Layer */
+        #rainCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 2;
+            pointer-events: none;
+            display: none;
+        }
+
         .draggable {
             position: absolute !important;
             cursor: move !important;
@@ -189,7 +201,6 @@
             pointer-events: none;
         }
 
-        /* Emoji Palette Box */
         .emoji-grid {
             display: flex;
             gap: 8px;
@@ -202,11 +213,28 @@
             border: 1px solid #28283d;
             border-radius: 6px;
             padding: 6px 10px;
-            font-size: 18px;
+            font-size: 13px;
             cursor: pointer;
             white-space: nowrap;
         }
 
+        /* Realistic Flying Bird Animation */
+        .anim-flying-bird {
+            animation: flyAcross 6s linear infinite, wingFlap 0.4s ease-in-out infinite alternate !important;
+        }
+
+        @keyframes flyAcross {
+            0% { left: -10%; top: 20%; transform: scale(0.6); }
+            50% { top: 10%; transform: scale(0.9); }
+            100% { left: 110%; top: 30%; transform: scale(0.6); }
+        }
+
+        @keyframes wingFlap {
+            0% { transform: translateY(0px) rotate(0deg); }
+            100% { transform: translateY(-8px) rotate(-10deg); }
+        }
+
+        /* Basic FX Animations */
         .anim-orbit { animation: orbit var(--speed, 3s) linear infinite; }
         .anim-bubble { animation: bubble var(--speed, 2s) ease-in-out infinite; }
         .anim-shake-emoji { animation: shake var(--speed, 0.2s) infinite; }
@@ -238,25 +266,23 @@
     <!-- 1. Background Photo & GIF Panel -->
     <div class="proj-panel">
         <div class="panel-heading"><i class="fa-solid fa-image"></i> 1. बैकग्राउंड फोटो/GIF चुनें</div>
-        <!-- image/gif allowed -->
         <input type="file" id="bgPhotoInput" class="rox-input" accept="image/*,image/gif" onchange="loadBgPhoto(event)">
         
         <div id="reelBoard" class="reel-board">
             <img id="bgImg" class="bg-display-img" src="" alt="Background">
+            <canvas id="rainCanvas"></canvas>
         </div>
 
         <button id="btnPlay" class="pink-btn" onclick="togglePlayAll()">⚡ Play Project (Audio + Animations)</button>
     </div>
 
-    <!-- 2. Text, Emoji & Mobile Sticker Panel -->
+    <!-- 2. Text, Realistic Rain & Flying Birds Panel -->
     <div class="proj-panel">
-        <div class="panel-heading"><i class="fa-solid fa-wand-magic-sparkles"></i> 2. लिरिक्स, इमोजी और मोबाइल स्टिकर</div>
+        <div class="panel-heading"><i class="fa-solid fa-wand-magic-sparkles"></i> 2. लिरिक्स, असली बारिश और उड़ते पक्षी</div>
         
-        <!-- Quick Emoji List -->
-        <label style="color:#8a8a9e; font-size:11px;">इमोजी चुनें ( Birds, Rain, Cloud, Flowers ):</label>
         <div class="emoji-grid">
-            <span class="emoji-item" onclick="addEmoji('🕊️')">🕊️ चिड़िया</span>
-            <span class="emoji-item" onclick="addEmoji('🌧️')">🌧️ बारिश</span>
+            <span class="emoji-item" style="border-color:#00e5ff;" onclick="toggleRealRain()">🌧️ असली बारिश (On/Off)</span>
+            <span class="emoji-item" style="border-color:#ff007f;" onclick="addFlyingBird()">🕊️ उड़ती चिड़िया</span>
             <span class="emoji-item" onclick="addEmoji('☁️')">☁️ बादल</span>
             <span class="emoji-item" onclick="addEmoji('🌸')">🌸 फूल</span>
             <span class="emoji-item" onclick="addEmoji('🤡')">🤡 जोकर</span>
@@ -264,8 +290,7 @@
             <span class="emoji-item" onclick="addEmoji('✨')">✨ सितारे</span>
         </div>
 
-        <!-- Custom Sticker / Small GIF from Mobile -->
-        <label style="color:#8a8a9e; font-size:11px; margin-top:4px; display:block;">मोबाइल से छोटा फोटो/PNG/GIF स्टिकर अपलोड करें:</label>
+        <label style="color:#8a8a9e; font-size:11px; margin-top:4px; display:block;">मोबाइल से स्टिकर/PNG/GIF अपलोड करें:</label>
         <input type="file" id="stickerInput" class="rox-input" accept="image/*,image/gif" onchange="addMobileSticker(event)">
 
         <div style="display:flex; gap:6px; margin-top:8px;">
@@ -363,6 +388,69 @@
         board.appendChild(el);
     }
 
+    // Flying Bird Effect
+    function addFlyingBird() {
+        const board = document.getElementById('reelBoard');
+        const el = document.createElement('div');
+        el.className = 'draggable anim-flying-bird';
+        el.innerText = '🕊️';
+        el.style.fontSize = '35px';
+        makeElementDraggable(el);
+        board.appendChild(el);
+    }
+
+    // Realistic Rain Canvas Code
+    let rainActive = false;
+    let rainInterval = null;
+    const canvas = document.getElementById('rainCanvas');
+    const ctx = canvas.getContext('2d');
+    let drops = [];
+
+    function toggleRealRain() {
+        rainActive = !rainActive;
+        if (rainActive) {
+            canvas.style.display = 'block';
+            canvas.width = canvas.offsetWidth;
+            canvas.height = canvas.offsetHeight;
+            drops = [];
+            for (let i = 0; i < 70; i++) {
+                drops.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    length: Math.random() * 15 + 10,
+                    speed: Math.random() * 8 + 6,
+                    opacity: Math.random() * 0.5 + 0.3
+                });
+            }
+            rainInterval = setInterval(drawRain, 25);
+        } else {
+            canvas.style.display = 'none';
+            clearInterval(rainInterval);
+        }
+    }
+
+    function drawRain() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.6)';
+        ctx.lineWidth = 1.2;
+        ctx.lineCap = 'round';
+
+        drops.forEach(drop => {
+            ctx.beginPath();
+            ctx.moveTo(drop.x, drop.y);
+            ctx.lineTo(drop.x - 1, drop.y + drop.length);
+            ctx.stroke();
+
+            drop.y += drop.speed;
+            drop.x -= 0.5;
+
+            if (drop.y > canvas.height) {
+                drop.y = -10;
+                drop.x = Math.random() * canvas.width;
+            }
+        });
+    }
+
     function addMobileSticker(event) {
         const file = event.target.files[0];
         if (file) {
@@ -387,8 +475,10 @@
 
     function setFX(fxClass) {
         document.querySelectorAll('.draggable').forEach(el => {
-            el.classList.remove('anim-orbit', 'anim-bubble', 'anim-shake-emoji', 'anim-zoom');
-            el.classList.add(fxClass);
+            if(!el.classList.contains('anim-flying-bird')) {
+                el.classList.remove('anim-orbit', 'anim-bubble', 'anim-shake-emoji', 'anim-zoom');
+                el.classList.add(fxClass);
+            }
         });
         updateSpeed();
     }
@@ -455,6 +545,8 @@
     function resetAll() {
         stopAudio();
         isPlaying = false;
+        if(rainActive) toggleRealRain();
+
         document.getElementById('btnPlay').innerText = "⚡ Play Project (Audio + Animations)";
         document.getElementById('btnPlay').style.background = "linear-gradient(90deg, #ff007f, #b500ff)";
         
