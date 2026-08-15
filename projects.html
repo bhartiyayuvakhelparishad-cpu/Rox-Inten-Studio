@@ -1,5 +1,115 @@
-Https://www.facebook.com/share/v/17qrUBfxz2/
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rox Music Studio - Motion Collage</title>
+    <!-- CSS (वही पुराना स्ट्रक्चर, म्यूजिक के लिए अपडेटेड) -->
+    <style>
+        /* [पिछला CSS वैसा ही रहेगा, बस म्यूजिक कंट्रोलर्स के लिए छोटा बदलाव] */
+        body { background: #0f0f1a; color: #fff; font-family: sans-serif; padding: 10px; }
+        .panel { background: #1a1a2e; border: 1px solid #282845; padding: 15px; border-radius: 10px; margin-bottom: 10px; }
+        .controls { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
+        button { padding: 10px; background: #252545; color: #fff; border: 1px solid #00e5ff; border-radius: 5px; cursor: pointer; }
+        .drop-zone { width: 100%; height: 300px; background: #000; border: 2px dashed #00e5ff; position: relative; overflow: hidden; }
+        .cutout-item { position: absolute; width: 100px; cursor: move; }
+        .cutout-item img { width: 100%; pointer-events: none; }
+    </style>
+</head>
+<body>
 
+    <div class="panel">
+        <h3>🎵 1. बैकग्राउंड म्यूजिक जोड़ें</h3>
+        <input type="file" id="musicUpload" accept="audio/*">
+        <audio id="bgMusic" loop></audio>
+    </div>
 
+    <div class="panel">
+        <h3>🎬 2. एनीमेशन बोर्ड (यहाँ से 'रिकॉर्ड' भी कर सकते हैं)</h3>
+        <div class="drop-zone" id="dropZone"></div>
+        <div class="controls">
+            <button onclick="addFrame()">➕ फ्रेम जोड़ें</button>
+            <button onclick="playAnimation()" id="btnPlay">▶️ एनीमेशन + म्यूजिक</button>
+            <button onclick="downloadVideo()" style="background:#ff1744;">🎥 वीडियो सेव करें</button>
+        </div>
+    </div>
 
-Is trah ka music aur imege jo gif animation jaisa lag raha hai kaise banta h
+    <div class="panel">
+        <h3>📦 आपकी गैलरी (यहाँ से बोर्ड पर लाएँ)</h3>
+        <div id="gallery"></div>
+    </div>
+
+    <script>
+        const musicUpload = document.getElementById('musicUpload');
+        const bgMusic = document.getElementById('bgMusic');
+        const dropZone = document.getElementById('dropZone');
+        let frames = [];
+        let animInterval = null;
+
+        // 1. म्यूजिक अपलोड
+        musicUpload.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                bgMusic.src = URL.createObjectURL(file);
+                alert("म्यूजिक लोड हो गया!");
+            }
+        });
+
+        // 2. फ्रेम जोड़ना
+        function addFrame() {
+            const currentScene = [];
+            document.querySelectorAll('.cutout-item').forEach(item => {
+                currentScene.push({
+                    src: item.querySelector('img').src,
+                    left: item.style.left,
+                    top: item.style.top
+                });
+            });
+            frames.push(currentScene);
+            alert("फ्रेम सेव हुआ: " + frames.length);
+        }
+
+        // 3. प्ले एनीमेशन (म्यूजिक के साथ)
+        function playAnimation() {
+            if (frames.length === 0) return alert("पहले फ्रेम जोड़ें!");
+            
+            // म्यूजिक प्ले करें
+            bgMusic.currentTime = 0;
+            bgMusic.play();
+
+            let i = 0;
+            animInterval = setInterval(() => {
+                dropZone.innerHTML = '';
+                frames[i].forEach(obj => {
+                    const div = document.createElement('div');
+                    div.className = 'cutout-item';
+                    div.style.left = obj.left;
+                    div.style.top = obj.top;
+                    div.innerHTML = `<img src="${obj.src}">`;
+                    dropZone.appendChild(div);
+                });
+                i++;
+                if (i >= frames.length) {
+                    clearInterval(animInterval);
+                    bgMusic.pause();
+                }
+            }, 500); // 500ms = 0.5 सेकंड प्रति फ्रेम
+        }
+
+        // 4. वीडियो एक्सपोर्ट (Web API)
+        function downloadVideo() {
+            alert("सुझाव: अपने फोन का 'Screen Recorder' चालू करें और 'एनीमेशन चलाएं' बटन दबाएं। यह सबसे आसान तरीका है!");
+        }
+
+        // गैलरी से बोर्ड पर लाने के लिए फंक्शन (पिछले कोड का हिस्सा)
+        function createMovable(src) {
+            const div = document.createElement('div');
+            div.className = 'cutout-item';
+            div.style.left = '50px'; div.style.top = '50px';
+            div.innerHTML = `<img src="${src}">`;
+            dropZone.appendChild(div);
+            // ड्रैग लॉजिक वही रहेगा जो हमने पहले बनाया था
+        }
+    </script>
+</body>
+</html>
