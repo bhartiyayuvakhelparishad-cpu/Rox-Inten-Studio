@@ -44,6 +44,7 @@
             margin-left: 5px !important;
         }
 
+        /* Full Menu Restored */
         .nav-scroller {
             display: flex !important;
             gap: 8px !important;
@@ -69,6 +70,10 @@
             background: #00e5ff !important;
             color: #000 !important;
             font-weight: bold !important;
+        }
+        .nav-item.setting-btn {
+            background: #ff007f !important;
+            color: #fff !important;
         }
 
         .proj-panel {
@@ -98,10 +103,6 @@
             font-size: 13px !important;
             margin-bottom: 8px !important;
             display: block !important;
-        }
-        .rox-input-half {
-            width: 48% !important;
-            display: inline-block !important;
         }
 
         .pink-btn {
@@ -183,11 +184,16 @@
 
     <div class="top-header">
         <div class="brand-title">Rox <span>INTEN STUDIO</span></div>
-        <div style="color: #00e5ff; font-size: 11px;"><i class="fa-solid fa-bolt"></i> Mobile Engine Ready</div>
+        <div style="color: #00e5ff; font-size: 11px;"><i class="fa-solid fa-bolt"></i> Mobile Engine Active</div>
     </div>
 
+    <!-- Restore Full Navigation Menu -->
     <div class="nav-scroller">
-        <a href="#" class="nav-item active">Projects</a>
+        <a href="index.html" class="nav-item">Home</a>
+        <a href="upload.html" class="nav-item">Upload</a>
+        <a href="ai-tools.html" class="nav-item">AI Magic</a>
+        <a href="projects.html" class="nav-item active">Projects</a>
+        <a href="#" class="nav-item setting-btn"><i class="fa-solid fa-gear"></i> Setting</a>
     </div>
 
     <!-- 1. Background Photo Panel -->
@@ -249,9 +255,7 @@
         const file = event.target.files[0];
         if (file) {
             const img = new Image();
-            img.onload = function() {
-                bgImage = img;
-            };
+            img.onload = function() { bgImage = img; };
             img.src = URL.createObjectURL(file);
         }
     }
@@ -279,18 +283,16 @@
     }
 
     function addStar() {
-        elements.push({ type: 'star', text: '✨', x: Math.random() * (canvas.width - 40), y: Math.random() * (canvas.height - 100), opacity: 1, scaleDir: -0.02, size: 26 });
+        elements.push({ type: 'star', text: '✨', x: Math.random() * (canvas.width - 40), y: Math.random() * (canvas.height - 100), size: 26 });
     }
 
     function addText() {
         lyricText = document.getElementById('txt').value || "Rox Studio";
     }
 
-    // MAIN CANVAS ANIMATION ENGINE
     function renderLoop() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        // 1. Draw Background
         if (bgImage) {
             ctx.drawImage(bgImage, 0, 0, canvas.width, canvas.height);
         } else {
@@ -298,7 +300,6 @@
             ctx.fillRect(0, 0, canvas.width, canvas.height);
         }
 
-        // 2. Draw Rain
         if (rainActive) {
             ctx.strokeStyle = 'rgba(255, 255, 255, 0.7)';
             ctx.lineWidth = 1.5;
@@ -315,26 +316,21 @@
             ctx.stroke();
         }
 
-        // 3. Draw Elements (Birds, Flowers, Stars)
         elements.forEach(el => {
             ctx.font = `${el.size}px sans-serif`;
-
             if (el.type === 'bird') {
                 ctx.fillText(el.text, el.x, el.y);
                 el.x += el.speed;
                 if (el.x > canvas.width + 40) el.x = -40;
-            } 
-            else if (el.type === 'flower') {
+            } else if (el.type === 'flower') {
                 ctx.fillText(el.text, el.x, el.y);
                 el.y += el.speed;
                 if (el.y > canvas.height + 40) el.y = -40;
-            }
-            else if (el.type === 'star') {
+            } else if (el.type === 'star') {
                 ctx.fillText(el.text, el.x, el.y);
             }
         });
 
-        // 4. Draw Lyrics Text
         if (lyricText) {
             ctx.font = 'bold 24px Segoe UI';
             ctx.fillStyle = '#ffffff';
@@ -342,14 +338,13 @@
             ctx.shadowColor = '#000';
             ctx.shadowBlur = 8;
             ctx.fillText(lyricText, canvas.width / 2, canvas.height - 60);
-            ctx.shadowBlur = 0; // reset
+            ctx.shadowBlur = 0;
         }
 
         requestAnimationFrame(renderLoop);
     }
     renderLoop();
 
-    // AUDIO & MP4 RECORDING LOGIC
     let audioCtx = null;
     let audioDestinationNode = null;
     let currentSource1 = null;
