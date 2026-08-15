@@ -3,116 +3,110 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Advanced Projects - Rox Studio</title>
+    <title>Rox Advanced Projects</title>
     <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    
     <style>
-        /* Rox Theme Styling */
-        .panel { background: #161625; border: 1px solid #333; border-radius: 12px; padding: 15px; margin-bottom: 15px; }
-        .control-label { color: #00e5ff; font-size: 12px; margin-bottom: 5px; display: block; }
-        .rox-input { background: #0f0f1a; border: 1px solid #333; color: white; padding: 10px; border-radius: 8px; width: 100%; box-sizing: border-box; margin-bottom: 10px; }
-        .reel-board { width: 100%; height: 250px; background: #000; border: 2px solid #333; border-radius: 10px; position: relative; overflow: hidden; background-size: cover; background-position: center; }
-        .draggable-text { position: absolute; cursor: grab; font-size: 24px; color: white; text-shadow: 2px 2px 4px #000; padding: 5px; user-select: none; touch-action: none; transition: transform 0.1s; }
+        /* Advanced Rox Theme Styles */
+        .panel { background: #161625; border: 1px solid #333; border-radius: 15px; padding: 15px; margin-bottom: 15px; }
+        .rox-input { background: #0f0f1a; border: 1px solid #444; color: white; padding: 10px; border-radius: 8px; width: 100%; margin-bottom: 5px; }
+        .reel-board { width: 100%; height: 250px; background: #000; border: 2px solid #333; position: relative; overflow: hidden; }
         
-        /* Animations with Variable Speed */
-        .anim-shake { animation: shakeFx infinite linear; }
-        .anim-zoom { animation: zoomFx infinite linear alternate; }
-        .anim-pulse { animation: pulseFx infinite linear; }
-
-        @keyframes shakeFx { 0%{transform: translate(2px, 2px);} 100%{transform: translate(-2px, -2px);} }
-        @keyframes zoomFx { 0%{transform: scale(1);} 100%{transform: scale(1.2);} }
-        @keyframes pulseFx { 0%{transform: scale(0.9);} 100%{transform: scale(1.05);} }
+        /* New Animations */
+        .anim-orbit { animation: orbit 3s linear infinite; }
+        .anim-bubble { animation: bubble 2s ease-in-out infinite; }
+        .anim-shake-emoji { animation: shake 0.2s infinite; }
+        @keyframes orbit { from { transform: rotate(0deg) translateX(50px) rotate(0deg); } to { transform: rotate(360deg) translateX(50px) rotate(-360deg); } }
+        @keyframes bubble { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-20px) scale(1.1); } }
+        @keyframes shake { 0% { transform: translate(1px, 1px); } 50% { transform: translate(-1px, -2px); } 100% { transform: translate(1px, 1px); } }
     </style>
 </head>
 <body>
 
 <div class="mobile-frame">
-    <div class="notch"></div>
     <div class="app-content">
-        <h1>Projects Studio</h1>
-
-        <!-- 1. Media Panel -->
+        <h2>Rox Advanced Editor</h2>
+        
+        <!-- Audio Mixer Panel -->
         <div class="panel">
-            <label class="control-label">📷 बैकग्राउंड फोटो चुनें</label>
-            <input type="file" id="bgInput" class="rox-input" accept="image/*" onchange="setBg(this)">
-            
-            <div id="reelBoard" class="reel-board"></div>
+            <h4 style="color:#00e5ff;">🎵 Audio Mixer</h4>
+            <input type="file" id="audio1" class="rox-input" accept="audio/*">
+            <input type="number" id="start1" placeholder="Start Time (sec)" class="rox-input">
+            <input type="file" id="audio2" class="rox-input" accept="audio/*">
+            <input type="number" id="start2" placeholder="Start Time (sec)" class="rox-input">
+            <button class="neon-btn" onclick="mixAudio()" style="width:100%">🎚️ Mix & Play</button>
         </div>
 
-        <!-- 2. Controls Panel -->
+        <div id="reelBoard" class="reel-board"></div>
+
+        <!-- Effect Panel -->
         <div class="panel">
-            <input type="text" id="lyricInput" class="rox-input" placeholder="यहाँ लिरिक्स लिखें...">
-            <button class="neon-btn" onclick="addText()" style="width:100%; padding:10px;">➕ Add Text</button>
-
-            <div style="margin-top:15px;">
-                <label class="control-label">⚡ Animation Speed (Slow to Fast)</label>
-                <input type="range" id="speedSlider" min="0.1" max="2.0" step="0.1" value="1.0" style="width:100%;">
+            <input type="text" id="txt" placeholder="Lyrics here..." class="rox-input">
+            <button class="dark-btn" onclick="addText()">➕ Add</button>
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:5px; margin-top:10px;">
+                <button class="dark-btn" onclick="setFX('anim-orbit')">🌀 Orbit</button>
+                <button class="dark-btn" onclick="setFX('anim-bubble')">🫧 Bubble</button>
+                <button class="dark-btn" onclick="setFX('anim-shake-emoji')">🤡 Emoji Shake</button>
+                <button class="dark-btn" onclick="resetAll()" style="background:red">❌ Reset</button>
             </div>
-
-            <div style="display:flex; gap:5px; margin-top:15px;">
-                <button class="dark-btn" onclick="applyFX('anim-shake')" style="flex:1;">🫨 Shake</button>
-                <button class="dark-btn" onclick="applyFX('anim-zoom')" style="flex:1;">🔍 Zoom</button>
-                <button class="dark-btn" onclick="applyFX('anim-pulse')" style="flex:1;">💓 Pulse</button>
-            </div>
-            <button class="dark-btn" onclick="resetAll()" style="background:#ff4757; width:100%; margin-top:10px;">❌ Reset</button>
         </div>
     </div>
 </div>
 
 <script>
-    // 1. Background Image Set
-    function setBg(input) {
-        if (input.files && input.files[0]) {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                document.getElementById('reelBoard').style.backgroundImage = `url('${e.target.result}')`;
-            };
-            reader.readAsDataURL(input.files[0]);
+    // Audio Mixing Logic
+    function mixAudio() {
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        
+        async function playTrack(fileInput, startTime) {
+            if(!fileInput.files[0]) return;
+            const arrayBuffer = await fileInput.files[0].arrayBuffer();
+            const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+            const source = audioContext.createBufferSource();
+            source.buffer = audioBuffer;
+            source.connect(audioContext.destination);
+            source.start(0, startTime);
         }
+
+        playTrack(document.getElementById('audio1'), document.getElementById('start1').value || 0);
+        playTrack(document.getElementById('audio2'), document.getElementById('start2').value || 0);
     }
 
-    // 2. Add Text
+    // Add Text with Emoji option
     function addText() {
-        const text = document.getElementById('lyricInput').value || "Rox...";
+        let text = document.getElementById('txt').value;
+        const board = document.getElementById('reelBoard');
         const el = document.createElement('div');
-        el.className = 'draggable-text';
+        el.className = 'draggable';
+        el.style.position = 'absolute';
+        el.style.color = 'white';
+        el.style.fontSize = '20px';
         el.innerText = text;
-        el.style.top = '100px';
-        el.style.left = '50px';
-        enableDrag(el);
-        document.getElementById('reelBoard').appendChild(el);
-        document.getElementById('lyricInput').value = "";
-    }
-
-    // 3. Drag Logic
-    function enableDrag(el) {
-        el.addEventListener("pointerdown", (e) => {
+        
+        // Drag logic
+        el.onpointerdown = (e) => {
             el.setPointerCapture(e.pointerId);
-            let shiftX = e.clientX - el.getBoundingClientRect().left;
-            let shiftY = e.clientY - el.getBoundingClientRect().top;
-            
-            el.onpointermove = (e) => {
-                el.style.left = (e.clientX - shiftX) + 'px';
-                el.style.top = (e.clientY - shiftY) + 'px';
+            el.onpointermove = (ev) => {
+                el.style.left = ev.clientX - 50 + 'px';
+                el.style.top = ev.clientY - 150 + 'px';
             };
-            el.onpointerup = () => { el.onpointermove = null; };
+        };
+        board.appendChild(el);
+    }
+
+    // Apply Effects
+    function setFX(fxClass) {
+        document.querySelectorAll('.draggable').forEach(el => {
+            el.className = 'draggable ' + fxClass;
+            // Emoji Shake Special
+            if(fxClass === 'anim-shake-emoji') {
+                el.innerText = '🤡 ' + el.innerText + ' 🤡';
+            }
         });
     }
 
-    // 4. Apply FX with Speed
-    function applyFX(cls) {
-        const speed = document.getElementById('speedSlider').value;
-        document.querySelectorAll('.draggable-text').forEach(el => {
-            el.className = 'draggable-text ' + cls;
-            el.style.animationDuration = speed + 's';
-        });
-    }
-
-    // 5. Reset
     function resetAll() {
         document.getElementById('reelBoard').innerHTML = '';
-        document.getElementById('reelBoard').style.backgroundImage = 'none';
+        location.reload();
     }
 </script>
 </body>
