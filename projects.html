@@ -161,10 +161,9 @@
             box-sizing: border-box !important;
         }
 
-        /* --- UPDATED REEL BOARD (BIGGER SIZE) --- */
         .reel-board {
             width: 100% !important;
-            height: 420px !important; /* हाइट 240px से बढ़ाकर 420px की गई */
+            height: 420px !important;
             background: #000 !important;
             border: 1px solid #00e5ff !important;
             border-radius: 10px !important;
@@ -178,7 +177,7 @@
         .bg-display-img {
             width: 100% !important;
             height: 100% !important;
-            object-fit: contain !important; /* पूरा फोटो बिना कटे दिखेगा */
+            object-fit: contain !important;
             display: none;
             position: absolute !important;
             top: 0 !important;
@@ -321,7 +320,8 @@
         </div>
 
         <button id="btnPlay" class="pink-btn" onclick="togglePlayAll()">⚡ Play Project (Audio + Animations)</button>
-        <button id="btnDownload" class="download-btn" onclick="downloadProject()"><i class="fa-solid fa-download"></i> 📥 Download File (Mobile Gallery)</button>
+        <!-- MP4 VIDEO DOWNLOAD BUTTON -->
+        <button id="btnDownload" class="download-btn" onclick="downloadMP4Video()"><i class="fa-solid fa-video"></i> 🎬 Download MP4 Video (Mobile Gallery)</button>
     </div>
 
     <!-- 2. Realistic Elements Panel -->
@@ -570,24 +570,54 @@
         });
     }
 
-    function downloadProject() {
-        const board = document.getElementById('reelBoard');
+    // --- MP4 REAL-TIME VIDEO RECORDING ENGINE ---
+    async function downloadMP4Video() {
         const btn = document.getElementById('btnDownload');
-        btn.innerText = "⏳ Exporting Image...";
+        const board = document.getElementById('reelBoard');
+        btn.innerText = "🎥 Recording MP4 (5 Sec)...";
 
-        html2canvas(board, { useCORS: true, allowTaint: true }).then(canvas => {
-            const image = canvas.toDataURL("image/png");
-            const link = document.createElement('a');
-            link.href = image;
-            link.download = 'Rox_Studio_Project_' + Date.now() + '.png';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            btn.innerHTML = '<i class="fa-solid fa-download"></i> 📥 Download File (Mobile Gallery)';
-        }).catch(err => {
-            alert('Download issue, try again!');
-            btn.innerHTML = '<i class="fa-solid fa-download"></i> 📥 Download File (Mobile Gallery)';
-        });
+        // Play audio during recording if active
+        if(!isPlaying) togglePlayAll();
+
+        const videoCanvas = document.createElement('canvas');
+        videoCanvas.width = board.clientWidth * 2;
+        videoCanvas.height = board.clientHeight * 2;
+        const vCtx = videoCanvas.getContext('2d');
+
+        const stream = videoCanvas.captureStream(60);
+        let options = { mimeType: 'video/mp4' };
+        if (!MediaRecorder.isTypeSupported('video/mp4')) {
+            options = { mimeType: 'video/webm;codecs=vp9' };
+        }
+
+        const mediaRecorder = new MediaRecorder(stream, options);
+        let chunks = [];
+
+        mediaRecorder.ondataavailable = (e) => chunks.push(e.data);
+        mediaRecorder.onstop = () => {
+            const blob = new Blob(chunks, { type: options.mimeType });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'Rox_Studio_Video_' + Date.now() + '.mp4';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            btn.innerHTML = '<i class="fa-solid fa-video"></i> 🎬 Download MP4 Video (Mobile Gallery)';
+        };
+
+        mediaRecorder.start();
+
+        let count = 0;
+        const recordInterval = setInterval(async () => {
+            const c = await html2canvas(board, { useCORS: true, scale: 2 });
+            vCtx.drawImage(c, 0, 0, videoCanvas.width, videoCanvas.height);
+            count++;
+            if (count >= 50) { // Records ~5 seconds video
+                clearInterval(recordInterval);
+                mediaRecorder.stop();
+            }
+        }, 100);
     }
 
     let audioCtx = null;
