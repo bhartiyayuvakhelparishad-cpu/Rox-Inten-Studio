@@ -1,139 +1,94 @@
-<!-- 🎬 Projects Tab Panel Start (Rox Theme) -->
+<!-- Rox UI Style -->
 <style>
-    .rox-panel { background: #1c1c2e; border: 1px solid #333; border-radius: 12px; padding: 15px; margin-bottom: 20px; }
-    .rox-panel h3 { color: #00e5ff; font-size: 16px; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; }
-    .btn-rox { background: linear-gradient(90deg, #7928ca, #ff007f); color: white; border: none; padding: 12px; border-radius: 8px; width: 100%; font-weight: bold; cursor: pointer; margin-top: 10px; }
-    .rox-input { background: #121220; border: 1px solid #333; color: #fff; padding: 10px; border-radius: 6px; width: 100%; margin-bottom: 10px; display: block; }
-    .reel-board { background: #000; border: 2px solid #333; border-radius: 10px; height: 300px; position: relative; overflow: hidden; margin-bottom: 10px; background-size: cover; background-position: center; }
-    .cutout-item { position: absolute; cursor: move; touch-action: none; user-select: none; color: #fff; font-size: 20px; padding: 5px; }
+    .rox-container { background: #0f0f1a; padding: 15px; border-radius: 15px; color: white; }
+    .rox-preview { width: 100%; height: 250px; background: #000; border: 2px solid #333; border-radius: 12px; position: relative; overflow: hidden; margin-bottom: 15px; }
+    .rox-btn { background: linear-gradient(90deg, #7928ca, #ff007f); border: none; color: white; padding: 10px; border-radius: 8px; font-weight: bold; width: 48%; margin: 5px 1%; }
+    .draggable-obj { position: absolute; cursor: grab; padding: 10px; color: white; font-size: 20px; text-shadow: 0 0 5px #00e5ff; touch-action: none; user-select: none; }
     
     /* Animations */
-    .shake { animation: shakeFx 0.5s infinite alternate; }
-    .zoom { animation: zoomFx 1.5s infinite alternate; }
-    .pulse { animation: pulseFx 0.6s infinite alternate; }
-    @keyframes shakeFx { 0% { transform: translate(1px, 1px); } 100% { transform: translate(-2px, -2px); } }
-    @keyframes zoomFx { 0% { transform: scale(1); } 100% { transform: scale(1.1); } }
-    @keyframes pulseFx { 0% { transform: scale(0.9); } 100% { transform: scale(1.05); } }
+    .anim-shake { animation: shake 0.5s infinite; }
+    .anim-zoom { animation: zoom 1s infinite alternate; }
+    @keyframes shake { 0%{transform: translate(1px, 1px);} 100%{transform: translate(-1px, -1px);} }
+    @keyframes zoom { 0%{transform: scale(1);} 100%{transform: scale(1.2);} }
 </style>
 
-<div id="projectsTab" class="page-content">
+<div class="rox-container">
+    <!-- Preview Area -->
+    <div id="previewArea" class="rox-preview"></div>
 
-    <!-- 1. Music Panel -->
-    <div class="rox-panel">
-        <h3>🎵 Music & Settings</h3>
-        <input type="file" id="projMusic" class="rox-input" accept="audio/*">
-        <audio id="projAudio" loop></audio>
-        <span id="musicName" style="color:#aaa; font-size:12px;">कोई गाना सेलेक्ट नहीं है</span>
-    </div>
-
-    <!-- 2. Preview Panel -->
-    <div class="rox-panel">
-        <h3>🎬 Reel Preview</h3>
-        <div id="reelBoard" class="reel-board"></div>
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-            <button onclick="saveReelFrame()" class="btn-rox" style="background:#00c853;">➕ Frame सेव करें</button>
-            <button onclick="playReelStatus()" id="btnPlayReel" class="btn-rox" style="background:#00e5ff; color:#000;">▶️ Play Reel</button>
-        </div>
-    </div>
-
-    <!-- 3. Editor Panel -->
-    <div class="rox-panel">
-        <h3>✨ Lyrics & FX</h3>
-        <input type="text" id="reelLyrics" class="rox-input" placeholder="यहाँ गाने के बोल लिखें...">
-        <button onclick="addLyricsToReel()" class="btn-rox">➕ लिरिक्स जोड़ें</button>
-        
-        <div style="margin-top:15px; display:flex; flex-wrap:wrap; gap:5px;">
-            <button onclick="applyReelFX('shake')" class="btn-rox" style="width:auto; padding:5px 10px;">🫨 Shake</button>
-            <button onclick="applyReelFX('zoom')" class="btn-rox" style="width:auto; padding:5px 10px;">🔍 Zoom</button>
-            <button onclick="applyReelFX('pulse')" class="btn-rox" style="width:auto; padding:5px 10px;">💓 Pulse</button>
-            <button onclick="clearReelFX()" class="btn-rox" style="background:#ff1744; width:auto; padding:5px 10px;">❌ Reset FX</button>
-        </div>
+    <!-- Controls -->
+    <input type="text" id="objText" placeholder="अपना टेक्स्ट लिखें..." style="width:100%; padding:10px; background:#1c1c2e; color:white; border:1px solid #333; border-radius:8px; margin-bottom:10px;">
+    
+    <button class="rox-btn" onclick="addText()" style="width:98%">➕ टेक्स्ट जोड़ें</button>
+    
+    <div style="display:flex; flex-wrap:wrap;">
+        <button class="rox-btn" onclick="applyAnim('anim-shake')">🫨 Shake</button>
+        <button class="rox-btn" onclick="applyAnim('anim-zoom')">🔍 Zoom</button>
+        <button class="rox-btn" onclick="playAnim()" style="background:#00c853">▶️ Play</button>
+        <button class="rox-btn" onclick="clearAll()" style="background:#ff1744">❌ Clear</button>
     </div>
 </div>
 
 <script>
-    const projMusic = document.getElementById('projMusic');
-    const projAudio = document.getElementById('projAudio');
-    const reelBoard = document.getElementById('reelBoard');
-    let reelFrames = [];
-    let reelTimer = null;
-
-    // गाना लोड
-    projMusic.addEventListener('change', (e) => {
-        const file = e.target.files[0];
-        if (file) {
-            projAudio.src = URL.createObjectURL(file);
-            document.getElementById('musicName').innerText = "🎵 " + file.name;
-        }
-    });
-
-    // लिरिक्स जोड़ना
-    function addLyricsToReel() {
-        const text = document.getElementById('reelLyrics').value;
-        if (!text) return alert("पहले कुछ लिखें!");
-        const div = document.createElement('div');
-        div.className = 'cutout-item';
-        div.innerText = text;
-        div.style.left = '50px'; div.style.top = '100px';
-        div.ondblclick = () => div.remove();
-        reelBoard.appendChild(div);
-        makeElementDraggable(div);
-        document.getElementById('reelLyrics').value = '';
-    }
-
-    // FX अप्लाई
-    function applyReelFX(cls) {
-        reelBoard.querySelectorAll('.cutout-item').forEach(el => {
-            el.className = 'cutout-item ' + cls;
-        });
-    }
-
-    function clearReelFX() {
-        reelBoard.querySelectorAll('.cutout-item').forEach(el => el.className = 'cutout-item');
-    }
-
-    // ड्रैग लॉजिक
-    function makeElementDraggable(el) {
-        let x = 0, y = 0;
-        el.onmousedown = (e) => {
-            let shiftX = e.clientX - el.getBoundingClientRect().left;
-            let shiftY = e.clientY - el.getBoundingClientRect().top;
-            document.onmousemove = (e) => {
-                el.style.left = e.clientX - shiftX + 'px';
-                el.style.top = e.clientY - shiftY + 'px';
-            };
-            document.onmouseup = () => document.onmousemove = null;
-        };
-    }
-
-    // फ्रेम सेव
-    function saveReelFrame() {
-        const items = [];
-        reelBoard.querySelectorAll('.cutout-item').forEach(item => {
-            items.push({ text: item.innerText, left: item.style.left, top: item.style.top, cls: item.className });
-        });
-        if(items.length > 0) reelFrames.push(items);
-        alert("Frame " + reelFrames.length + " Saved!");
-    }
-
-    // प्ले रील
-    function playReelStatus() {
-        if(reelFrames.length === 0) return alert("पहले Frame Save करें!");
-        if(reelTimer) { clearInterval(reelTimer); reelTimer=null; projAudio.pause(); return; }
+    // 1. टेक्स्ट जोड़ें
+    function addText() {
+        const text = document.getElementById('objText').value || "Rox";
+        const area = document.getElementById('previewArea');
+        const el = document.createElement('div');
+        el.className = 'draggable-obj';
+        el.innerText = text;
+        el.style.left = '50px';
+        el.style.top = '50px';
         
-        projAudio.play();
-        let idx = 0;
-        reelTimer = setInterval(() => {
-            reelBoard.innerHTML = '';
-            reelFrames[idx].forEach(data => {
-                const el = document.createElement('div');
-                el.className = data.cls;
-                el.innerText = data.text;
-                el.style.left = data.left; el.style.top = data.top;
-                reelBoard.appendChild(el);
-            });
-            idx = (idx + 1) % reelFrames.length;
-        }, 500);
+        // ड्रैग करने का लॉजिक (मोबाइल + डेस्कटॉप दोनों के लिए)
+        enableDrag(el);
+        area.appendChild(el);
+    }
+
+    // 2. ड्रैग करने वाला फंक्शन (मोबाइल टच फिक्स)
+    function enableDrag(el) {
+        let active = false;
+        let currentX, currentY, initialX, initialY, xOffset = 0, yOffset = 0;
+
+        el.addEventListener("pointerdown", dragStart);
+        document.addEventListener("pointermove", drag);
+        document.addEventListener("pointerup", dragEnd);
+
+        function dragStart(e) {
+            initialX = e.clientX - xOffset;
+            initialY = e.clientY - yOffset;
+            active = true;
+        }
+
+        function drag(e) {
+            if (active) {
+                e.preventDefault();
+                currentX = e.clientX - initialX;
+                currentY = e.clientY - initialY;
+                xOffset = currentX;
+                yOffset = currentY;
+                el.style.transform = `translate(${currentX}px, ${currentY}px)`;
+            }
+        }
+
+        function dragEnd() { active = false; }
+    }
+
+    // 3. एनीमेशन लगाना
+    function applyAnim(className) {
+        document.querySelectorAll('.draggable-obj').forEach(el => {
+            el.className = 'draggable-obj ' + className;
+        });
+    }
+
+    // 4. Play button (सबको एक साथ चलाने के लिए)
+    function playAnim() {
+        applyAnim('anim-shake');
+        setTimeout(() => applyAnim('anim-zoom'), 1000);
+    }
+
+    // 5. क्लियर करना
+    function clearAll() {
+        document.getElementById('previewArea').innerHTML = '';
     }
 </script>
-<!-- 🎬 Projects Tab Panel End -->
