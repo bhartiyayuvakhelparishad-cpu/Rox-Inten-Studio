@@ -1,115 +1,274 @@
-<!DOCTYPE html>
-<html lang="hi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rox Music Studio - Motion Collage</title>
-    <!-- CSS (वही पुराना स्ट्रक्चर, म्यूजिक के लिए अपडेटेड) -->
-    <style>
-        /* [पिछला CSS वैसा ही रहेगा, बस म्यूजिक कंट्रोलर्स के लिए छोटा बदलाव] */
-        body { background: #0f0f1a; color: #fff; font-family: sans-serif; padding: 10px; }
-        .panel { background: #1a1a2e; border: 1px solid #282845; padding: 15px; border-radius: 10px; margin-bottom: 10px; }
-        .controls { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
-        button { padding: 10px; background: #252545; color: #fff; border: 1px solid #00e5ff; border-radius: 5px; cursor: pointer; }
-        .drop-zone { width: 100%; height: 300px; background: #000; border: 2px dashed #00e5ff; position: relative; overflow: hidden; }
-        .cutout-item { position: absolute; width: 100px; cursor: move; }
-        .cutout-item img { width: 100%; pointer-events: none; }
-    </style>
-</head>
-<body>
+<!-- 🎬 Projects Tab Panel Start -->
+<div id="projectsTab" class="page-content">
 
+    <!-- 1. म्यूजिक और बैकग्राउंड कंट्रोल -->
     <div class="panel">
-        <h3>🎵 1. बैकग्राउंड म्यूजिक जोड़ें</h3>
-        <input type="file" id="musicUpload" accept="audio/*">
-        <audio id="bgMusic" loop></audio>
+        <h3>🎵 1. Music & Animated Background</h3>
+        <div class="tools">
+            <label class="btn-upload" style="background:#ff007f;">🎵 गाना चुनें 
+                <input type="file" id="projMusic" accept="audio/*" style="display:none;">
+            </label>
+            <label class="btn-upload" style="background:#7928ca;">🖼️ BG फोटो बदलें 
+                <input type="file" id="projBgImg" accept="image/*" style="display:none;">
+            </label>
+            <input type="color" id="bgColorPicker" value="#05050a" title="BG कलर बदलें" style="height:35px; width:40px; cursor:pointer; background:none; border:none;">
+            <audio id="projAudio" loop></audio>
+        </div>
+        <p id="musicName" style="font-size:11px; color:#00e5ff; margin-top:5px;">कोई गाना सेलेक्ट नहीं है</p>
     </div>
 
+    <!-- 2. मेन वीडियो मेकर बोर्ड -->
     <div class="panel">
-        <h3>🎬 2. एनीमेशन बोर्ड (यहाँ से 'रिकॉर्ड' भी कर सकते हैं)</h3>
-        <div class="drop-zone" id="dropZone"></div>
-        <div class="controls">
-            <button onclick="addFrame()">➕ फ्रेम जोड़ें</button>
-            <button onclick="playAnimation()" id="btnPlay">▶️ एनीमेशन + म्यूजिक</button>
-            <button onclick="downloadVideo()" style="background:#ff1744;">🎥 वीडियो सेव करें</button>
+        <h3>🎬 2. Reel Preview Board</h3>
+        <div id="reelBoard" class="drop-zone" style="height:350px; background:#05050a; border:2px dashed #00e5ff; position:relative; overflow:hidden; background-size:cover; background-position:center;">
+            <!-- फोटो और लिरिक्स यहाँ लोड होंगे -->
+        </div>
+
+        <!-- टाइमलाइन स्ट्रिप -->
+        <div class="frame-strip" id="reelTimeline" style="display:flex; gap:5px; margin-top:8px; overflow-x:auto;">
+            <span style="font-size:10px; color:#aaa;">बीट/फ्रेम: </span>
+        </div>
+
+        <div class="tools" style="margin-top:10px;">
+            <button onclick="saveReelFrame()" style="background:#00c853; color:#000; font-weight:bold;">➕ Beat/Frame जोड़ें</button>
+            <button onclick="playReelStatus()" id="btnPlayReel" style="background:#00e5ff; color:#000; font-weight:bold;">▶️ Play Reel + Song</button>
+            <button onclick="clearReelBoard()" style="background:#ff1744;">🗑️ रीसेट</button>
         </div>
     </div>
 
+    <!-- 3. Advanced Lyrics & Motion FX Controls -->
     <div class="panel">
-        <h3>📦 आपकी गैलरी (यहाँ से बोर्ड पर लाएँ)</h3>
-        <div id="gallery"></div>
+        <h3>✨ 3. Lyrics Customization & Motion FX</h3>
+        <!-- Lyrics Edit Controls -->
+        <div class="tools" style="margin-bottom:10px;">
+            <input type="text" id="reelLyrics" placeholder="गाने की लाइन (Lyrics) लिखें..." style="padding:10px; border-radius:6px; border:1px solid #3d3d66; background:#121220; color:#fff; flex:1;">
+            <input type="color" id="textColorPicker" value="#ffffff" title="Text Color" style="height:35px; width:35px; cursor:pointer; background:none; border:none;">
+            <select id="textSizeSelect" style="padding:8px; background:#121220; color:#fff; border:1px solid #3d3d66; border-radius:6px;">
+                <option value="18px">Small</option>
+                <option value="24px" selected>Medium</option>
+                <option value="32px">Large</option>
+            </select>
+            <button onclick="addLyricsToReel()" style="background:#00e5ff; color:#000; font-weight:bold;">➕ जोड़ें</button>
+        </div>
+        
+        <!-- Beat Speed & Motion FX Options -->
+        <div class="tools">
+            <span style="font-size:11px; color:#aaa; width:100%;">बीट एनीमेशन इफ़ेक्ट्स:</span>
+            <button onclick="applyReelFX('shake')">🫨 Reel Shake</button>
+            <button onclick="applyReelFX('zoom')">🔍 Slow Zoom</button>
+            <button onclick="applyReelFX('pulse')">💓 Beat Pulse</button>
+            <button onclick="applyReelFX('slide')">↔️ Slide In</button>
+            <button onclick="applyReelFX('fade')">👻 Fade Glow</button>
+            <button onclick="applyReelFX('rotate')">🔄 Rotate Beat</button>
+            <button onclick="clearReelFX()" style="background:#ff1744;">❌ FX रिमूव</button>
+        </div>
+
+        <!-- Beat Speed Adjuster -->
+        <div class="tools" style="margin-top:10px; align-items:center;">
+            <span style="font-size:11px; color:#aaa;">स्पीड:</span>
+            <button onclick="setBeatSpeed(200)">⚡ Fast (0.2s)</button>
+            <button onclick="setBeatSpeed(500)" class="active">🎵 Normal (0.5s)</button>
+            <button onclick="setBeatSpeed(1000)">🐢 Slow (1.0s)</button>
+        </div>
     </div>
 
-    <script>
-        const musicUpload = document.getElementById('musicUpload');
-        const bgMusic = document.getElementById('bgMusic');
-        const dropZone = document.getElementById('dropZone');
-        let frames = [];
-        let animInterval = null;
+</div>
+<!-- 🎬 Projects Tab Panel End -->
 
-        // 1. म्यूजिक अपलोड
-        musicUpload.addEventListener('change', (e) => {
+<script>
+    const projMusic = document.getElementById('projMusic');
+    const projBgImg = document.getElementById('projBgImg');
+    const bgColorPicker = document.getElementById('bgColorPicker');
+    const projAudio = document.getElementById('projAudio');
+    const reelBoard = document.getElementById('reelBoard');
+    const reelTimeline = document.getElementById('reelTimeline');
+    
+    let reelFrames = [];
+    let reelTimer = null;
+    let beatSpeed = 500; // डिफ़ॉल्ट बीट स्पीड 0.5s
+
+    // 1. गाना लोड करना
+    if(projMusic) {
+        projMusic.addEventListener('change', (e) => {
             const file = e.target.files[0];
             if (file) {
-                bgMusic.src = URL.createObjectURL(file);
-                alert("म्यूजिक लोड हो गया!");
+                projAudio.src = URL.createObjectURL(file);
+                document.getElementById('musicName').innerText = "🎵 " + file.name;
+                showToast("गाने का ऑडियो सिंक हो गया!");
             }
         });
+    }
 
-        // 2. फ्रेम जोड़ना
-        function addFrame() {
-            const currentScene = [];
-            document.querySelectorAll('.cutout-item').forEach(item => {
-                currentScene.push({
-                    src: item.querySelector('img').src,
-                    left: item.style.left,
-                    top: item.style.top
-                });
+    // 2. बैकग्राउंड फोटो बदलना
+    if(projBgImg) {
+        projBgImg.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const url = URL.createObjectURL(file);
+                reelBoard.style.backgroundImage = `url('${url}')`;
+                showToast("बैकग्राउंड इमेज सेट हो गई!");
+            }
+        });
+    }
+
+    // 3. बैकग्राउंड सॉलिड कलर बदलना
+    if(bgColorPicker) {
+        bgColorPicker.addEventListener('input', (e) => {
+            reelBoard.style.backgroundImage = 'none';
+            reelBoard.style.backgroundColor = e.target.value;
+        });
+    }
+
+    // 4. Custom Styled Lyrics जोड़ना
+    function addLyricsToReel() {
+        const text = document.getElementById('reelLyrics').value;
+        const color = document.getElementById('textColorPicker').value;
+        const size = document.getElementById('textSizeSelect').value;
+        
+        if (!text) return showToast("पहले बोल (Text) लिखें!");
+
+        const div = document.createElement('div');
+        div.className = 'lyrics-text cutout-item';
+        div.innerText = text;
+        div.style.left = '30px';
+        div.style.top = '100px';
+        div.style.color = color;
+        div.style.fontSize = size;
+        div.style.textShadow = '0 0 8px #000, 0 0 12px #00e5ff';
+
+        // डबल टैप / क्लिक करके एलिमेंट डिलीट करने की सुविधा
+        div.ondblclick = () => { div.remove(); showToast("एलिमेंट हटाया गया!"); };
+        
+        reelBoard.appendChild(div);
+        makeElementDraggable(div);
+        document.getElementById('reelLyrics').value = '';
+        showToast("Lyrics जोड़ा गया!");
+    }
+
+    // 5. Reels FX लागू करना
+    function applyReelFX(effectClass) {
+        const items = reelBoard.querySelectorAll('.cutout-item');
+        if(items.length === 0) return showToast("पहले बोर्ड पर फोटो या Lyrics लाएँ!");
+        
+        items.forEach(item => {
+            item.classList.remove('shake', 'zoom', 'pulse', 'slide', 'fade', 'rotate');
+            item.classList.add(effectClass);
+        });
+        showToast(effectClass + " FX एप्लाई हुआ!");
+    }
+
+    function clearReelFX() {
+        reelBoard.querySelectorAll('.cutout-item').forEach(item => {
+            item.classList.remove('shake', 'zoom', 'pulse', 'slide', 'fade', 'rotate');
+        });
+        showToast("सब FX हटा दिए गए!");
+    }
+
+    function setBeatSpeed(ms) {
+        beatSpeed = ms;
+        showToast(`बीट स्पीड ${ms/1000}s सेट हुई!`);
+        if (reelTimer) { // अगर वीडियो चल रहा है तो नई स्पीड लागू करें
+            playReelStatus();
+            playReelStatus();
+        }
+    }
+
+    // 6. बीट / फ्रेम सेव करना
+    function saveReelFrame() {
+        const currentElements = [];
+        reelBoard.querySelectorAll('.cutout-item').forEach(item => {
+            const isText = item.classList.contains('lyrics-text');
+            currentElements.push({
+                type: isText ? 'text' : 'img',
+                content: isText ? item.innerText : item.querySelector('img').src,
+                left: item.style.left,
+                top: item.style.top,
+                color: item.style.color,
+                fontSize: item.style.fontSize,
+                classes: item.className
             });
-            frames.push(currentScene);
-            alert("फ्रेम सेव हुआ: " + frames.length);
+        });
+
+        if (currentElements.length === 0) return showToast("बोर्ड खाली है!");
+
+        reelFrames.push({
+            elements: currentElements,
+            bgImg: reelBoard.style.backgroundImage,
+            bgColor: reelBoard.style.backgroundColor
+        });
+        
+        const thumb = document.createElement('div');
+        thumb.className = 'frame-thumb';
+        thumb.innerText = `Beat-${reelFrames.length}`;
+        reelTimeline.appendChild(thumb);
+        showToast(`Beat ${reelFrames.length} सेव हुई!`);
+    }
+
+    // 7. वीडियो एनीमेशन + ऑडियो प्ले
+    function playReelStatus() {
+        if (reelFrames.length === 0) return showToast("कम से कम 1 Beat/Frame सेव करें!");
+
+        if (reelTimer) {
+            clearInterval(reelTimer);
+            reelTimer = null;
+            projAudio.pause();
+            document.getElementById('btnPlayReel').innerText = "▶️ Play Reel + Song";
+            return;
         }
 
-        // 3. प्ले एनीमेशन (म्यूजिक के साथ)
-        function playAnimation() {
-            if (frames.length === 0) return alert("पहले फ्रेम जोड़ें!");
+        document.getElementById('btnPlayReel').innerText = "⏹️ Stop Reel";
+        
+        if (projAudio.src) {
+            projAudio.currentTime = 0;
+            projAudio.play();
+        }
+
+        let idx = 0;
+        reelTimer = setInterval(() => {
+            reelBoard.innerHTML = '';
+            const activeFrame = reelFrames[idx];
             
-            // म्यूजिक प्ले करें
-            bgMusic.currentTime = 0;
-            bgMusic.play();
+            // बैकग्राउंड एनीमेशन सिंक
+            reelBoard.style.backgroundImage = activeFrame.bgImg;
+            reelBoard.style.backgroundColor = activeFrame.bgColor;
 
-            let i = 0;
-            animInterval = setInterval(() => {
-                dropZone.innerHTML = '';
-                frames[i].forEach(obj => {
-                    const div = document.createElement('div');
-                    div.className = 'cutout-item';
-                    div.style.left = obj.left;
-                    div.style.top = obj.top;
-                    div.innerHTML = `<img src="${obj.src}">`;
-                    dropZone.appendChild(div);
-                });
-                i++;
-                if (i >= frames.length) {
-                    clearInterval(animInterval);
-                    bgMusic.pause();
+            activeFrame.elements.forEach(obj => {
+                const el = document.createElement('div');
+                el.className = obj.classes;
+                el.style.left = obj.left;
+                el.style.top = obj.top;
+
+                if (obj.type === 'text') {
+                    el.innerText = obj.content;
+                    el.style.color = obj.color;
+                    el.style.fontSize = obj.fontSize;
+                } else {
+                    const img = document.createElement('img');
+                    img.src = obj.content;
+                    el.appendChild(img);
                 }
-            }, 500); // 500ms = 0.5 सेकंड प्रति फ्रेम
-        }
 
-        // 4. वीडियो एक्सपोर्ट (Web API)
-        function downloadVideo() {
-            alert("सुझाव: अपने फोन का 'Screen Recorder' चालू करें और 'एनीमेशन चलाएं' बटन दबाएं। यह सबसे आसान तरीका है!");
-        }
+                el.ondblclick = () => el.remove();
+                reelBoard.appendChild(el);
+                makeElementDraggable(el);
+            });
 
-        // गैलरी से बोर्ड पर लाने के लिए फंक्शन (पिछले कोड का हिस्सा)
-        function createMovable(src) {
-            const div = document.createElement('div');
-            div.className = 'cutout-item';
-            div.style.left = '50px'; div.style.top = '50px';
-            div.innerHTML = `<img src="${src}">`;
-            dropZone.appendChild(div);
-            // ड्रैग लॉजिक वही रहेगा जो हमने पहले बनाया था
+            idx = (idx + 1) % reelFrames.length;
+        }, beatSpeed);
+    }
+
+    function clearReelBoard() {
+        if (reelTimer) {
+            clearInterval(reelTimer);
+            reelTimer = null;
+            document.getElementById('btnPlayReel').innerText = "▶️ Play Reel + Song";
         }
-    </script>
-</body>
-</html>
+        projAudio.pause();
+        reelBoard.innerHTML = '';
+        reelBoard.style.backgroundImage = 'none';
+        reelBoard.style.backgroundColor = '#05050a';
+        reelFrames = [];
+        reelTimeline.innerHTML = '<span style="font-size:10px; color:#aaa;">बीट/फ्रेम: </span>';
+        showToast("Projects बोर्ड रीसेट हुआ!");
+    }
+</script>
