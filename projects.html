@@ -128,6 +128,21 @@
             margin-top: 5px !important;
             display: block !important;
         }
+
+        .download-btn {
+            background: linear-gradient(90deg, #00c853, #00e5ff) !important;
+            color: #000 !important;
+            border: none !important;
+            padding: 12px !important;
+            border-radius: 8px !important;
+            font-weight: bold !important;
+            width: 100% !important;
+            font-size: 13px !important;
+            cursor: pointer !important;
+            margin-top: 8px !important;
+            display: block !important;
+        }
+
         .action-grid {
             display: grid !important;
             grid-template-columns: repeat(2, 1fr) !important;
@@ -217,9 +232,6 @@
             white-space: nowrap;
         }
 
-        /* --- Realistic Element Animations --- */
-        
-        /* 1. Flying Bird Animation */
         .anim-flying-bird {
             animation: flyAcross 7s linear infinite, wingFlap 0.4s ease-in-out infinite alternate !important;
         }
@@ -233,7 +245,6 @@
             100% { transform: translateY(-8px) rotate(-10deg); }
         }
 
-        /* 2. Floating Clouds Animation */
         .anim-real-cloud {
             animation: floatCloud 15s linear infinite !important;
             opacity: 0.8;
@@ -244,7 +255,6 @@
             100% { left: 110%; }
         }
 
-        /* 3. Falling Flower Petals */
         .anim-falling-flower {
             animation: fallFlower 5s ease-in-out infinite !important;
         }
@@ -254,7 +264,6 @@
             100% { top: 105%; transform: rotate(360deg) translateX(-25px); }
         }
 
-        /* 4. Twinkling Realistic Stars */
         .anim-twinkle-star {
             animation: starGlow 1.2s ease-in-out infinite alternate !important;
         }
@@ -263,7 +272,6 @@
             100% { opacity: 1; transform: scale(1.3); filter: drop-shadow(0 0 10px #00e5ff); }
         }
 
-        /* 5. 3D Pop Clown Animation */
         .anim-3d-clown {
             animation: clownBounce 2s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite alternate !important;
         }
@@ -272,7 +280,6 @@
             100% { transform: scale(1.2) rotate(10deg); }
         }
 
-        /* Speed Adjustments */
         .anim-orbit { animation: orbit var(--speed, 3s) linear infinite; }
         .anim-bubble { animation: bubble var(--speed, 2s) ease-in-out infinite; }
         .anim-shake-emoji { animation: shake var(--speed, 0.2s) infinite; }
@@ -283,6 +290,8 @@
         @keyframes shake { 0% { transform: translate(2px, 2px); } 50% { transform: translate(-2px, -2px); } 100% { transform: translate(2px, 2px); } }
         @keyframes zoomFx { 0% { transform: scale(1); } 100% { transform: scale(1.18); } }
     </style>
+    <!-- HTML5 Canvas Capture library for Downloading -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
 <body>
 
@@ -312,6 +321,8 @@
         </div>
 
         <button id="btnPlay" class="pink-btn" onclick="togglePlayAll()">⚡ Play Project (Audio + Animations)</button>
+        <!-- DOWNLOAD BUTTON -->
+        <button id="btnDownload" class="download-btn" onclick="downloadProject()"><i class="fa-solid fa-download"></i> 📥 Download File (Mobile Gallery)</button>
     </div>
 
     <!-- 2. Realistic Elements Panel -->
@@ -413,7 +424,6 @@
         document.getElementById('txt').value = '';
     }
 
-    // --- Special Realistic Handlers ---
     function addFlyingBird() {
         const board = document.getElementById('reelBoard');
         const el = document.createElement('div');
@@ -559,6 +569,27 @@
         const duration = (2 / val) + 's';
         document.querySelectorAll('.draggable').forEach(el => {
             el.style.setProperty('--speed', duration);
+        });
+    }
+
+    // --- DOWNLOAD FUNCTION FOR MOBILE ---
+    function downloadProject() {
+        const board = document.getElementById('reelBoard');
+        const btn = document.getElementById('btnDownload');
+        btn.innerText = "⏳ Exporting Image...";
+
+        html2canvas(board, { useCORS: true, allowTaint: true }).then(canvas => {
+            const image = canvas.toDataURL("image/png");
+            const link = document.createElement('a');
+            link.href = image;
+            link.download = 'Rox_Studio_Project_' + Date.now() + '.png';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            btn.innerHTML = '<i class="fa-solid fa-download"></i> 📥 Download File (Mobile Gallery)';
+        }).catch(err => {
+            alert('Download issue, try again!');
+            btn.innerHTML = '<i class="fa-solid fa-download"></i> 📥 Download File (Mobile Gallery)';
         });
     }
 
