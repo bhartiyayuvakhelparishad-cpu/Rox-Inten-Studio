@@ -1,94 +1,119 @@
-<!-- Rox UI Style -->
-<style>
-    .rox-container { background: #0f0f1a; padding: 15px; border-radius: 15px; color: white; }
-    .rox-preview { width: 100%; height: 250px; background: #000; border: 2px solid #333; border-radius: 12px; position: relative; overflow: hidden; margin-bottom: 15px; }
-    .rox-btn { background: linear-gradient(90deg, #7928ca, #ff007f); border: none; color: white; padding: 10px; border-radius: 8px; font-weight: bold; width: 48%; margin: 5px 1%; }
-    .draggable-obj { position: absolute; cursor: grab; padding: 10px; color: white; font-size: 20px; text-shadow: 0 0 5px #00e5ff; touch-action: none; user-select: none; }
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Projects - Rox Studio</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
-    /* Animations */
-    .anim-shake { animation: shake 0.5s infinite; }
-    .anim-zoom { animation: zoom 1s infinite alternate; }
-    @keyframes shake { 0%{transform: translate(1px, 1px);} 100%{transform: translate(-1px, -1px);} }
-    @keyframes zoom { 0%{transform: scale(1);} 100%{transform: scale(1.2);} }
-</style>
+    <style>
+        /* Rox Theme Styling */
+        .panel { background: #161625; border: 1px solid #333; border-radius: 12px; padding: 15px; margin-bottom: 15px; }
+        .control-label { color: #00e5ff; font-size: 12px; margin-bottom: 5px; display: block; }
+        .rox-input { background: #0f0f1a; border: 1px solid #333; color: white; padding: 10px; border-radius: 8px; width: 100%; box-sizing: border-box; margin-bottom: 10px; }
+        .reel-board { width: 100%; height: 250px; background: #000; border: 2px solid #333; border-radius: 10px; position: relative; overflow: hidden; background-size: cover; background-position: center; }
+        .draggable-text { position: absolute; cursor: grab; font-size: 24px; color: white; text-shadow: 2px 2px 4px #000; padding: 5px; user-select: none; touch-action: none; transition: transform 0.1s; }
+        
+        /* Animations with Variable Speed */
+        .anim-shake { animation: shakeFx infinite linear; }
+        .anim-zoom { animation: zoomFx infinite linear alternate; }
+        .anim-pulse { animation: pulseFx infinite linear; }
 
-<div class="rox-container">
-    <!-- Preview Area -->
-    <div id="previewArea" class="rox-preview"></div>
+        @keyframes shakeFx { 0%{transform: translate(2px, 2px);} 100%{transform: translate(-2px, -2px);} }
+        @keyframes zoomFx { 0%{transform: scale(1);} 100%{transform: scale(1.2);} }
+        @keyframes pulseFx { 0%{transform: scale(0.9);} 100%{transform: scale(1.05);} }
+    </style>
+</head>
+<body>
 
-    <!-- Controls -->
-    <input type="text" id="objText" placeholder="अपना टेक्स्ट लिखें..." style="width:100%; padding:10px; background:#1c1c2e; color:white; border:1px solid #333; border-radius:8px; margin-bottom:10px;">
-    
-    <button class="rox-btn" onclick="addText()" style="width:98%">➕ टेक्स्ट जोड़ें</button>
-    
-    <div style="display:flex; flex-wrap:wrap;">
-        <button class="rox-btn" onclick="applyAnim('anim-shake')">🫨 Shake</button>
-        <button class="rox-btn" onclick="applyAnim('anim-zoom')">🔍 Zoom</button>
-        <button class="rox-btn" onclick="playAnim()" style="background:#00c853">▶️ Play</button>
-        <button class="rox-btn" onclick="clearAll()" style="background:#ff1744">❌ Clear</button>
+<div class="mobile-frame">
+    <div class="notch"></div>
+    <div class="app-content">
+        <h1>Projects Studio</h1>
+
+        <!-- 1. Media Panel -->
+        <div class="panel">
+            <label class="control-label">📷 बैकग्राउंड फोटो चुनें</label>
+            <input type="file" id="bgInput" class="rox-input" accept="image/*" onchange="setBg(this)">
+            
+            <div id="reelBoard" class="reel-board"></div>
+        </div>
+
+        <!-- 2. Controls Panel -->
+        <div class="panel">
+            <input type="text" id="lyricInput" class="rox-input" placeholder="यहाँ लिरिक्स लिखें...">
+            <button class="neon-btn" onclick="addText()" style="width:100%; padding:10px;">➕ Add Text</button>
+
+            <div style="margin-top:15px;">
+                <label class="control-label">⚡ Animation Speed (Slow to Fast)</label>
+                <input type="range" id="speedSlider" min="0.1" max="2.0" step="0.1" value="1.0" style="width:100%;">
+            </div>
+
+            <div style="display:flex; gap:5px; margin-top:15px;">
+                <button class="dark-btn" onclick="applyFX('anim-shake')" style="flex:1;">🫨 Shake</button>
+                <button class="dark-btn" onclick="applyFX('anim-zoom')" style="flex:1;">🔍 Zoom</button>
+                <button class="dark-btn" onclick="applyFX('anim-pulse')" style="flex:1;">💓 Pulse</button>
+            </div>
+            <button class="dark-btn" onclick="resetAll()" style="background:#ff4757; width:100%; margin-top:10px;">❌ Reset</button>
+        </div>
     </div>
 </div>
 
 <script>
-    // 1. टेक्स्ट जोड़ें
+    // 1. Background Image Set
+    function setBg(input) {
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                document.getElementById('reelBoard').style.backgroundImage = `url('${e.target.result}')`;
+            };
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
+    // 2. Add Text
     function addText() {
-        const text = document.getElementById('objText').value || "Rox";
-        const area = document.getElementById('previewArea');
+        const text = document.getElementById('lyricInput').value || "Rox...";
         const el = document.createElement('div');
-        el.className = 'draggable-obj';
+        el.className = 'draggable-text';
         el.innerText = text;
+        el.style.top = '100px';
         el.style.left = '50px';
-        el.style.top = '50px';
-        
-        // ड्रैग करने का लॉजिक (मोबाइल + डेस्कटॉप दोनों के लिए)
         enableDrag(el);
-        area.appendChild(el);
+        document.getElementById('reelBoard').appendChild(el);
+        document.getElementById('lyricInput').value = "";
     }
 
-    // 2. ड्रैग करने वाला फंक्शन (मोबाइल टच फिक्स)
+    // 3. Drag Logic
     function enableDrag(el) {
-        let active = false;
-        let currentX, currentY, initialX, initialY, xOffset = 0, yOffset = 0;
-
-        el.addEventListener("pointerdown", dragStart);
-        document.addEventListener("pointermove", drag);
-        document.addEventListener("pointerup", dragEnd);
-
-        function dragStart(e) {
-            initialX = e.clientX - xOffset;
-            initialY = e.clientY - yOffset;
-            active = true;
-        }
-
-        function drag(e) {
-            if (active) {
-                e.preventDefault();
-                currentX = e.clientX - initialX;
-                currentY = e.clientY - initialY;
-                xOffset = currentX;
-                yOffset = currentY;
-                el.style.transform = `translate(${currentX}px, ${currentY}px)`;
-            }
-        }
-
-        function dragEnd() { active = false; }
-    }
-
-    // 3. एनीमेशन लगाना
-    function applyAnim(className) {
-        document.querySelectorAll('.draggable-obj').forEach(el => {
-            el.className = 'draggable-obj ' + className;
+        el.addEventListener("pointerdown", (e) => {
+            el.setPointerCapture(e.pointerId);
+            let shiftX = e.clientX - el.getBoundingClientRect().left;
+            let shiftY = e.clientY - el.getBoundingClientRect().top;
+            
+            el.onpointermove = (e) => {
+                el.style.left = (e.clientX - shiftX) + 'px';
+                el.style.top = (e.clientY - shiftY) + 'px';
+            };
+            el.onpointerup = () => { el.onpointermove = null; };
         });
     }
 
-    // 4. Play button (सबको एक साथ चलाने के लिए)
-    function playAnim() {
-        applyAnim('anim-shake');
-        setTimeout(() => applyAnim('anim-zoom'), 1000);
+    // 4. Apply FX with Speed
+    function applyFX(cls) {
+        const speed = document.getElementById('speedSlider').value;
+        document.querySelectorAll('.draggable-text').forEach(el => {
+            el.className = 'draggable-text ' + cls;
+            el.style.animationDuration = speed + 's';
+        });
     }
 
-    // 5. क्लियर करना
-    function clearAll() {
-        document.getElementById('previewArea').innerHTML = '';
+    // 5. Reset
+    function resetAll() {
+        document.getElementById('reelBoard').innerHTML = '';
+        document.getElementById('reelBoard').style.backgroundImage = 'none';
     }
 </script>
+</body>
+</html>
