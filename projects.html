@@ -147,6 +147,7 @@
             width: 100%;
             height: 100%;
             display: block;
+            touch-action: none;
         }
 
         .emoji-grid {
@@ -228,6 +229,13 @@
             <span class="emoji-item" style="border-color:#b500ff;" onclick="addBubble()">💭 थॉट बबल</span>
         </div>
 
+        <!-- Move Mode Toggle Button -->
+        <div style="margin-bottom: 10px;">
+            <button id="moveToggleBtn" class="dark-btn" style="width:100%; background:#28283d; color:#00e5ff; font-weight:bold;" onclick="toggleMoveMode()">
+                🖐️ मूव मोड: बंद (Click to Enable Drag & Drop)
+            </button>
+        </div>
+
         <!-- Speed Control Slider -->
         <div class="slider-container">
             <div style="display:flex; justify-content:space-between; font-size:12px; color:#00e5ff; margin-bottom:4px;">
@@ -275,8 +283,14 @@
     let drops = [];
     let elements = [];
     let customStickers = [];
-    let lyricText = "";
+    let textElements = [];
     let globalSpeedMultiplier = 1.0;
+
+    let isMoveMode = false;
+    let isDragging = false;
+    let selectedElement = null;
+    let dragOffsetX = 0;
+    let dragOffsetY = 0;
 
     function loadBgPhoto(event) {
         const file = event.target.files[0];
@@ -300,13 +314,47 @@
             img.onload = function() {
                 customStickers.push({
                     img: img,
-                    x: (canvas.width / 2) - 60,
-                    y: (canvas.height / 2) - 60,
-                    w: 120,
-                    h: 120
+                    x: (canvas.width / 2) - 50,
+                    y: (canvas.height / 2) - 50,
+                    w: 100,
+                    h: 100
                 });
             };
             img.src = URL.createObjectURL(file);
+            fileInput.value = '';
+        } else {
+            alert("कृपया पहले एक PNG/इमेज फाइल चुनें!");
+        }
+    }
+
+    function addText() {
+        const txtInput = document.getElementById('txt');
+        const textVal = txtInput.value.trim();
+        if (textVal) {
+            textElements.push({
+                text: textVal,
+                x: canvas.width / 2,
+                y: canvas.height - 80 - (textElements.length * 30),
+                fontSize: 24,
+                color: '#ffffff'
+            });
+            txtInput.value = '';
+        } else {
+            alert("कृपया पहले टेक्स्ट/लिरिक्स लिखें!");
+        }
+    }
+
+    function toggleMoveMode() {
+        isMoveMode = !isMoveMode;
+        const btn = document.getElementById('moveToggleBtn');
+        if (isMoveMode) {
+            btn.innerText = "✋ मूव मोड: चालू (एलिमेंट्स को टच करके खिसकाएं)";
+            btn.style.background = "#00e5ff";
+            btn.style.color = "#000";
+        } else {
+            btn.innerText = "🖐️ मूव मोड: बंद (Click to Enable Drag & Drop)";
+            btn.style.background = "#28283d";
+            btn.style.color = "#00e5ff";
         }
     }
 
@@ -340,14 +388,9 @@
         elements.push({ type: 'bubble', text: '💭', x: Math.random() * (canvas.width - 50), y: canvas.height + 20, baseSpeed: 1.8, size: 32 });
     }
 
-    function addText() {
-        lyricText = document.getElementById('txt').value || "Rox Studio";
-    }
-
     function renderLoop() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        // 1. Draw Background Photo
         if (bgImage) {
             ctx.drawImage(bgImage, 0, 0, canvas.width, canvas.height);
         } else {
@@ -355,12 +398,10 @@
             ctx.fillRect(0, 0, canvas.width, canvas.height);
         }
 
-        // 2. Draw Custom Mobile PNG Stickers
         customStickers.forEach(stk => {
             ctx.drawImage(stk.img, stk.x, stk.y, stk.w, stk.h);
         });
 
-        // 3. Draw Rain (With Speed Control)
         if (rainActive) {
             ctx.strokeStyle = 'rgba(255, 255, 255, 0.7)';
             ctx.lineWidth = 1.5;
@@ -377,7 +418,6 @@
             ctx.stroke();
         }
 
-        // 4. Draw Animated FX Elements (Bird, Flower, Bubble, Star)
         elements.forEach(el => {
             ctx.font = `${el.size}px sans-serif`;
             const currentSpeed = el.baseSpeed * globalSpeedMultiplier;
@@ -392,27 +432,92 @@
                 if (el.y > canvas.height + 40) el.y = -40;
             } else if (el.type === 'bubble') {
                 ctx.fillText(el.text, el.x, el.y);
-                el.y -= currentSpeed; // Moving upwards
+                el.y -= currentSpeed;
                 if (el.y < -40) el.y = canvas.height + 40;
             } else if (el.type === 'star') {
                 ctx.fillText(el.text, el.x, el.y);
             }
         });
 
-        // 5. Draw Lyrics Text
-        if (lyricText) {
-            ctx.font = 'bold 24px Segoe UI';
-            ctx.fillStyle = '#ffffff';
+        textElements.forEach(tEl => {
+            ctx.font = `bold ${tEl.fontSize}px Segoe UI`;
+            ctx.fillStyle = tEl.color;
             ctx.textAlign = 'center';
             ctx.shadowColor = '#000';
             ctx.shadowBlur = 8;
-            ctx.fillText(lyricText, canvas.width / 2, canvas.height - 60);
+            ctx.fillText(tEl.text, tEl.x, tEl.y);
             ctx.shadowBlur = 0;
-        }
+        });
 
         requestAnimationFrame(renderLoop);
     }
     renderLoop();
+
+    function getCanvasCoords(e) {
+        const rect = canvas.getBoundingClientRect();
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        const scaleX = canvas.width / rect.width;
+        const scaleY = canvas.height / rect.height;
+
+        return {
+            x: (clientX - rect.left) * scaleX,
+            y: (clientY - rect.top) * scaleY
+        };
+    }
+
+    function handleStart(e) {
+        if (!isMoveMode) return;
+        const pos = getCanvasCoords(e);
+
+        for (let i = customStickers.length - 1; i >= 0; i--) {
+            let stk = customStickers[i];
+            if (pos.x >= stk.x && pos.x <= stk.x + stk.w && pos.y >= stk.y && pos.y <= stk.y + stk.h) {
+                selectedElement = stk;
+                isDragging = true;
+                dragOffsetX = pos.x - stk.x;
+                dragOffsetY = pos.y - stk.y;
+                return;
+            }
+        }
+
+        for (let i = textElements.length - 1; i >= 0; i--) {
+            let txt = textElements[i];
+            ctx.font = `bold ${txt.fontSize}px Segoe UI`;
+            let textWidth = ctx.measureText(txt.text).width;
+            let textHeight = txt.fontSize;
+
+            if (pos.x >= txt.x - (textWidth / 2) && pos.x <= txt.x + (textWidth / 2) &&
+                pos.y >= txt.y - textHeight && pos.y <= txt.y) {
+                selectedElement = txt;
+                isDragging = true;
+                dragOffsetX = pos.x - txt.x;
+                dragOffsetY = pos.y - txt.y;
+                return;
+            }
+        }
+    }
+
+    function handleMove(e) {
+        if (!isDragging || !selectedElement) return;
+        e.preventDefault();
+        const pos = getCanvasCoords(e);
+        selectedElement.x = pos.x - dragOffsetX;
+        selectedElement.y = pos.y - dragOffsetY;
+    }
+
+    function handleEnd() {
+        isDragging = false;
+        selectedElement = null;
+    }
+
+    canvas.addEventListener('mousedown', handleStart);
+    canvas.addEventListener('mousemove', handleMove);
+    canvas.addEventListener('mouseup', handleEnd);
+
+    canvas.addEventListener('touchstart', handleStart, { passive: false });
+    canvas.addEventListener('touchmove', handleMove, { passive: false });
+    canvas.addEventListener('touchend', handleEnd);
 
     let audioCtx = null;
     let audioDestinationNode = null;
@@ -536,13 +641,14 @@
         drops = [];
         elements = [];
         customStickers = [];
-        lyricText = "";
+        textElements = [];
         bgImage = null;
         globalSpeedMultiplier = 1.0;
         document.getElementById('speedRange').value = 1.0;
         document.getElementById('speedVal').innerText = "1.0x";
         document.getElementById('bgPhotoInput').value = '';
         document.getElementById('stickerInput').value = '';
+        document.getElementById('txt').value = '';
         document.getElementById('audio1').value = '';
         document.getElementById('audio2').value = '';
     }
