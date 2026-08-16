@@ -169,6 +169,11 @@
             cursor: pointer;
             white-space: nowrap;
         }
+        .emoji-item.selected {
+            background: #00e5ff !important;
+            color: #000 !important;
+            font-weight: bold;
+        }
 
         .dark-btn {
             background: #1a1a2e !important;
@@ -223,9 +228,15 @@
     <div class="proj-panel">
         <div class="panel-heading"><i class="fa-solid fa-wand-magic-sparkles"></i> 2. ओरिजिनल एलिमेंट्स और लिरिक्स</div>
         
-        <!-- Emoji / Water Effect Buttons -->
+        <!-- Rain & Water Controls -->
+        <label style="color:#00e5ff; font-size:12px; margin-bottom:4px; display:block;">🌧️ बारिश स्टाइल चुनें:</label>
         <div class="emoji-grid">
-            <span class="emoji-item" style="border-color:#00e5ff;" onclick="toggleRain()">🌧️ असली बारिश</span>
+            <span class="emoji-item" id="btnRainStraight" onclick="setRainStyle('straight')"> सीधी बारिश</span>
+            <span class="emoji-item" id="btnRainSlant" onclick="setRainStyle('slant')"> तिरछी बारिश</span>
+            <span class="emoji-item" id="btnRainHeavy" onclick="setRainStyle('heavy')"> मूसलाधार बारिश</span>
+        </div>
+
+        <div class="emoji-grid" style="margin-top: 6px;">
             <span class="emoji-item" style="border-color:#ff007f;" onclick="addBird()">🕊️ उड़ती चिड़िया</span>
             <span class="emoji-item" onclick="addFlower()">🌸 गिरता फूल</span>
             <span class="emoji-item" style="border-color:#00e5ff;" onclick="toggleTransparentWater()">💧 पानी (Transparent)</span>
@@ -233,7 +244,7 @@
         </div>
 
         <!-- Speed Control Slider -->
-        <div class="slider-container">
+        <div class="slider-container" style="margin-top: 8px;">
             <div style="display:flex; justify-content:space-between; font-size:12px; color:#00e5ff; margin-bottom:4px;">
                 <span>⚡ मूविंग स्पीड (कम / ज्यादा):</span>
                 <span id="speedVal">1.0x</span>
@@ -248,8 +259,15 @@
             <button class="dark-btn" style="background:#ff007f; color:#fff; font-weight:bold; width: 35%;" onclick="addCustomSticker()">➕ Add Sticker</button>
         </div>
 
+        <!-- Text/Lyric Direction Controls -->
+        <label style="color:#00e5ff; font-size:12px; margin-top:4px; display:block;">🔤 टेक्स्ट डायरेक्शन चुनें:</label>
+        <div class="emoji-grid">
+            <span class="emoji-item selected" id="txtDirUp" onclick="setTextDirection('up')">⬆️ नीचे से ऊपर</span>
+            <span class="emoji-item" id="txtDirDown" onclick="setTextDirection('down')">⬇️ ऊपर से नीचे</span>
+        </div>
+
         <!-- Text/Lyric Input -->
-        <div style="display:flex; gap:6px; margin-top:8px;">
+        <div style="display:flex; gap:6px; margin-top:4px;">
             <input type="text" id="txt" placeholder="यहाँ लिरिक्स लिखें..." class="rox-input" style="margin:0;">
             <button class="dark-btn" style="background:#00e5ff; color:#000; font-weight:bold; width: 30%;" onclick="addText()">➕ Add Text</button>
         </div>
@@ -276,13 +294,14 @@
 
     let bgImage = null;
     let rainActive = false;
+    let rainStyle = 'slant'; // 'straight', 'slant', 'heavy'
     let drops = [];
     let elements = [];
     let customStickers = [];
     let textElements = [];
+    let textDirection = 'up'; // 'up' या 'down'
     let globalSpeedMultiplier = 1.0;
 
-    // तालाब और वाटर इफ़ेक्ट के लिए वैरिएबल
     let waterLevel = 560; 
     let ripples = [];
     let transparentWater = false;
@@ -300,6 +319,46 @@
     function changeSpeed(val) {
         globalSpeedMultiplier = parseFloat(val);
         document.getElementById('speedVal').innerText = globalSpeedMultiplier.toFixed(1) + 'x';
+    }
+
+    function setRainStyle(style) {
+        rainStyle = style;
+        rainActive = true;
+        
+        // Active button UI highlight
+        document.getElementById('btnRainStraight').classList.remove('selected');
+        document.getElementById('btnRainSlant').classList.remove('selected');
+        document.getElementById('btnRainHeavy').classList.remove('selected');
+        
+        if(style === 'straight') document.getElementById('btnRainStraight').classList.add('selected');
+        if(style === 'slant') document.getElementById('btnRainSlant').classList.add('selected');
+        if(style === 'heavy') document.getElementById('btnRainHeavy').classList.add('selected');
+
+        initRainDrops();
+    }
+
+    function setTextDirection(dir) {
+        textDirection = dir;
+        document.getElementById('txtDirUp').classList.remove('selected');
+        document.getElementById('txtDirDown').classList.remove('selected');
+
+        if(dir === 'up') document.getElementById('txtDirUp').classList.add('selected');
+        if(dir === 'down') document.getElementById('txtDirDown').classList.add('selected');
+    }
+
+    function initRainDrops() {
+        drops = [];
+        let count = (rainStyle === 'heavy') ? 400 : 200;
+        let len = (rainStyle === 'heavy') ? 35 : 20;
+        
+        for (let i = 0; i < count; i++) {
+            drops.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                length: Math.random() * len + 10,
+                baseSpeed: Math.random() * 12 + 8
+            });
+        }
     }
 
     function toggleTransparentWater() {
@@ -335,29 +394,17 @@
     function addText() {
         const txtInput = document.getElementById('txt');
         const val = txtInput.value.trim() || "Rox Studio";
+        
+        // यदि ऊपर से नीचे जाना है तो शुरुआत टॉप से होगी, नहीं तो बॉटम से
+        let startY = (textDirection === 'down') ? 0 : 700;
+
         textElements.push({
             text: val,
-            x: Math.random() * (canvas.width - 150) + 50,
-            y: Math.random() * (waterLevel - 100) + 50,
-            dx: (Math.random() - 0.5) * 3.5,
-            dy: (Math.random() - 0.5) * 3.5
+            x: canvas.width / 2,
+            y: startY,
+            direction: textDirection
         });
         txtInput.value = "";
-    }
-
-    // भारी और घनी बारिश (रील्स जैसी)
-    function toggleRain() {
-        rainActive = !rainActive;
-        if (rainActive && drops.length === 0) {
-            for (let i = 0; i < 200; i++) {
-                drops.push({
-                    x: Math.random() * canvas.width,
-                    y: Math.random() * canvas.height,
-                    length: Math.random() * 25 + 15,
-                    baseSpeed: Math.random() * 15 + 10
-                });
-            }
-        }
     }
 
     function addBird() {
@@ -372,9 +419,7 @@
         if (!transparentWater && !solidWater) return;
 
         ctx.save();
-        
-        // पानी के एरिया को फोटो की चौड़ाई (w और x) के अंदर ही रखेंगे
-        let pY = y + h - 140; // फोटो के निचले हिस्से में तालाब
+        let pY = y + h - 140; 
         
         if (transparentWater) {
             ctx.fillStyle = "rgba(0, 150, 255, 0.3)"; 
@@ -399,9 +444,7 @@
             ctx.stroke();
 
             r.radius += 0.8 * globalSpeedMultiplier;
-            if (r.radius > 35) {
-                ripples.splice(index, 1);
-            }
+            if (r.radius > 35) ripples.splice(index, 1);
         });
 
         if (Math.random() > 0.90) {
@@ -417,7 +460,6 @@
     function renderLoop() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        // फोटो एरिया कैलकुलेशन (Aspect Ratio Fit)
         let w = canvas.width;
         let h = canvas.height;
         let x = 0;
@@ -438,34 +480,41 @@
             ctx.fillRect(0, 0, canvas.width, canvas.height);
         }
 
-        // ==========================================
-        // CLIP MASK: यहाँ से सभी इफ़ेक्ट्स सिर्फ फोटो के अंदर रहेंगे
-        // ==========================================
         ctx.save();
         ctx.beginPath();
         ctx.rect(x, y, w, h);
         ctx.clip();
 
-        // 1. Custom Stickers / GIFs
+        // 1. Custom Stickers
         customStickers.forEach(stk => {
             stk.x += stk.dx * globalSpeedMultiplier;
             stk.y += stk.dy * globalSpeedMultiplier;
-
             if (stk.x <= x || stk.x + stk.w >= x + w) stk.dx *= -1;
             if (stk.y <= y || stk.y + stk.h >= y + h) stk.dy *= -1;
-
             ctx.drawImage(stk.img, stk.x, stk.y, stk.w, stk.h);
         });
 
-        // 2. Draw Heavy Rain (Reels Style - फोटो के अंदर)
+        // 2. Rain Styles (सीधी, तिरछी, मूसलाधार)
         if (rainActive) {
-            ctx.strokeStyle = 'rgba(255, 255, 255, 0.45)';
-            ctx.lineWidth = 1.2;
+            if (drops.length === 0) initRainDrops();
+
+            ctx.strokeStyle = (rainStyle === 'heavy') ? 'rgba(230, 230, 255, 0.7)' : 'rgba(200, 200, 255, 0.45)';
+            ctx.lineWidth = (rainStyle === 'heavy') ? 1.8 : 1.1;
             ctx.beginPath();
+            
             drops.forEach(drop => {
+                let xOffset = 0;
+                if (rainStyle === 'slant' || rainStyle === 'heavy') {
+                    xOffset = 5; // तिरछापन
+                }
+
                 ctx.moveTo(drop.x, drop.y);
-                ctx.lineTo(drop.x - 0.5, drop.y + drop.length);
-                drop.y += drop.baseSpeed * globalSpeedMultiplier;
+                ctx.lineTo(drop.x + xOffset, drop.y + drop.length);
+                
+                let fallMultiplier = (rainStyle === 'heavy') ? 2.5 : 1.5;
+                drop.y += drop.baseSpeed * globalSpeedMultiplier * fallMultiplier;
+                if (xOffset > 0) drop.x += 1.5 * globalSpeedMultiplier;
+
                 if (drop.y > y + h) {
                     drop.y = y;
                     drop.x = x + Math.random() * w;
@@ -474,11 +523,10 @@
             ctx.stroke();
         }
 
-        // 3. Draw Animated FX Elements (Bird / Flower)
+        // 3. Elements (Bird / Flower)
         elements.forEach(el => {
             ctx.font = `${el.size}px sans-serif`;
-            const currentSpeed = el.baseSpeed * globalSpeedMultiplier;
-
+            let currentSpeed = el.baseSpeed * globalSpeedMultiplier;
             if (el.type === 'bird') {
                 ctx.fillText(el.text, el.x, el.y);
                 el.x += currentSpeed;
@@ -493,29 +541,28 @@
             }
         });
 
-        // 4. Text / Lyrics
+        // 4. Text Direction (नीचे से ऊपर / ऊपर से नीचे)
         textElements.forEach(tEl => {
-            tEl.x += tEl.dx * globalSpeedMultiplier;
-            tEl.y += tEl.dy * globalSpeedMultiplier;
+            if (tEl.direction === 'up') {
+                tEl.y -= 2 * globalSpeedMultiplier;
+                if (tEl.y < y - 50) tEl.y = y + h + 50; // लूप बॉटम से टॉप
+            } else {
+                tEl.y += 2 * globalSpeedMultiplier;
+                if (tEl.y > y + h + 50) tEl.y = y - 50; // लूप टॉप से बॉटम
+            }
 
-            if (tEl.x <= x + 30 || tEl.x >= x + w - 30) tEl.dx *= -1;
-            if (tEl.y <= y + 30 || tEl.y >= y + h - 30) tEl.dy *= -1;
-
-            ctx.font = 'bold 24px Segoe UI';
+            ctx.font = 'bold 28px Segoe UI';
             ctx.fillStyle = '#ffffff';
             ctx.textAlign = 'center';
             ctx.shadowColor = '#000';
-            ctx.shadowBlur = 8;
+            ctx.shadowBlur = 10;
             ctx.fillText(tEl.text, tEl.x, tEl.y);
             ctx.shadowBlur = 0;
         });
 
-        // 5. तालाब और पानी का इफ़ेक्ट फोटो के अंदर
         drawPondAndWaterEffects(x, y, w, h);
 
-        ctx.restore(); // Clipping Mask समाप्त
-        // ==========================================
-
+        ctx.restore();
         requestAnimationFrame(renderLoop);
     }
     renderLoop();
@@ -540,7 +587,6 @@
 
     async function togglePlayAll() {
         const btn = document.getElementById('btnPlay');
-
         if (isPlaying) {
             stopAudio();
             btn.innerText = "⚡ Play Project";
@@ -582,7 +628,6 @@
 
     function toggleRecordCanvasMP4() {
         const btn = document.getElementById('btnDownload');
-
         if (isRecording) {
             if (mediaRecorder) mediaRecorder.stop();
             stopAudio();
