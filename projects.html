@@ -1,1 +1,935 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Projects - Rox Inten Studio</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        html, body {
+            background-color: #0b0b14 !important;
+            color: #fff !important;
+            font-family: 'Segoe UI', sans-serif !important;
+            margin: 0 !important;
+            padding: 10px !important;
+            width: 100% !important;
+            box-sizing: border-box !important;
+            display: block !important;
+        }
 
+        .main-container {
+            display: flex !important;
+            flex-direction: column !important;
+            width: 100% !important;
+            max-width: 500px !important;
+            margin: 0 auto !important;
+        }
+
+        .top-header {
+            display: flex !important;
+            justify-content: space-between !important;
+            align-items: center !important;
+            padding: 5px 0 10px 0 !important;
+            width: 100% !important;
+        }
+        .brand-title {
+            font-size: 18px !important;
+            font-weight: bold !important;
+            color: #00e5ff !important;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .brand-title img.logo-icon {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 1px solid #00e5ff;
+        }
+        .brand-title span {
+            color: #ff007f !important;
+            font-size: 11px !important;
+            margin-left: 2px !important;
+        }
+
+        .nav-scroller {
+            display: flex !important;
+            gap: 8px !important;
+            overflow-x: auto !important;
+            padding-bottom: 12px !important;
+            margin-bottom: 10px !important;
+            white-space: nowrap !important;
+            width: 100% !important;
+        }
+        .nav-scroller::-webkit-scrollbar { display: none; }
+        .nav-item {
+            background: #161625 !important;
+            color: #00e5ff !important;
+            border: 1px solid #28283d !important;
+            padding: 8px 16px !important;
+            border-radius: 8px !important;
+            text-decoration: none !important;
+            font-size: 13px !important;
+            font-weight: 500 !important;
+            display: inline-block !important;
+        }
+        .nav-item.active {
+            background: #00e5ff !important;
+            color: #000 !important;
+            font-weight: bold !important;
+        }
+        .nav-item.setting-btn {
+            background: #ff007f !important;
+            color: #fff !important;
+        }
+
+        .proj-panel {
+            background: #121220 !important;
+            border: 1px solid #232338 !important;
+            border-radius: 12px !important;
+            padding: 14px !important;
+            margin-bottom: 14px !important;
+            width: 100% !important;
+            box-sizing: border-box !important;
+            display: block !important;
+        }
+        .panel-heading {
+            color: #00e5ff !important;
+            font-size: 14px !important;
+            margin: 0 0 12px 0 !important;
+        }
+        
+        .rox-input {
+            background: #0a0a12 !important;
+            border: 1px solid #2b2b40 !important;
+            color: #fff !important;
+            padding: 10px !important;
+            border-radius: 8px !important;
+            width: 100% !important;
+            box-sizing: border-box !important;
+            font-size: 13px !important;
+            margin-bottom: 8px !important;
+            display: block !important;
+        }
+
+        .pink-btn {
+            background: linear-gradient(90deg, #ff007f, #b500ff) !important;
+            color: #fff !important;
+            border: none !important;
+            padding: 12px !important;
+            border-radius: 8px !important;
+            font-weight: bold !important;
+            width: 100% !important;
+            font-size: 13px !important;
+            cursor: pointer !important;
+            margin-top: 5px !important;
+            display: block !important;
+        }
+
+        .download-btn {
+            background: linear-gradient(90deg, #00c853, #00e5ff) !important;
+            color: #000 !important;
+            border: none !important;
+            padding: 12px !important;
+            border-radius: 8px !important;
+            font-weight: bold !important;
+            width: 100% !important;
+            font-size: 13px !important;
+            cursor: pointer !important;
+            margin-top: 8px !important;
+            display: block !important;
+        }
+
+        .reel-board-container {
+            width: 100%;
+            height: 450px;
+            position: relative;
+            background: #000;
+            border: 1px solid #00e5ff;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #studioCanvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+            object-fit: contain;
+            touch-action: none;
+        }
+
+        .emoji-grid {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding: 6px 0;
+            margin-bottom: 8px;
+        }
+        .emoji-item {
+            background: #1a1a2e;
+            border: 1px solid #28283d;
+            border-radius: 6px;
+            padding: 6px 10px;
+            font-size: 13px;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+        .emoji-item.selected {
+            background: #00e5ff !important;
+            color: #000 !important;
+            font-weight: bold;
+        }
+
+        .dark-btn {
+            background: #1a1a2e !important;
+            color: #fff !important;
+            border: 1px solid #32324e !important;
+            padding: 10px !important;
+            border-radius: 8px !important;
+            font-size: 12px !important;
+            cursor: pointer !important;
+        }
+
+        .slider-container {
+            background: #0a0a12;
+            border: 1px solid #2b2b40;
+            border-radius: 8px;
+            padding: 8px 12px;
+            margin-bottom: 10px;
+        }
+
+        .audio-row {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 6px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="main-container">
+
+    <div class="top-header">
+        <div class="brand-title">
+            <img src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAP//////////////////////////////////////////////////////////////////////////////////////wgALCAABAAEBAREA/8QAFBABAAAAAAAAAAAAAAAAAAAAAP/aAAgBAQABPxA=" class="logo-icon" alt="Rox Logo">
+            Rox <span>INTEN STUDIO</span>
+        </div>
+        <div style="color: #00e5ff; font-size: 11px;"><i class="fa-solid fa-bolt"></i> Mobile Engine Active</div>
+    </div>
+
+    <div class="nav-scroller">
+        <a href="index.html" class="nav-item">Home</a>
+        <a href="upload.html" class="nav-item">Upload</a>
+        <a href="ai-tools.html" class="nav-item">AI Magic</a>
+        <a href="projects.html" class="nav-item active">Projects</a>
+        <a href="#" class="nav-item setting-btn"><i class="fa-solid fa-gear"></i> Setting</a>
+    </div>
+
+    <!-- 1. Background Photo Panel -->
+    <div class="proj-panel">
+        <div class="panel-heading"><i class="fa-solid fa-image"></i> 1. बैकग्राउंड फोटो चुनें</div>
+        <input type="file" id="bgPhotoInput" class="rox-input" accept="image/*" onchange="loadBgPhoto(event)">
+        
+        <div class="reel-board-container">
+            <canvas id="studioCanvas" width="400" height="700"></canvas>
+        </div>
+
+        <button id="btnPlay" class="pink-btn" onclick="togglePlayAll()">⚡ Play Project</button>
+        <button id="btnDownload" class="download-btn" onclick="toggleRecordCanvasMP4()"><i class="fa-solid fa-video"></i> 🎬 Record & Download MP4 (With Sound + FX)</button>
+    </div>
+
+    <!-- 2. FX Elements & Controls Panel -->
+    <div class="proj-panel">
+        <div class="panel-heading"><i class="fa-solid fa-wand-magic-sparkles"></i> 2. ओरिजिनल एलिमेंट्स और लिरिक्स</div>
+        
+        <!-- Rain & Water Controls -->
+        <label style="color:#00e5ff; font-size:12px; margin-bottom:4px; display:block;">🌧️ बारिश स्टाइल चुनें:</label>
+        <div class="emoji-grid">
+            <span class="emoji-item" id="btnRainStraight" onclick="setRainStyle('straight')"> सीधी बारिश</span>
+            <span class="emoji-item" id="btnRainSlant" onclick="setRainStyle('slant')"> तिरछी बारिश</span>
+            <span class="emoji-item" id="btnRainHeavy" onclick="setRainStyle('heavy')"> मूसलाधार बारिश</span>
+        </div>
+
+        <!-- 4 रंग के फूलों के बटन -->
+        <label style="color:#00e5ff; font-size:12px; margin-top:6px; display:block;">🌸 फूल (4 रंग):</label>
+        <div class="emoji-grid">
+            <span class="emoji-item" style="border-color:#00e5ff;" onclick="addFlower('blue')">🔵 नीला फूल</span>
+            <span class="emoji-item" style="border-color:#ff007f;" onclick="addFlower('pink')">🌸 गुलाबी फूल</span>
+            <span class="emoji-item" style="border-color:#ff4757;" onclick="addFlower('red')">🔴 लाल फूल</span>
+            <span class="emoji-item" style="border-color:#ffa502;" onclick="addFlower('yellow')">🟡 पीला फूल</span>
+        </div>
+
+        <div class="emoji-grid" style="margin-top: 6px;">
+            <span class="emoji-item" style="border-color:#ff007f;" onclick="addBird()">🕊️ उड़ती चिड़िया</span>
+            <span class="emoji-item" style="border-color:#00e5ff;" onclick="toggleTransparentWater()">💧 पानी (Transparent)</span>
+            <span class="emoji-item" style="border-color:#b500ff;" onclick="toggleSolidWater()">🌊 पानी (Solid)</span>
+        </div>
+
+        <!-- Speed Control Slider -->
+        <div class="slider-container" style="margin-top: 8px;">
+            <div style="display:flex; justify-content:space-between; font-size:12px; color:#00e5ff; margin-bottom:4px;">
+                <span>⚡ मूविंग स्पीड (कम / ज्यादा):</span>
+                <span id="speedVal">1.0x</span>
+            </div>
+            <input type="range" id="speedRange" min="0.2" max="4.0" step="0.1" value="1.0" style="width:100%; accent-color:#00e5ff;" oninput="changeSpeed(this.value)">
+        </div>
+
+        <!-- Mobile Sticker / PNG Upload Field -->
+        <label style="color:#00e5ff; font-size:12px; margin-top:6px; display:block;">मोबाइल से स्टिकर/PNG/GIF अपलोड करें:</label>
+        <div style="display:flex; gap:6px; margin-top:4px; margin-bottom:10px;">
+            <input type="file" id="stickerInput" class="rox-input" accept="image/*" style="margin:0;">
+            <button class="dark-btn" style="background:#ff007f; color:#fff; font-weight:bold; width: 35%;" onclick="addCustomSticker()">➕ Add Sticker</button>
+        </div>
+
+        <!-- Text/Lyric Direction Controls -->
+        <label style="color:#00e5ff; font-size:12px; margin-top:4px; display:block;">🔤 टेक्स्ट डायरेक्शन चुनें:</label>
+        <div class="emoji-grid">
+            <span class="emoji-item selected" id="txtDirUp" onclick="setTextDirection('up')">⬆️ नीचे से ऊपर</span>
+            <span class="emoji-item" id="txtDirDown" onclick="setTextDirection('down')">⬇️ ऊपर से नीचे</span>
+        </div>
+
+        <!-- Text/Lyric Input -->
+        <div style="display:flex; gap:6px; margin-top:4px;">
+            <input type="text" id="txt" placeholder="यहाँ लिरिक्स लिखें..." class="rox-input" style="margin:0;">
+            <button class="dark-btn" style="background:#00e5ff; color:#000; font-weight:bold; width: 30%;" onclick="addText()">➕ Add Text</button>
+        </div>
+    </div>
+
+    <!-- 4. Overlay Gallery Panel (New Feature) -->
+    <div class="proj-panel">
+        <div class="panel-heading"><i class="fa-solid fa-layer-group"></i> 4. Overlay Gallery (फोटो लेयर्स, Drag & Resize)</div>
+        <label style="color:#00e5ff; font-size:12px; margin-bottom:4px; display:block;">गैलरी में कई फोटो जोड़ें:</label>
+        <input type="file" id="galleryInput" class="rox-input" accept="image/*" multiple onchange="addToGallery(event)">
+        
+        <div id="galleryGrid" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 8px;">
+            <!-- चुनी गई फोटोज यहाँ दिखेंगी -->
+        </div>
+        <div style="font-size: 11px; color: #8a8a9e; margin-top: 6px;">💡 टिप: फोटो पर क्लिक करके वीडियो में लाएं। कोने वाले पिंक हैंडल से साइज बड़ा/छोटा करके बॉक्स में फिट करें और उंगली से कहीं भी खींचें।</div>
+    </div>
+
+    <!-- 3. Audio Cut & Mixer Panel with Start/End Time -->
+    <div class="proj-panel">
+        <div class="panel-heading"><i class="fa-solid fa-music"></i> 3. ऑडियो ट्रैक (Start & End Time Controls)</div>
+        
+        <!-- Track 1 Controls -->
+        <label style="color:#8a8a9e; font-size:11px;">Track 1 (ऑडियो फाइल):</label>
+        <input type="file" id="audio1" class="rox-input" accept="audio/*">
+        <div class="audio-row">
+            <input type="number" id="audio1Start" class="rox-input" placeholder="Start (sec) e.g. 0" style="margin:0;" value="0" min="0" step="0.1">
+            <input type="number" id="audio1End" class="rox-input" placeholder="End (sec) e.g. 30" style="margin:0;" value="" min="0" step="0.1">
+        </div>
+        
+        <!-- Track 2 Controls -->
+        <label style="color:#8a8a9e; font-size:11px; margin-top:8px; display:block;">Track 2 (ऑडियो फाइल):</label>
+        <input type="file" id="audio2" class="rox-input" accept="audio/*">
+        <div class="audio-row">
+            <input type="number" id="audio2Start" class="rox-input" placeholder="Start (sec) e.g. 0" style="margin:0;" value="0" min="0" step="0.1">
+            <input type="number" id="audio2End" class="rox-input" placeholder="End (sec) e.g. 30" style="margin:0;" value="" min="0" step="0.1">
+        </div>
+
+        <button class="dark-btn" style="background:#ff4757; color:#fff; width:100%; margin-top:8px;" onclick="resetAll()">🗑️ Reset</button>
+    </div>
+
+</div>
+
+<script>
+    const canvas = document.getElementById('studioCanvas');
+    const ctx = canvas.getContext('2d');
+
+    let bgImage = null;
+    let rainActive = false;
+    let rainStyle = 'slant'; 
+    let drops = [];
+    let elements = [];
+    let customStickers = [];
+    let textElements = [];
+    let textDirection = 'up'; 
+    let globalSpeedMultiplier = 1.0;
+
+    let waterLevel = 560; 
+    let ripples = [];
+    let transparentWater = false;
+    let solidWater = false;
+
+    // गैलरी और ओवरले वेरिएबल्स (Drag & Resize के साथ)
+    let galleryItems = [];
+    let activeOverlays = [];
+    let draggedOverlay = null;
+    let isResizing = false;
+    let resizeHandleSize = 20;
+    let dragOffsetX = 0;
+    let dragOffsetY = 0;
+
+    function loadBgPhoto(event) {
+        const file = event.target.files[0];
+        if (file) {
+            const img = new Image();
+            img.onload = function() { bgImage = img; };
+            img.src = URL.createObjectURL(file);
+        }
+    }
+
+    function changeSpeed(val) {
+        globalSpeedMultiplier = parseFloat(val);
+        document.getElementById('speedVal').innerText = globalSpeedMultiplier.toFixed(1) + 'x';
+    }
+
+    function setRainStyle(style) {
+        rainStyle = style;
+        rainActive = true;
+        
+        document.getElementById('btnRainStraight').classList.remove('selected');
+        document.getElementById('btnRainSlant').classList.remove('selected');
+        document.getElementById('btnRainHeavy').classList.remove('selected');
+        
+        if(style === 'straight') document.getElementById('btnRainStraight').classList.add('selected');
+        if(style === 'slant') document.getElementById('btnRainSlant').classList.add('selected');
+        if(style === 'heavy') document.getElementById('btnRainHeavy').classList.add('selected');
+
+        initRainDrops();
+    }
+
+    function setTextDirection(dir) {
+        textDirection = dir;
+        document.getElementById('txtDirUp').classList.remove('selected');
+        document.getElementById('txtDirDown').classList.remove('selected');
+
+        if(dir === 'up') document.getElementById('txtDirUp').classList.add('selected');
+        if(dir === 'down') document.getElementById('txtDirDown').classList.add('selected');
+    }
+
+    function initRainDrops() {
+        drops = [];
+        let count = (rainStyle === 'heavy') ? 400 : 200;
+        let len = (rainStyle === 'heavy') ? 35 : 20;
+        
+        for (let i = 0; i < count; i++) {
+            drops.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                length: Math.random() * len + 10,
+                baseSpeed: Math.random() * 12 + 8
+            });
+        }
+    }
+
+    function toggleTransparentWater() {
+        transparentWater = !transparentWater;
+        solidWater = false; 
+    }
+
+    function toggleSolidWater() {
+        solidWater = !solidWater;
+        transparentWater = false; 
+    }
+
+    function addCustomSticker() {
+        const fileInput = document.getElementById('stickerInput');
+        const file = fileInput.files[0];
+        if (file) {
+            const img = new Image();
+            img.onload = function() {
+                customStickers.push({
+                    img: img,
+                    x: Math.random() * (canvas.width - 120),
+                    y: Math.random() * (waterLevel - 150),
+                    w: 90,
+                    h: 90,
+                    dx: (Math.random() - 0.5) * 4,
+                    dy: (Math.random() - 0.5) * 4
+                });
+            };
+            img.src = URL.createObjectURL(file);
+        }
+    }
+
+    // गैलरी फंक्शंस
+    function addToGallery(event) {
+        const files = event.target.files;
+        for (let i = 0; i < files.length; i++) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    galleryItems.push({ id: Date.now() + Math.random(), img: img, active: false });
+                    renderGallery();
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(files[i]);
+        }
+    }
+
+    function renderGallery() {
+        const grid = document.getElementById('galleryGrid');
+        grid.innerHTML = '';
+        galleryItems.forEach((item, index) => {
+            const div = document.createElement('div');
+            div.style.position = 'relative';
+            div.style.border = item.active ? '2px solid #00e5ff' : '1px solid #28283d';
+            div.style.borderRadius = '6px';
+            div.style.overflow = 'hidden';
+            div.style.cursor = 'pointer';
+            div.innerHTML = `
+                <img src="${item.img.src}" style="width:100%; height:55px; object-fit:cover; display:block;">
+                <div style="position:absolute; top:2px; right:2px; background:${item.active ? '#00e5ff' : 'rgba(0,0,0,0.6)'}; color:${item.active ? '#000' : '#fff'}; font-size:10px; padding:1px 4px; border-radius:3px;">${item.active ? 'ON' : 'OFF'}</div>
+            `;
+            div.onclick = () => toggleGalleryOverlay(index);
+            grid.appendChild(div);
+        });
+    }
+
+    function toggleGalleryOverlay(index) {
+        let item = galleryItems[index];
+        item.active = !item.active;
+
+        if (item.active) {
+            activeOverlays.push({
+                id: item.id,
+                img: item.img,
+                x: 80,
+                y: 120,
+                w: 140,
+                h: 140
+            });
+        } else {
+            activeOverlays = activeOverlays.filter(o => o.id !== item.id);
+        }
+        renderGallery();
+    }
+
+    // Canvas Touch & Mouse Drag / Resize Listeners
+    function getCanvasCoordinates(e) {
+        const rect = canvas.getBoundingClientRect();
+        const clientX = e.clientX || (e.touches && e.touches[0].clientX);
+        const clientY = e.clientY || (e.touches && e.touches[0].clientY);
+        
+        const scaleX = canvas.width / rect.width;
+        const scaleY = canvas.height / rect.height;
+
+        return {
+            x: (clientX - rect.left) * scaleX,
+            y: (clientY - rect.top) * scaleY
+        };
+    }
+
+    canvas.addEventListener('mousedown', startDrag);
+    canvas.addEventListener('touchstart', startDrag, { passive: false });
+
+    canvas.addEventListener('mousemove', dragMove);
+    canvas.addEventListener('touchmove', dragMove, { passive: false });
+
+    canvas.addEventListener('mouseup', endDrag);
+    canvas.addEventListener('touchend', endDrag);
+
+    function startDrag(e) {
+        const coords = getCanvasCoordinates(e);
+        
+        // 1. Check Resize Handle (Bottom-Right Corner)
+        for (let i = activeOverlays.length - 1; i >= 0; i--) {
+            let ov = activeOverlays[i];
+            if (coords.x >= ov.x + ov.w - resizeHandleSize && coords.x <= ov.x + ov.w &&
+                coords.y >= ov.y + ov.h - resizeHandleSize && coords.y <= ov.y + ov.h) {
+                draggedOverlay = ov;
+                isResizing = true;
+                if(e.cancelable) e.preventDefault();
+                return;
+            }
+        }
+
+        // 2. Check Regular Drag
+        for (let i = activeOverlays.length - 1; i >= 0; i--) {
+            let ov = activeOverlays[i];
+            if (coords.x >= ov.x && coords.x <= ov.x + ov.w && coords.y >= ov.y && coords.y <= ov.y + ov.h) {
+                draggedOverlay = ov;
+                isResizing = false;
+                dragOffsetX = coords.x - ov.x;
+                dragOffsetY = coords.y - ov.y;
+                if(e.cancelable) e.preventDefault();
+                break;
+            }
+        }
+    }
+
+    function dragMove(e) {
+        if (!draggedOverlay) return;
+        const coords = getCanvasCoordinates(e);
+        
+        if (isResizing) {
+            draggedOverlay.w = Math.max(30, coords.x - draggedOverlay.x);
+            draggedOverlay.h = Math.max(30, coords.y - draggedOverlay.y);
+        } else {
+            draggedOverlay.x = coords.x - dragOffsetX;
+            draggedOverlay.y = coords.y - dragOffsetY;
+        }
+        if(e.cancelable) e.preventDefault();
+    }
+
+    function endDrag() {
+        draggedOverlay = null;
+        isResizing = false;
+    }
+
+    function addText() {
+        const txtInput = document.getElementById('txt');
+        const val = txtInput.value.trim() || "Rox Studio";
+        let startY = (textDirection === 'down') ? -50 : 750;
+
+        textElements.push({
+            text: val,
+            x: canvas.width / 2,
+            y: startY,
+            direction: textDirection
+        });
+        txtInput.value = "";
+    }
+
+    function addBird() {
+        elements.push({ type: 'bird', text: '🕊️', x: -50, y: 100 + Math.random() * 200, baseSpeed: 2, size: 30 });
+    }
+
+    function addFlower(color) {
+        elements.push({ type: 'flower', color: color, x: Math.random() * (canvas.width - 40), y: -40, baseSpeed: 2.5, size: 28 });
+    }
+
+    function drawPondAndWaterEffects(x, y, w, h) {
+        if (!transparentWater && !solidWater) return;
+
+        ctx.save();
+        let pY = y + h - 140; 
+        
+        if (transparentWater) {
+            ctx.fillStyle = "rgba(0, 150, 255, 0.3)"; 
+        } else if (solidWater) {
+            ctx.fillStyle = "rgba(0, 80, 180, 1.0)";  
+        }
+        
+        ctx.fillRect(x, pY, w, (y + h) - pY);
+
+        ctx.strokeStyle = "rgba(0, 229, 255, 0.6)";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(x, pY);
+        ctx.lineTo(x + w, pY);
+        ctx.stroke();
+
+        ctx.strokeStyle = "rgba(255, 255, 255, 0.5)";
+        ctx.lineWidth = 1.2;
+        ripples.forEach((r, index) => {
+            ctx.beginPath();
+            ctx.ellipse(r.x, r.y, r.radius, r.radius * 0.4, 0, 0, Math.PI * 2);
+            ctx.stroke();
+
+            r.radius += 0.8 * globalSpeedMultiplier;
+            if (r.radius > 35) ripples.splice(index, 1);
+        });
+
+        if (Math.random() > 0.90) {
+            ripples.push({
+                x: x + Math.random() * w,
+                y: pY + Math.random() * 40,
+                radius: 2
+            });
+        }
+        ctx.restore();
+    }
+
+    function renderLoop() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        let w = canvas.width;
+        let h = canvas.height;
+        let x = 0;
+        let y = 0;
+
+        if (bgImage) {
+            const hRatio = canvas.width / bgImage.width;
+            const vRatio = canvas.height / bgImage.height;
+            const ratio = Math.min(hRatio, vRatio);
+            w = bgImage.width * ratio;
+            h = bgImage.height * ratio;
+            x = (canvas.width - w) / 2;
+            y = (canvas.height - h) / 2;
+            
+            ctx.drawImage(bgImage, 0, 0, bgImage.width, bgImage.height, x, y, w, h);
+        } else {
+            ctx.fillStyle = '#111';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        }
+
+        ctx.save();
+        ctx.beginPath();
+        ctx.rect(x, y, w, h);
+        ctx.clip();
+
+        // 1. Gallery Overlays Rendering with Resize Handle & Border
+        activeOverlays.forEach(ov => {
+            ctx.drawImage(ov.img, ov.x, ov.y, ov.w, ov.h);
+            
+            // Border & Resize Handle Box
+            ctx.strokeStyle = "#00e5ff";
+            ctx.lineWidth = 1.5;
+            ctx.strokeRect(ov.x, ov.y, ov.w, ov.h);
+            
+            ctx.fillStyle = "#ff007f";
+            ctx.fillRect(ov.x + ov.w - resizeHandleSize, ov.y + ov.h - resizeHandleSize, resizeHandleSize, resizeHandleSize);
+        });
+
+        // 2. Custom Stickers
+        customStickers.forEach(stk => {
+            stk.x += stk.dx * globalSpeedMultiplier;
+            stk.y += stk.dy * globalSpeedMultiplier;
+            if (stk.x <= x || stk.x + stk.w >= x + w) stk.dx *= -1;
+            if (stk.y <= y || stk.y + stk.h >= y + h) stk.dy *= -1;
+            ctx.drawImage(stk.img, stk.x, stk.y, stk.w, stk.h);
+        });
+
+        // 3. Rain Styles
+        if (rainActive) {
+            if (drops.length === 0) initRainDrops();
+
+            ctx.strokeStyle = (rainStyle === 'heavy') ? 'rgba(230, 230, 255, 0.7)' : 'rgba(200, 200, 255, 0.45)';
+            ctx.lineWidth = (rainStyle === 'heavy') ? 1.8 : 1.1;
+            ctx.beginPath();
+            
+            drops.forEach(drop => {
+                let xOffset = 0;
+                if (rainStyle === 'slant' || rainStyle === 'heavy') {
+                    xOffset = 5;
+                }
+
+                ctx.moveTo(drop.x, drop.y);
+                ctx.lineTo(drop.x + xOffset, drop.y + drop.length);
+                
+                let fallMultiplier = (rainStyle === 'heavy') ? 2.5 : 1.5;
+                drop.y += drop.baseSpeed * globalSpeedMultiplier * fallMultiplier;
+                if (xOffset > 0) drop.x += 1.5 * globalSpeedMultiplier;
+
+                if (drop.y > y + h) {
+                    drop.y = y;
+                    drop.x = x + Math.random() * w;
+                }
+            });
+            ctx.stroke();
+        }
+
+        // 4. Elements (Bird / Flowers)
+        elements.forEach(el => {
+            let currentSpeed = el.baseSpeed * globalSpeedMultiplier;
+            
+            if (el.type === 'bird') {
+                ctx.font = `${el.size}px sans-serif`;
+                ctx.fillText(el.text, el.x, el.y);
+                el.x += currentSpeed;
+                if (el.x > x + w + 40) el.x = x - 40;
+            } else if (el.type === 'flower') {
+                ctx.save();
+                ctx.font = `${el.size}px sans-serif`;
+                ctx.shadowBlur = 6;
+                if (el.color === 'blue') ctx.shadowColor = '#00e5ff';
+                else if (el.color === 'pink') ctx.shadowColor = '#ff007f';
+                else if (el.color === 'red') ctx.shadowColor = '#ff4757';
+                else if (el.color === 'yellow') ctx.shadowColor = '#ffa502';
+
+                let flowerEmoji = '🌸';
+                if (el.color === 'blue') flowerEmoji = '🔷';
+                else if (el.color === 'pink') flowerEmoji = '🌸';
+                else if (el.color === 'red') flowerEmoji = '🌺';
+                else if (el.color === 'yellow') flowerEmoji = '🌼';
+
+                ctx.fillText(flowerEmoji, el.x, el.y);
+                ctx.restore();
+
+                el.y += currentSpeed;
+                if (el.y > y + h + 40) {
+                    el.y = y - 40;
+                    el.x = x + Math.random() * (w - 40);
+                }
+            }
+        });
+
+        // 5. Text Direction Animation Live Fix
+        textElements.forEach(tEl => {
+            if (tEl.direction === 'up') {
+                tEl.y -= 2 * globalSpeedMultiplier;
+                if (tEl.y < -50) tEl.y = 750; 
+            } else {
+                tEl.y += 2 * globalSpeedMultiplier;
+                if (tEl.y > 750) tEl.y = -50; 
+            }
+
+            ctx.font = 'bold 28px Segoe UI';
+            ctx.fillStyle = '#ffffff';
+            ctx.textAlign = 'center';
+            ctx.shadowColor = '#000';
+            ctx.shadowBlur = 10;
+            ctx.fillText(tEl.text, tEl.x, tEl.y);
+            ctx.shadowBlur = 0;
+        });
+
+        drawPondAndWaterEffects(x, y, w, h);
+
+        ctx.restore();
+        requestAnimationFrame(renderLoop);
+    }
+    renderLoop();
+
+    let audioCtx = null;
+    let audioDestinationNode = null;
+    let currentSource1 = null;
+    let currentSource2 = null;
+    let isPlaying = false;
+    let mediaRecorder = null;
+    let isRecording = false;
+
+    function initAudioContext() {
+        if (!audioCtx) {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            audioDestinationNode = audioCtx.createMediaStreamDestination();
+        }
+        if (audioCtx.state === 'suspended') {
+            audioCtx.resume();
+        }
+    }
+
+    async function togglePlayAll() {
+        const btn = document.getElementById('btnPlay');
+        if (isPlaying) {
+            stopAudio();
+            btn.innerText = "⚡ Play Project";
+            btn.style.background = "linear-gradient(90deg, #ff007f, #b500ff)";
+            isPlaying = false;
+        } else {
+            initAudioContext();
+            btn.innerText = "⏹️ Stop Playback";
+            btn.style.background = "#ff4757";
+            isPlaying = true;
+
+            const file1 = document.getElementById('audio1').files[0];
+            if (file1) {
+                let start1 = parseFloat(document.getElementById('audio1Start').value) || 0;
+                let end1Input = document.getElementById('audio1End').value;
+                let buf1 = await file1.arrayBuffer().then(b => audioCtx.decodeAudioData(b));
+                
+                currentSource1 = audioCtx.createBufferSource();
+                currentSource1.buffer = buf1;
+                currentSource1.connect(audioCtx.destination);
+                currentSource1.connect(audioDestinationNode);
+                
+                let duration1 = end1Input ? parseFloat(end1Input) - start1 : (buf1.duration - start1);
+                currentSource1.start(0, start1, duration1 > 0 ? duration1 : undefined);
+            }
+
+            const file2 = document.getElementById('audio2').files[0];
+            if (file2) {
+                let start2 = parseFloat(document.getElementById('audio2Start').value) || 0;
+                let end2Input = document.getElementById('audio2End').value;
+                let buf2 = await file2.arrayBuffer().then(b => audioCtx.decodeAudioData(b));
+                
+                currentSource2 = audioCtx.createBufferSource();
+                currentSource2.buffer = buf2;
+                currentSource2.connect(audioCtx.destination);
+                currentSource2.connect(audioDestinationNode);
+                
+                let duration2 = end2Input ? parseFloat(end2Input) - start2 : (buf2.duration - start2);
+                currentSource2.start(0, start2, duration2 > 0 ? duration2 : undefined);
+            }
+        }
+    }
+
+    function stopAudio() {
+        if (currentSource1) try { currentSource1.stop(); } catch(e){}
+        if (currentSource2) try { currentSource2.stop(); } catch(e){}
+    }
+
+    function toggleRecordCanvasMP4() {
+        const btn = document.getElementById('btnDownload');
+        if (isRecording) {
+            if (mediaRecorder) mediaRecorder.stop();
+            stopAudio();
+            isPlaying = false;
+            document.getElementById('btnPlay').innerText = "⚡ Play Project";
+            document.getElementById('btnPlay').style.background = "linear-gradient(90deg, #ff007f, #b500ff)";
+            btn.innerHTML = '<i class="fa-solid fa-video"></i> 🎬 Record & Download MP4 (With Sound + FX)';
+            btn.style.background = "linear-gradient(90deg, #00c853, #00e5ff)";
+            isRecording = false;
+        } else {
+            initAudioContext();
+            if (!isPlaying) togglePlayAll();
+
+            const canvasStream = canvas.captureStream(30);
+            const combinedStream = new MediaStream([
+                ...canvasStream.getVideoTracks(),
+                ...audioDestinationNode.stream.getAudioTracks()
+            ]);
+
+            let options = { mimeType: 'video/webm' };
+            if (MediaRecorder.isTypeSupported('video/mp4')) {
+                options = { mimeType: 'video/mp4' };
+            } else if (MediaRecorder.isTypeSupported('video/webm;codecs=vp9')) {
+                options = { mimeType: 'video/webm;codecs=vp9' };
+            }
+
+            mediaRecorder = new MediaRecorder(combinedStream, options);
+            let chunks = [];
+
+            mediaRecorder.ondataavailable = (e) => {
+                if (e.data.size > 0) chunks.push(e.data);
+            };
+
+            mediaRecorder.onstop = () => {
+                const blob = new Blob(chunks, { type: options.mimeType });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'Rox_Studio_Video_' + Date.now() + '.mp4';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+            };
+
+            mediaRecorder.start();
+            isRecording = true;
+            btn.innerHTML = "🛑 Recording... Click to Stop & Save MP4";
+            btn.style.background = "#ff4757";
+        }
+    }
+
+    function resetAll() {
+        stopAudio();
+        isPlaying = false;
+        if (isRecording) toggleRecordCanvasMP4();
+        rainActive = false;
+        transparentWater = false;
+        solidWater = false;
+        drops = [];
+        elements = [];
+        customStickers = [];
+        textElements = [];
+        galleryItems = [];
+        activeOverlays = [];
+        bgImage = null;
+        globalSpeedMultiplier = 1.0;
+        document.getElementById('speedRange').value = 1.0;
+        document.getElementById('speedVal').innerText = "1.0x";
+        document.getElementById('bgPhotoInput').value = '';
+        document.getElementById('stickerInput').value = '';
+        document.getElementById('galleryInput').value = '';
+        document.getElementById('galleryGrid').innerHTML = '';
+        document.getElementById('txt').value = '';
+        document.getElementById('audio1').value = '';
+        document.getElementById('audio1Start').value = '0';
+        document.getElementById('audio1End').value = '';
+        document.getElementById('audio2').value = '';
+        document.getElementById('audio2Start').value = '0';
+        document.getElementById('audio2End').value = '';
+    }
+</script>
+</body>
+</html>
