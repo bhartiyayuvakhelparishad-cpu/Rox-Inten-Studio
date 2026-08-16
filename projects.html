@@ -219,7 +219,7 @@
     <div class="proj-panel">
         <div class="panel-heading"><i class="fa-solid fa-wand-magic-sparkles"></i> 2. ओरिजिनल एलिमेंट्स और लिरिक्स</div>
         
-        <!-- Emoji / Water Effect Buttons (Updated) -->
+        <!-- Emoji / Water Effect Buttons -->
         <div class="emoji-grid">
             <span class="emoji-item" style="border-color:#00e5ff;" onclick="toggleRain()">🌧️ असली बारिश</span>
             <span class="emoji-item" style="border-color:#ff007f;" onclick="addBird()">🕊️ उड़ती चिड़िया</span>
@@ -300,15 +300,14 @@
 
     function toggleTransparentWater() {
         transparentWater = !transparentWater;
-        solidWater = false; // अगर सॉलिड ऑन है तो बंद हो जाएगा
+        solidWater = false; 
     }
 
     function toggleSolidWater() {
         solidWater = !solidWater;
-        transparentWater = false; // अगर ट्रांसपेरेंट ऑन है तो बंद हो जाएगा
+        transparentWater = false; 
     }
 
-    // स्टिकर / GIF (चारों तरफ राइट-लेफ्ट-अप-डाउन घूमने वाला लॉजिक)
     function addCustomSticker() {
         const fileInput = document.getElementById('stickerInput');
         const file = fileInput.files[0];
@@ -329,7 +328,6 @@
         }
     }
 
-    // टेक्स्ट / लिरिक्स (चारों तरफ राइट-लेफ्ट-अप-डाउन घूमने वाला लॉजिक)
     function addText() {
         const txtInput = document.getElementById('txt');
         const val = txtInput.value.trim() || "Rox Studio";
@@ -343,15 +341,16 @@
         txtInput.value = "";
     }
 
+    // भारी और घनी बारिश (रील्स जैसी)
     function toggleRain() {
         rainActive = !rainActive;
         if (rainActive && drops.length === 0) {
-            for (let i = 0; i < 60; i++) {
+            for (let i = 0; i < 200; i++) {
                 drops.push({
                     x: Math.random() * canvas.width,
                     y: Math.random() * canvas.height,
-                    length: Math.random() * 20 + 10,
-                    baseSpeed: Math.random() * 10 + 5
+                    length: Math.random() * 25 + 15,
+                    baseSpeed: Math.random() * 15 + 10
                 });
             }
         }
@@ -365,22 +364,19 @@
         elements.push({ type: 'flower', text: '🌸', x: Math.random() * (canvas.width - 40), y: -40, baseSpeed: 2.5, size: 28 });
     }
 
-    // तालाब और पानी की बूंदों (Ripples) को ड्रा करने का अपडेटेड फंक्शन
     function drawPondAndWaterEffects() {
-        if (!transparentWater && !solidWater) return; // अगर कोई वाटर इफ़ेक्ट ऑन नहीं है तो कुछ मत दिखाओ
+        if (!transparentWater && !solidWater) return;
 
         ctx.save();
         
-        // ट्रांसपेरेंट या सॉलिड रंग सेट करें
         if (transparentWater) {
-            ctx.fillStyle = "rgba(0, 150, 255, 0.3)"; // ट्रांसपेरेंट पानी
+            ctx.fillStyle = "rgba(0, 150, 255, 0.3)"; 
         } else if (solidWater) {
-            ctx.fillStyle = "rgba(0, 80, 180, 1.0)";  // सॉलिड (Non-Transparent) पानी
+            ctx.fillStyle = "rgba(0, 80, 180, 1.0)";  
         }
         
         ctx.fillRect(0, waterLevel, canvas.width, canvas.height - waterLevel);
 
-        // तालाब की ऊपरी सतह पर चमकती हुई बॉर्डर लाइन
         ctx.strokeStyle = "rgba(0, 229, 255, 0.6)";
         ctx.lineWidth = 2;
         ctx.beginPath();
@@ -388,7 +384,6 @@
         ctx.lineTo(canvas.width, waterLevel);
         ctx.stroke();
 
-        // पानी में गिरती बूंदों की लहरें (Ripples)
         ctx.strokeStyle = "rgba(255, 255, 255, 0.5)";
         ctx.lineWidth = 1.2;
         ripples.forEach((r, index) => {
@@ -402,7 +397,6 @@
             }
         });
 
-        // यदि बारिश या पानी का इफ़ेक्ट ऑन है तो तालाब में लगातार बूंदें गिरेंगी
         if (Math.random() > 0.90) {
             ripples.push({
                 x: Math.random() * canvas.width,
@@ -424,7 +418,7 @@
             ctx.fillRect(0, 0, canvas.width, canvas.height);
         }
 
-        // 2. Custom Stickers / GIFs - चारों तरफ (Right, Left, Up, Down) बाउंसिंग मूवमेंट
+        // 2. Custom Stickers / GIFs
         customStickers.forEach(stk => {
             stk.x += stk.dx * globalSpeedMultiplier;
             stk.y += stk.dy * globalSpeedMultiplier;
@@ -435,14 +429,14 @@
             ctx.drawImage(stk.img, stk.x, stk.y, stk.w, stk.h);
         });
 
-        // 3. Draw Rain (With Speed Control)
+        // 3. Draw Heavy Rain (Reels Style)
         if (rainActive) {
-            ctx.strokeStyle = 'rgba(255, 255, 255, 0.7)';
-            ctx.lineWidth = 1.5;
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.45);';
+            ctx.lineWidth = 1.2;
             ctx.beginPath();
             drops.forEach(drop => {
                 ctx.moveTo(drop.x, drop.y);
-                ctx.lineTo(drop.x - 1, drop.y + drop.length);
+                ctx.lineTo(drop.x - 0.5, drop.y + drop.length);
                 drop.y += drop.baseSpeed * globalSpeedMultiplier;
                 if (drop.y > canvas.height) {
                     drop.y = -20;
@@ -452,7 +446,7 @@
             ctx.stroke();
         }
 
-        // 4. Draw Animated FX Elements (Bird, Flower)
+        // 4. Draw Animated FX Elements
         elements.forEach(el => {
             ctx.font = `${el.size}px sans-serif`;
             const currentSpeed = el.baseSpeed * globalSpeedMultiplier;
@@ -475,7 +469,7 @@
             }
         });
 
-        // 5. Text / Lyrics - चारों तरफ (Right, Left, Up, Down) बाउंसिंग मूवमेंट
+        // 5. Text / Lyrics
         textElements.forEach(tEl => {
             tEl.x += tEl.dx * globalSpeedMultiplier;
             tEl.y += tEl.dy * globalSpeedMultiplier;
@@ -496,24 +490,7 @@
         // 6. नीचे तालाब और पानी की बूंदों का इफ़ेक्ट
         drawPondAndWaterEffects();
 
-        // 7. Rox Inten Studio वाटरमार्क और लोगो (ऊपर कोने में हमेशा दिखेगा)
-        ctx.save();
-        ctx.fillStyle = "rgba(0, 229, 255, 0.85)";
-        ctx.font = "bold 13px Segoe UI";
-        ctx.textAlign = "left";
-        ctx.shadowColor = "#000";
-        ctx.shadowBlur = 4;
-        
-        ctx.fillText("Rox Inten Studio", 32, 28);
-        
-        ctx.fillStyle = "#ff007f";
-        ctx.beginPath();
-        ctx.arc(18, 23, 7, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.strokeStyle = "#fff";
-        ctx.lineWidth = 1.5;
-        ctx.stroke();
-        ctx.restore();
+        // (यहाँ से वाटरमार्क पूरी तरह हटा दिया गया है)
 
         requestAnimationFrame(renderLoop);
     }
