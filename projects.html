@@ -161,6 +161,7 @@
             height: 100%;
             display: block;
             object-fit: contain;
+            touch-action: none;
         }
 
         .emoji-grid {
@@ -300,6 +301,18 @@
         </div>
     </div>
 
+    <!-- 4. Overlay Gallery Panel (New Feature) -->
+    <div class="proj-panel">
+        <div class="panel-heading"><i class="fa-solid fa-layer-group"></i> 4. Overlay Gallery (फोटो लेयर्स & Drag)</div>
+        <label style="color:#00e5ff; font-size:12px; margin-bottom:4px; display:block;">गैलरी में कई फोटो जोड़ें:</label>
+        <input type="file" id="galleryInput" class="rox-input" accept="image/*" multiple onchange="addToGallery(event)">
+        
+        <div id="galleryGrid" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 8px;">
+            <!-- चुनी गई फोटोज यहाँ दिखेंगी -->
+        </div>
+        <div style="font-size: 11px; color: #8a8a9e; margin-top: 6px;">💡 टिप: फोटो पर क्लिक करके वीडियो में लाएं/हटाएं। वीडियो पर फोटो को उंगली से खींचकर (Drag) कहीं भी ले जा सकते हैं।</div>
+    </div>
+
     <!-- 3. Audio Cut & Mixer Panel with Start/End Time -->
     <div class="proj-panel">
         <div class="panel-heading"><i class="fa-solid fa-music"></i> 3. ऑडियो ट्रैक (Start & End Time Controls)</div>
@@ -343,6 +356,13 @@
     let ripples = [];
     let transparentWater = false;
     let solidWater = false;
+
+    // गैलरी और ओवरले वेरिएबल्स
+    let galleryItems = [];
+    let activeOverlays = [];
+    let draggedOverlay = null;
+    let dragOffsetX = 0;
+    let dragOffsetY = 0;
 
     function loadBgPhoto(event) {
         const file = event.target.files[0];
@@ -425,6 +445,113 @@
             };
             img.src = URL.createObjectURL(file);
         }
+    }
+
+    // गैलरी फंक्शंस
+    function addToGallery(event) {
+        const files = event.target.files;
+        for (let i = 0; i < files.length; i++) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    galleryItems.push({ id: Date.now() + Math.random(), img: img, active: false });
+                    renderGallery();
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(files[i]);
+        }
+    }
+
+    function renderGallery() {
+        const grid = document.getElementById('galleryGrid');
+        grid.innerHTML = '';
+        galleryItems.forEach((item, index) => {
+            const div = document.createElement('div');
+            div.style.position = 'relative';
+            div.style.border = item.active ? '2px solid #00e5ff' : '1px solid #28283d';
+            div.style.borderRadius = '6px';
+            div.style.overflow = 'hidden';
+            div.style.cursor = 'pointer';
+            div.innerHTML = `
+                <img src="${item.img.src}" style="width:100%; height:55px; object-fit:cover; display:block;">
+                <div style="position:absolute; top:2px; right:2px; background:${item.active ? '#00e5ff' : 'rgba(0,0,0,0.6)'}; color:${item.active ? '#000' : '#fff'}; font-size:10px; padding:1px 4px; border-radius:3px;">${item.active ? 'ON' : 'OFF'}</div>
+            `;
+            div.onclick = () => toggleGalleryOverlay(index);
+            grid.appendChild(div);
+        });
+    }
+
+    function toggleGalleryOverlay(index) {
+        let item = galleryItems[index];
+        item.active = !item.active;
+
+        if (item.active) {
+            activeOverlays.push({
+                id: item.id,
+                img: item.img,
+                x: 100,
+                y: 150,
+                w: 120,
+                h: 120
+            });
+        } else {
+            activeOverlays = activeOverlays.filter(o => o.id !== item.id);
+        }
+        renderGallery();
+    }
+
+    // Canvas Touch & Mouse Drag Listeners for Overlays
+    function getCanvasCoordinates(e) {
+        const rect = canvas.getBoundingClientRect();
+        const clientX = e.clientX || (e.touches && e.touches[0].clientX);
+        const clientY = e.clientY || (e.touches && e.touches[0].clientY);
+        
+        // Scale factors for Canvas internal resolution vs display size
+        const scaleX = canvas.width / rect.width;
+        const scaleY = canvas.height / rect.height;
+
+        return {
+            x: (clientX - rect.left) * scaleX,
+            y: (clientY - rect.top) * scaleY
+        };
+    }
+
+    canvas.addEventListener('mousedown', startDrag);
+    canvas.addEventListener('touchstart', startDrag, { passive: false });
+
+    canvas.addEventListener('mousemove', dragMove);
+    canvas.addEventListener('touchmove', dragMove, { passive: false });
+
+    canvas.addEventListener('mouseup', endDrag);
+    canvas.addEventListener('touchend', endDrag);
+
+    function startDrag(e) {
+        const coords = getCanvasCoordinates(e);
+        // Reverse loop to pick topmost overlay first
+        for (let i = activeOverlays.length - 1; i >= 0; i--) {
+            let ov = activeOverlays[i];
+            if (coords.x >= ov.x && coords.x <= ov.x + ov.w && coords.y >= ov.y && coords.y <= ov.y + ov.h) {
+                draggedOverlay = ov;
+                dragOffsetX = coords.x - ov.x;
+                dragOffsetY = coords.y - ov.y;
+                if(e.cancelable) e.preventDefault();
+                break;
+            }
+        }
+    }
+
+    function dragMove(e) {
+        if (!draggedOverlay) return;
+        const coords = getCanvasCoordinates(e);
+        draggedOverlay.x = coords.x - dragOffsetX;
+        draggedOverlay.y = coords.y - dragOffsetY;
+        if(e.cancelable) e.preventDefault();
+    }
+
+    function endDrag() {
+        draggedOverlay = null;
     }
 
     function addText() {
@@ -519,7 +646,12 @@
         ctx.rect(x, y, w, h);
         ctx.clip();
 
-        // 1. Custom Stickers
+        // 1. Gallery Overlays Rendering & Drag
+        activeOverlays.forEach(ov => {
+            ctx.drawImage(ov.img, ov.x, ov.y, ov.w, ov.h);
+        });
+
+        // 2. Custom Stickers
         customStickers.forEach(stk => {
             stk.x += stk.dx * globalSpeedMultiplier;
             stk.y += stk.dy * globalSpeedMultiplier;
@@ -528,7 +660,7 @@
             ctx.drawImage(stk.img, stk.x, stk.y, stk.w, stk.h);
         });
 
-        // 2. Rain Styles
+        // 3. Rain Styles
         if (rainActive) {
             if (drops.length === 0) initRainDrops();
 
@@ -557,7 +689,7 @@
             ctx.stroke();
         }
 
-        // 3. Elements (Bird / Flowers)
+        // 4. Elements (Bird / Flowers)
         elements.forEach(el => {
             let currentSpeed = el.baseSpeed * globalSpeedMultiplier;
             
@@ -592,7 +724,7 @@
             }
         });
 
-        // 4. Text Direction Animation Fix
+        // 5. Text Direction Animation Fix
         textElements.forEach(tEl => {
             if (tEl.direction === 'up') {
                 tEl.y -= 2 * globalSpeedMultiplier;
@@ -750,12 +882,16 @@
         elements = [];
         customStickers = [];
         textElements = [];
+        galleryItems = [];
+        activeOverlays = [];
         bgImage = null;
         globalSpeedMultiplier = 1.0;
         document.getElementById('speedRange').value = 1.0;
         document.getElementById('speedVal').innerText = "1.0x";
         document.getElementById('bgPhotoInput').value = '';
         document.getElementById('stickerInput').value = '';
+        document.getElementById('galleryInput').value = '';
+        document.getElementById('galleryGrid').innerHTML = '';
         document.getElementById('txt').value = '';
         document.getElementById('audio1').value = '';
         document.getElementById('audio1Start').value = '0';
