@@ -236,9 +236,17 @@
             <span class="emoji-item" id="btnRainHeavy" onclick="setRainStyle('heavy')"> मूसलाधार बारिश</span>
         </div>
 
+        <!-- 4 रंग के फूलों के बटन -->
+        <label style="color:#00e5ff; font-size:12px; margin-top:6px; display:block;">🌸 फूल (4 रंग):</label>
+        <div class="emoji-grid">
+            <span class="emoji-item" style="border-color:#00e5ff;" onclick="addFlower('blue')">🔵 नीला फूल</span>
+            <span class="emoji-item" style="border-color:#ff007f;" onclick="addFlower('pink')">🌸 गुलाबी फूल</span>
+            <span class="emoji-item" style="border-color:#ff4757;" onclick="addFlower('red')">🔴 लाल फूल</span>
+            <span class="emoji-item" style="border-color:#ffa502;" onclick="addFlower('yellow')">🟡 पीला फूल</span>
+        </div>
+
         <div class="emoji-grid" style="margin-top: 6px;">
             <span class="emoji-item" style="border-color:#ff007f;" onclick="addBird()">🕊️ उड़ती चिड़िया</span>
-            <span class="emoji-item" onclick="addFlower()">🌸 गिरता फूल</span>
             <span class="emoji-item" style="border-color:#00e5ff;" onclick="toggleTransparentWater()">💧 पानी (Transparent)</span>
             <span class="emoji-item" style="border-color:#b500ff;" onclick="toggleSolidWater()">🌊 पानी (Solid)</span>
         </div>
@@ -294,12 +302,12 @@
 
     let bgImage = null;
     let rainActive = false;
-    let rainStyle = 'slant'; // 'straight', 'slant', 'heavy'
+    let rainStyle = 'slant'; 
     let drops = [];
     let elements = [];
     let customStickers = [];
     let textElements = [];
-    let textDirection = 'up'; // 'up' या 'down'
+    let textDirection = 'up'; 
     let globalSpeedMultiplier = 1.0;
 
     let waterLevel = 560; 
@@ -325,7 +333,6 @@
         rainStyle = style;
         rainActive = true;
         
-        // Active button UI highlight
         document.getElementById('btnRainStraight').classList.remove('selected');
         document.getElementById('btnRainSlant').classList.remove('selected');
         document.getElementById('btnRainHeavy').classList.remove('selected');
@@ -394,8 +401,6 @@
     function addText() {
         const txtInput = document.getElementById('txt');
         const val = txtInput.value.trim() || "Rox Studio";
-        
-        // यदि ऊपर से नीचे जाना है तो शुरुआत टॉप से होगी, नहीं तो बॉटम से
         let startY = (textDirection === 'down') ? 0 : 700;
 
         textElements.push({
@@ -411,8 +416,9 @@
         elements.push({ type: 'bird', text: '🕊️', x: -50, y: 100 + Math.random() * 200, baseSpeed: 2, size: 30 });
     }
 
-    function addFlower() {
-        elements.push({ type: 'flower', text: '🌸', x: Math.random() * (canvas.width - 40), y: -40, baseSpeed: 2.5, size: 28 });
+    // 4 अलग-अलग रंगों के फूलों को जोड़ने वाला फंक्शन
+    function addFlower(color) {
+        elements.push({ type: 'flower', color: color, x: Math.random() * (canvas.width - 40), y: -40, baseSpeed: 2.5, size: 28 });
     }
 
     function drawPondAndWaterEffects(x, y, w, h) {
@@ -494,7 +500,7 @@
             ctx.drawImage(stk.img, stk.x, stk.y, stk.w, stk.h);
         });
 
-        // 2. Rain Styles (सीधी, तिरछी, मूसलाधार)
+        // 2. Rain Styles
         if (rainActive) {
             if (drops.length === 0) initRainDrops();
 
@@ -505,7 +511,7 @@
             drops.forEach(drop => {
                 let xOffset = 0;
                 if (rainStyle === 'slant' || rainStyle === 'heavy') {
-                    xOffset = 5; // तिरछापन
+                    xOffset = 5;
                 }
 
                 ctx.moveTo(drop.x, drop.y);
@@ -523,16 +529,34 @@
             ctx.stroke();
         }
 
-        // 3. Elements (Bird / Flower)
+        // 3. Elements (Bird / 4-Color Flowers)
         elements.forEach(el => {
-            ctx.font = `${el.size}px sans-serif`;
             let currentSpeed = el.baseSpeed * globalSpeedMultiplier;
+            
             if (el.type === 'bird') {
+                ctx.font = `${el.size}px sans-serif`;
                 ctx.fillText(el.text, el.x, el.y);
                 el.x += currentSpeed;
                 if (el.x > x + w + 40) el.x = x - 40;
             } else if (el.type === 'flower') {
-                ctx.fillText(el.text, el.x, el.y);
+                // 4 अलग-अलग रंगों के अनुसार फूल सेट करना
+                ctx.save();
+                ctx.font = `${el.size}px sans-serif`;
+                ctx.shadowBlur = 6;
+                if (el.color === 'blue') ctx.shadowColor = '#00e5ff';
+                else if (el.color === 'pink') ctx.shadowColor = '#ff007f';
+                else if (el.color === 'red') ctx.shadowColor = '#ff4757';
+                else if (el.color === 'yellow') ctx.shadowColor = '#ffa502';
+
+                let flowerEmoji = '🌸';
+                if (el.color === 'blue') flowerEmoji = '🔷';
+                else if (el.color === 'pink') flowerEmoji = '🌸';
+                else if (el.color === 'red') flowerEmoji = '🌺';
+                else if (el.color === 'yellow') flowerEmoji = '🌼';
+
+                ctx.fillText(flowerEmoji, el.x, el.y);
+                ctx.restore();
+
                 el.y += currentSpeed;
                 if (el.y > y + h + 40) {
                     el.y = y - 40;
@@ -541,14 +565,14 @@
             }
         });
 
-        // 4. Text Direction (नीचे से ऊपर / ऊपर से नीचे)
+        // 4. Text Direction
         textElements.forEach(tEl => {
             if (tEl.direction === 'up') {
                 tEl.y -= 2 * globalSpeedMultiplier;
-                if (tEl.y < y - 50) tEl.y = y + h + 50; // लूप बॉटम से टॉप
+                if (tEl.y < y - 50) tEl.y = y + h + 50; 
             } else {
                 tEl.y += 2 * globalSpeedMultiplier;
-                if (tEl.y > y + h + 50) tEl.y = y - 50; // लूप टॉप से बॉटम
+                if (tEl.y > y + h + 50) tEl.y = y - 50; 
             }
 
             ctx.font = 'bold 28px Segoe UI';
