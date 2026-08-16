@@ -238,10 +238,10 @@
         </div>
 
         <!-- Mobile Sticker / PNG Upload Field -->
-        <label style="color:#00e5ff; font-size:12px; margin-top:6px; display:block;">मोबाइल से स्टिकर/PNG अपलोड करें:</label>
+        <label style="color:#00e5ff; font-size:12px; margin-top:6px; display:block;">मोबाइल से स्टिकर/PNG/GIF अपलोड करें:</label>
         <div style="display:flex; gap:6px; margin-top:4px; margin-bottom:10px;">
             <input type="file" id="stickerInput" class="rox-input" accept="image/*" style="margin:0;">
-            <button class="dark-btn" style="background:#ff007f; color:#fff; font-weight:bold; width: 35%;" onclick="addCustomSticker()">➕ Add PNG</button>
+            <button class="dark-btn" style="background:#ff007f; color:#fff; font-weight:bold; width: 35%;" onclick="addCustomSticker()">➕ Add Sticker</button>
         </div>
 
         <!-- Text/Lyric Input -->
@@ -278,6 +278,10 @@
     let textElements = [];
     let globalSpeedMultiplier = 1.0;
 
+    // तालाब और वाटर इफ़ेक्ट के लिए वैरिएबल
+    let waterLevel = 560; 
+    let ripples = [];
+
     function loadBgPhoto(event) {
         const file = event.target.files[0];
         if (file) {
@@ -292,7 +296,7 @@
         document.getElementById('speedVal').innerText = globalSpeedMultiplier.toFixed(1) + 'x';
     }
 
-    // अपलोड किया गया PNG / स्टिकर (चारों तरफ राइट-लेफ्ट-अप-डाउन घूमने वाला लॉजिक)
+    // स्टिकर / GIF (चारों तरफ राइट-लेफ्ट-अप-डाउन घूमने वाला लॉजिक)
     function addCustomSticker() {
         const fileInput = document.getElementById('stickerInput');
         const file = fileInput.files[0];
@@ -302,11 +306,11 @@
                 customStickers.push({
                     img: img,
                     x: Math.random() * (canvas.width - 120),
-                    y: Math.random() * (canvas.height - 150),
-                    w: 100,
-                    h: 100,
-                    dx: (Math.random() - 0.5) * 4, // X Velocity
-                    dy: (Math.random() - 0.5) * 4  // Y Velocity
+                    y: Math.random() * (waterLevel - 150),
+                    w: 90,
+                    h: 90,
+                    dx: (Math.random() - 0.5) * 4,
+                    dy: (Math.random() - 0.5) * 4
                 });
             };
             img.src = URL.createObjectURL(file);
@@ -320,7 +324,7 @@
         textElements.push({
             text: val,
             x: Math.random() * (canvas.width - 150) + 50,
-            y: Math.random() * (canvas.height - 100) + 50,
+            y: Math.random() * (waterLevel - 100) + 50,
             dx: (Math.random() - 0.5) * 3.5,
             dy: (Math.random() - 0.5) * 3.5
         });
@@ -350,11 +354,55 @@
     }
 
     function addStar() {
-        elements.push({ type: 'star', text: '✨', x: Math.random() * (canvas.width - 40), y: Math.random() * (canvas.height - 100), baseSpeed: 0, size: 26 });
+        elements.push({ type: 'star', text: '✨', x: Math.random() * (canvas.width - 40), y: Math.random() * (waterLevel - 100), baseSpeed: 0, size: 26 });
     }
 
     function addBubble() {
-        elements.push({ type: 'bubble', text: '💭', x: Math.random() * (canvas.width - 50), y: canvas.height + 20, baseSpeed: 1.8, size: 32 });
+        elements.push({ type: 'bubble', text: '💭', x: Math.random() * (canvas.width - 50), y: waterLevel - 20, baseSpeed: 1.8, size: 32 });
+    }
+
+    // तालाब और पानी की बूंदों (Ripples) को ड्रा करने का फंक्शन
+    function drawPondAndWaterEffects() {
+        ctx.save();
+        // ट्रांसपेरेंट तालाब का लुक (नीचे का हिस्सा)
+        let gradient = ctx.createLinearGradient(0, waterLevel, 0, canvas.height);
+        gradient.addColorStop(0, "rgba(0, 150, 255, 0.2)");
+        gradient.addColorStop(1, "rgba(0, 80, 180, 0.5)");
+        
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, waterLevel, canvas.width, canvas.height - waterLevel);
+
+        // तालाब की ऊपरी सतह पर चमकती हुई बॉर्डर लाइन
+        ctx.strokeStyle = "rgba(0, 229, 255, 0.6)";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(0, waterLevel);
+        ctx.lineTo(canvas.width, waterLevel);
+        ctx.stroke();
+
+        // पानी में गिरती बूंदों की लहरें (Ripples)
+        ctx.lineWidth = 1.2;
+        ripples.forEach((r, index) => {
+            ctx.strokeStyle = `rgba(255, 255, 255, ${1 - r.radius / 35})`;
+            ctx.beginPath();
+            ctx.ellipse(r.x, r.y, r.radius, r.radius * 0.4, 0, 0, Math.PI * 2);
+            ctx.stroke();
+
+            r.radius += 0.8 * globalSpeedMultiplier;
+            if (r.radius > 35) {
+                ripples.splice(index, 1);
+            }
+        });
+
+        // यदि बारिश चालू है तो तालाब में लगातार बूंदें गिरेंगी
+        if (rainActive && Math.random() > 0.6) {
+            ripples.push({
+                x: Math.random() * canvas.width,
+                y: waterLevel + Math.random() * (canvas.height - waterLevel),
+                radius: 2
+            });
+        }
+        ctx.restore();
     }
 
     function renderLoop() {
@@ -368,14 +416,14 @@
             ctx.fillRect(0, 0, canvas.width, canvas.height);
         }
 
-        // 2. Custom Stickers - चारों तरफ (Right, Left, Up, Down) बाउंसिंग मूवमेंट
+        // 2. Custom Stickers / GIFs - चारों तरफ (Right, Left, Up, Down) बाउंसिंग मूवमेंट
         customStickers.forEach(stk => {
             stk.x += stk.dx * globalSpeedMultiplier;
             stk.y += stk.dy * globalSpeedMultiplier;
 
-            // स्क्रीन की दीवारों से टकराकर दिशा बदलना
+            // स्क्रीन की दीवारों से टकराकर दिशा बदलना (ऊपर तालाब की सीमा का ध्यान रखते हुए)
             if (stk.x <= 0 || stk.x + stk.w >= canvas.width) stk.dx *= -1;
-            if (stk.y <= 0 || stk.y + stk.h >= canvas.height) stk.dy *= -1;
+            if (stk.y <= 0 || stk.y + stk.h >= waterLevel) stk.dy *= -1;
 
             ctx.drawImage(stk.img, stk.x, stk.y, stk.w, stk.h);
         });
@@ -409,11 +457,16 @@
             } else if (el.type === 'flower') {
                 ctx.fillText(el.text, el.x, el.y);
                 el.y += currentSpeed;
-                if (el.y > canvas.height + 40) el.y = -40;
+                if (el.y > waterLevel) {
+                    // फूल पानी में गिरने पर रिपल बनाएगा
+                    ripples.push({ x: el.x, y: waterLevel + Math.random() * 20, radius: 2 });
+                    el.y = -40;
+                    el.x = Math.random() * (canvas.width - 40);
+                }
             } else if (el.type === 'bubble') {
                 ctx.fillText(el.text, el.x, el.y);
                 el.y -= currentSpeed;
-                if (el.y < -40) el.y = canvas.height + 40;
+                if (el.y < -40) el.y = waterLevel;
             } else if (el.type === 'star') {
                 ctx.fillText(el.text, el.x, el.y);
             }
@@ -426,7 +479,7 @@
 
             // स्क्रीन की दीवारों से टकराकर दिशा बदलना
             if (tEl.x <= 50 || tEl.x >= canvas.width - 50) tEl.dx *= -1;
-            if (tEl.y <= 30 || tEl.y >= canvas.height - 20) tEl.dy *= -1;
+            if (tEl.y <= 30 || tEl.y >= waterLevel - 20) tEl.dy *= -1;
 
             ctx.font = 'bold 24px Segoe UI';
             ctx.fillStyle = '#ffffff';
@@ -437,7 +490,10 @@
             ctx.shadowBlur = 0;
         });
 
-        // 6. Rox Inten Studio वाटरमार्क और लोगो (ऊपर कोने में हमेशा दिखेगा)
+        // 6. नीचे ट्रांसपेरेंट तालाब और पानी की बूंदों का इफ़ेक्ट
+        drawPondAndWaterEffects();
+
+        // 7. Rox Inten Studio वाटरमार्क और लोगो (ऊपर कोने में हमेशा दिखेगा)
         ctx.save();
         ctx.fillStyle = "rgba(0, 229, 255, 0.85)";
         ctx.font = "bold 13px Segoe UI";
@@ -445,7 +501,7 @@
         ctx.shadowColor = "#000";
         ctx.shadowBlur = 4;
         
-        // लोगो आइकॉन और टेक्स्ट
+        // लोगो टेक्स्ट
         ctx.fillText("Rox Inten Studio", 32, 28);
         
         // छोटा लोगो गोलाकार प्रतीक (Icon)
@@ -587,7 +643,6 @@
         textElements = [];
         bgImage = null;
         globalSpeedMultiplier = 1.0;
-        document.getElementById('speedRange').value = screens = 1.0;
         document.getElementById('speedRange').value = 1.0;
         document.getElementById('speedVal').innerText = "1.0x";
         document.getElementById('bgPhotoInput').value = '';
