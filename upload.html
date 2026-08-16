@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Projects - Rox Inten Studio</title>
+    <title>Upload & Studio - Rox Inten Studio</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
@@ -34,14 +34,26 @@
             width: 100% !important;
         }
         .brand-title {
-            font-size: 20px !important;
+            font-size: 19px !important;
             font-weight: bold !important;
             color: #00e5ff !important;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .brand-title img.logo-icon {
+            width: 38px !important;
+            height: 38px !important;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #00e5ff;
+            background: #161625;
+            padding: 1px;
         }
         .brand-title span {
             color: #ff007f !important;
             font-size: 11px !important;
-            margin-left: 5px !important;
+            margin-left: 2px !important;
         }
 
         .nav-scroller {
@@ -134,36 +146,24 @@
 
         .reel-board-container {
             width: 100%;
-            height: 420px;
+            height: 400px;
             position: relative;
             background: #000;
             border: 1px solid #00e5ff;
             border-radius: 10px;
             overflow: hidden;
             margin-bottom: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
 
         #studioCanvas {
             width: 100%;
             height: 100%;
             display: block;
-        }
-
-        .emoji-grid {
-            display: flex;
-            gap: 8px;
-            overflow-x: auto;
-            padding: 6px 0;
-            margin-bottom: 8px;
-        }
-        .emoji-item {
-            background: #1a1a2e;
-            border: 1px solid #28283d;
-            border-radius: 6px;
-            padding: 6px 10px;
-            font-size: 13px;
-            cursor: pointer;
-            white-space: nowrap;
+            object-fit: contain;
+            touch-action: none;
         }
 
         .dark-btn {
@@ -176,12 +176,10 @@
             cursor: pointer !important;
         }
 
-        .slider-container {
-            background: #0a0a12;
-            border: 1px solid #2b2b40;
-            border-radius: 8px;
-            padding: 8px 12px;
-            margin-bottom: 10px;
+        .audio-row {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 6px;
         }
     </style>
 </head>
@@ -190,78 +188,68 @@
 <div class="main-container">
 
     <div class="top-header">
-        <div class="brand-title">Rox <span>INTEN STUDIO</span></div>
-        <div style="color: #00e5ff; font-size: 11px;"><i class="fa-solid fa-bolt"></i> Mobile Engine Active</div>
+        <div class="brand-title">
+            <img src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAP//////////////////////////////////////////////////////////////////////////////////////wgALCAABAAEBAREA/8QAFBABAAAAAAAAAAAAAAAAAAAAAP/aAAgBAQABPxA=" class="logo-icon" alt="Rox Logo">
+            Rox <span>INTEN STUDIO</span>
+        </div>
+        <div style="color: #00e5ff; font-size: 11px;"><i class="fa-solid fa-bolt"></i> Upload Engine Active</div>
     </div>
 
+    <!-- मेनू बार -->
     <div class="nav-scroller">
         <a href="index.html" class="nav-item">Home</a>
-        <a href="upload.html" class="nav-item">Upload</a>
+        <a href="upload.html" class="nav-item active">Upload</a>
         <a href="ai-tools.html" class="nav-item">AI Magic</a>
-        <a href="projects.html" class="nav-item active">Projects</a>
+        <a href="projects.html" class="nav-item">Projects</a>
         <a href="#" class="nav-item setting-btn"><i class="fa-solid fa-gear"></i> Setting</a>
     </div>
 
-    <!-- 1. Background Photo Panel -->
+    <!-- 1. मुख्य बैकग्राउंड वीडियो/फोटो अपलोड -->
     <div class="proj-panel">
-        <div class="panel-heading"><i class="fa-solid fa-image"></i> 1. बैकग्राउंड फोटो चुनें</div>
-        <input type="file" id="bgPhotoInput" class="rox-input" accept="image/*" onchange="loadBgPhoto(event)">
+        <div class="panel-heading"><i class="fa-solid5 fa-film"></i> 1. गैलरी से मेन वीडियो/फोटो चुनें</div>
+        <input type="file" id="bgPhotoInput" class="rox-input" accept="image/*,video/*" onchange="loadMedia(event)">
         
         <div class="reel-board-container">
             <canvas id="studioCanvas" width="400" height="700"></canvas>
+            <video id="sourceVideo" style="display:none;" crossorigin="anonymous" playsinline loop></video>
         </div>
 
-        <button id="btnPlay" class="pink-btn" onclick="togglePlayAll()">⚡ Play Project</button>
-        <button id="btnDownload" class="download-btn" onclick="toggleRecordCanvasMP4()"><i class="fa-solid fa-video"></i> 🎬 Record & Download MP4 (With Sound + FX)</button>
+        <button id="btnPlay" class="pink-btn" onclick="togglePlayAll()">⚡ Play Preview</button>
+        <button id="btnDownload" class="download-btn" onclick="toggleRecordCanvasMP4()"><i class="fa-solid fa-video"></i> 🎬 Record & Download MP4</button>
     </div>
 
-    <!-- 2. FX Elements & Controls Panel -->
+    <!-- 2. गैलरी ओवरले (ड्रैग, रीसाइज और रिप्लेस) -->
     <div class="proj-panel">
-        <div class="panel-heading"><i class="fa-solid fa-wand-magic-sparkles"></i> 2. ओरिजिनल एलिमेंट्स और लिरिक्स</div>
+        <div class="panel-heading"><i class="fa-solid fa-layer-group"></i> 2. गैलरी से वीडियो/फोटो ओवरले जोड़ें (Drag & Resize)</div>
+        <input type="file" id="galleryInput" class="rox-input" accept="image/*,video/*" multiple onchange="addToGallery(event)">
         
-        <!-- Emoji Buttons (Includes Bubble) -->
-        <div class="emoji-grid">
-            <span class="emoji-item" style="border-color:#00e5ff;" onclick="toggleRain()">🌧️ असली बारिश</span>
-            <span class="emoji-item" style="border-color:#ff007f;" onclick="addBird()">🕊️ उड़ती चिड़िया</span>
-            <span class="emoji-item" onclick="addFlower()">🌸 गिरता फूल</span>
-            <span class="emoji-item" onclick="addStar()">✨ चमकता तारा</span>
-            <span class="emoji-item" style="border-color:#b500ff;" onclick="addBubble()">💭 थॉट बबल</span>
+        <div id="galleryGrid" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 8px;">
+            <!-- चुनी गई मीडिया यहाँ दिखेंगी -->
         </div>
-
-        <!-- Speed Control Slider -->
-        <div class="slider-container">
-            <div style="display:flex; justify-content:space-between; font-size:12px; color:#00e5ff; margin-bottom:4px;">
-                <span>⚡ मूविंग स्पीड (कम / ज्यादा):</span>
-                <span id="speedVal">1.0x</span>
-            </div>
-            <input type="range" id="speedRange" min="0.2" max="4.0" step="0.1" value="1.0" style="width:100%; accent-color:#00e5ff;" oninput="changeSpeed(this.value)">
-        </div>
-
-        <!-- Mobile Sticker / PNG Upload Field -->
-        <label style="color:#00e5ff; font-size:12px; margin-top:6px; display:block;">मोबाइल से स्टिकर/PNG अपलोड करें:</label>
-        <div style="display:flex; gap:6px; margin-top:4px; margin-bottom:10px;">
-            <input type="file" id="stickerInput" class="rox-input" accept="image/*" style="margin:0;">
-            <button class="dark-btn" style="background:#ff007f; color:#fff; font-weight:bold; width: 35%;" onclick="addCustomSticker()">➕ Add PNG</button>
-        </div>
-
-        <!-- Text/Lyric Input -->
-        <div style="display:flex; gap:6px; margin-top:8px;">
-            <input type="text" id="txt" placeholder="यहाँ लिरिक्स लिखें..." class="rox-input" style="margin:0;">
-            <button class="dark-btn" style="background:#00e5ff; color:#000; font-weight:bold; width: 30%;" onclick="addText()">➕ Add Text</button>
-        </div>
+        <div style="font-size: 11px; color: #8a8a9e; margin-top: 6px;">💡 टिप: मीडिया पर क्लिक करके स्क्रीन पर लाएं। कोने के पिंक हैंडल से साइज छोटा-बड़ा करें और उंगली से खींचकर कहीं भी सेट करें।</div>
     </div>
 
-    <!-- 3. Audio Cut & Mixer Panel -->
+    <!-- 3. ऑडियो मिक्सर, कट और रिप्लेस -->
     <div class="proj-panel">
-        <div class="panel-heading"><i class="fa-solid fa-music"></i> 3. ऑडियो ट्रैक (4 Min Supported)</div>
+        <div class="panel-heading"><i class="fa-solid fa-music"></i> 3. ऑडियो ट्रैक (गैलरी से जोड़ें, कट और रिप्लेस करें)</div>
         
-        <label style="color:#8a8a9e; font-size:11px;">Track 1:</label>
+        <!-- Track 1 -->
+        <label style="color:#8a8a9e; font-size:11px;">Track 1 ऑडियो:</label>
         <input type="file" id="audio1" class="rox-input" accept="audio/*">
+        <div class="audio-row">
+            <input type="number" id="audio1Start" class="rox-input" placeholder="Start (sec)" style="margin:0;" value="0" min="0" step="0.1">
+            <input type="number" id="audio1End" class="rox-input" placeholder="End (sec)" style="margin:0;" value="" min="0" step="0.1">
+        </div>
         
-        <label style="color:#8a8a9e; font-size:11px; margin-top:4px; display:block;">Track 2:</label>
+        <!-- Track 2 -->
+        <label style="color:#8a8a9e; font-size:11px; margin-top:8px; display:block;">Track 2 ऑडियो:</label>
         <input type="file" id="audio2" class="rox-input" accept="audio/*">
+        <div class="audio-row">
+            <input type="number" id="audio2Start" class="rox-input" placeholder="Start (sec)" style="margin:0;" value="0" min="0" step="0.1">
+            <input type="number" id="audio2End" class="rox-input" placeholder="End (sec)" style="margin:0;" value="" min="0" step="0.1">
+        </div>
 
-        <button class="dark-btn" style="background:#ff4757; color:#fff; width:100%; margin-top:8px;" onclick="resetAll()">🗑️ Reset</button>
+        <button class="dark-btn" style="background:#ff4757; color:#fff; width:100%; margin-top:8px;" onclick="resetAll()">🗑️ Reset All</button>
     </div>
 
 </div>
@@ -269,195 +257,226 @@
 <script>
     const canvas = document.getElementById('studioCanvas');
     const ctx = canvas.getContext('2d');
+    const sourceVideo = document.getElementById('sourceVideo');
 
     let bgImage = null;
-    let rainActive = false;
-    let drops = [];
-    let elements = [];
-    let customStickers = [];
-    let textElements = [];
-    let globalSpeedMultiplier = 1.0;
+    let isVideoBg = false;
+    let galleryItems = [];
+    let activeOverlays = [];
+    let draggedOverlay = null;
+    let isResizing = false;
+    let resizeHandleSize = 20;
+    let dragOffsetX = 0;
+    let dragOffsetY = 0;
 
-    function loadBgPhoto(event) {
+    function loadMedia(event) {
         const file = event.target.files[0];
         if (file) {
-            const img = new Image();
-            img.onload = function() { bgImage = img; };
-            img.src = URL.createObjectURL(file);
-        }
-    }
-
-    function changeSpeed(val) {
-        globalSpeedMultiplier = parseFloat(val);
-        document.getElementById('speedVal').innerText = globalSpeedMultiplier.toFixed(1) + 'x';
-    }
-
-    // अपलोड किया गया PNG / स्टिकर (चारों तरफ राइट-लेफ्ट-अप-डाउन घूमने वाला लॉजिक)
-    function addCustomSticker() {
-        const fileInput = document.getElementById('stickerInput');
-        const file = fileInput.files[0];
-        if (file) {
-            const img = new Image();
-            img.onload = function() {
-                customStickers.push({
-                    img: img,
-                    x: Math.random() * (canvas.width - 120),
-                    y: Math.random() * (canvas.height - 150),
-                    w: 100,
-                    h: 100,
-                    dx: (Math.random() - 0.5) * 4, // X Velocity
-                    dy: (Math.random() - 0.5) * 4  // Y Velocity
-                });
-            };
-            img.src = URL.createObjectURL(file);
-        }
-    }
-
-    // टेक्स्ट / लिरिक्स (चारों तरफ राइट-लेफ्ट-अप-डाउन घूमने वाला लॉजिक)
-    function addText() {
-        const txtInput = document.getElementById('txt');
-        const val = txtInput.value.trim() || "Rox Studio";
-        textElements.push({
-            text: val,
-            x: Math.random() * (canvas.width - 150) + 50,
-            y: Math.random() * (canvas.height - 100) + 50,
-            dx: (Math.random() - 0.5) * 3.5,
-            dy: (Math.random() - 0.5) * 3.5
-        });
-        txtInput.value = "";
-    }
-
-    function toggleRain() {
-        rainActive = !rainActive;
-        if (rainActive && drops.length === 0) {
-            for (let i = 0; i < 60; i++) {
-                drops.push({
-                    x: Math.random() * canvas.width,
-                    y: Math.random() * canvas.height,
-                    length: Math.random() * 20 + 10,
-                    baseSpeed: Math.random() * 10 + 5
-                });
+            const fileURL = URL.createObjectURL(file);
+            if (file.type.startsWith('video/')) {
+                bgImage = null;
+                isVideoBg = true;
+                sourceVideo.src = fileURL;
+                sourceVideo.load();
+                sourceVideo.play();
+            } else {
+                isVideoBg = false;
+                sourceVideo.pause();
+                const img = new Image();
+                img.onload = function() { bgImage = img; };
+                img.src = fileURL;
             }
         }
     }
 
-    function addBird() {
-        elements.push({ type: 'bird', text: '🕊️', x: -50, y: 100 + Math.random() * 200, baseSpeed: 2, size: 30 });
+    function addToGallery(event) {
+        const files = event.target.files;
+        for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                if (file.type.startsWith('video/')) {
+                    const vid = document.createElement('video');
+                    vid.src = e.target.result;
+                    vid.muted = true;
+                    vid.playsInline = true;
+                    vid.loop = true;
+                    vid.play();
+                    galleryItems.push({ id: Date.now() + Math.random(), type: 'video', media: vid, active: false });
+                    renderGallery();
+                } else {
+                    const img = new Image();
+                    img.onload = function() {
+                        galleryItems.push({ id: Date.now() + Math.random(), type: 'image', media: img, active: false });
+                        renderGallery();
+                    };
+                    img.src = e.target.result;
+                }
+            };
+            reader.readAsDataURL(file);
+        }
     }
 
-    function addFlower() {
-        elements.push({ type: 'flower', text: '🌸', x: Math.random() * (canvas.width - 40), y: -40, baseSpeed: 2.5, size: 28 });
+    function renderGallery() {
+        const grid = document.getElementById('galleryGrid');
+        grid.innerHTML = '';
+        galleryItems.forEach((item, index) => {
+            const div = document.createElement('div');
+            div.style.position = 'relative';
+            div.style.border = item.active ? '2px solid #00e5ff' : '1px solid #28283d';
+            div.style.borderRadius = '6px';
+            div.style.overflow = 'hidden';
+            div.style.cursor = 'pointer';
+            
+            if (item.type === 'video') {
+                div.innerHTML = `
+                    <video src="${item.media.src}" style="width:100%; height:55px; object-fit:cover; display:block;" muted autoplay loop></video>
+                    <div style="position:absolute; top:2px; right:2px; background:${item.active ? '#00e5ff' : 'rgba(0,0,0,0.6)'}; color:${item.active ? '#000' : '#fff'}; font-size:10px; padding:1px 4px; border-radius:3px;">${item.active ? 'ON' : 'OFF'}</div>
+                `;
+            } else {
+                div.innerHTML = `
+                    <img src="${item.media.src}" style="width:100%; height:55px; object-fit:cover; display:block;">
+                    <div style="position:absolute; top:2px; right:2px; background:${item.active ? '#00e5ff' : 'rgba(0,0,0,0.6)'}; color:${item.active ? '#000' : '#fff'}; font-size:10px; padding:1px 4px; border-radius:3px;">${item.active ? 'ON' : 'OFF'}</div>
+                `;
+            }
+            div.onclick = () => toggleGalleryOverlay(index);
+            grid.appendChild(div);
+        });
     }
 
-    function addStar() {
-        elements.push({ type: 'star', text: '✨', x: Math.random() * (canvas.width - 40), y: Math.random() * (canvas.height - 100), baseSpeed: 0, size: 26 });
+    function toggleGalleryOverlay(index) {
+        let item = galleryItems[index];
+        item.active = !item.active;
+
+        if (item.active) {
+            activeOverlays.push({
+                id: item.id,
+                type: item.type,
+                media: item.media,
+                x: 80,
+                y: 120,
+                w: 140,
+                h: 140
+            });
+        } else {
+            activeOverlays = activeOverlays.filter(o => o.id !== item.id);
+        }
+        renderGallery();
     }
 
-    function addBubble() {
-        elements.push({ type: 'bubble', text: '💭', x: Math.random() * (canvas.width - 50), y: canvas.height + 20, baseSpeed: 1.8, size: 32 });
+    function getCanvasCoordinates(e) {
+        const rect = canvas.getBoundingClientRect();
+        const clientX = e.clientX || (e.touches && e.touches[0].clientX);
+        const clientY = e.clientY || (e.touches && e.touches[0].clientY);
+        
+        const scaleX = canvas.width / rect.width;
+        const scaleY = canvas.height / rect.height;
+
+        return {
+            x: (clientX - rect.left) * scaleX,
+            y: (clientY - rect.top) * scaleY
+        };
+    }
+
+    canvas.addEventListener('mousedown', startDrag);
+    canvas.addEventListener('touchstart', startDrag, { passive: false });
+    canvas.addEventListener('mousemove', dragMove);
+    canvas.addEventListener('touchmove', dragMove, { passive: false });
+    canvas.addEventListener('mouseup', endDrag);
+    canvas.addEventListener('touchend', endDrag);
+
+    function startDrag(e) {
+        const coords = getCanvasCoordinates(e);
+        
+        for (let i = activeOverlays.length - 1; i >= 0; i--) {
+            let ov = activeOverlays[i];
+            if (coords.x >= ov.x + ov.w - resizeHandleSize && coords.x <= ov.x + ov.w &&
+                coords.y >= ov.y + ov.h - resizeHandleSize && coords.y <= ov.y + ov.h) {
+                draggedOverlay = ov;
+                isResizing = true;
+                if(e.cancelable) e.preventDefault();
+                return;
+            }
+        }
+
+        for (let i = activeOverlays.length - 1; i >= 0; i--) {
+            let ov = activeOverlays[i];
+            if (coords.x >= ov.x && coords.x <= ov.x + ov.w && coords.y >= ov.y && coords.y <= ov.y + ov.h) {
+                draggedOverlay = ov;
+                isResizing = false;
+                dragOffsetX = coords.x - ov.x;
+                dragOffsetY = coords.y - ov.y;
+                if(e.cancelable) e.preventDefault();
+                break;
+            }
+        }
+    }
+
+    function dragMove(e) {
+        if (!draggedOverlay) return;
+        const coords = getCanvasCoordinates(e);
+        
+        if (isResizing) {
+            draggedOverlay.w = Math.max(30, coords.x - draggedOverlay.x);
+            draggedOverlay.h = Math.max(30, coords.y - draggedOverlay.y);
+        } else {
+            draggedOverlay.x = coords.x - dragOffsetX;
+            draggedOverlay.y = coords.y - dragOffsetY;
+        }
+        if(e.cancelable) e.preventDefault();
+    }
+
+    function endDrag() {
+        draggedOverlay = null;
+        isResizing = false;
     }
 
     function renderLoop() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        // 1. Draw Background Photo
-        if (bgImage) {
-            ctx.drawImage(bgImage, 0, 0, canvas.width, canvas.height);
+        let w = canvas.width;
+        let h = canvas.height;
+        let x = 0;
+        let y = 0;
+
+        if (isVideoBg && sourceVideo.readyState >= 2) {
+            const hRatio = canvas.width / sourceVideo.videoWidth;
+            const vRatio = canvas.height / sourceVideo.videoHeight;
+            const ratio = Math.min(hRatio, vRatio);
+            w = sourceVideo.videoWidth * ratio;
+            h = sourceVideo.videoHeight * ratio;
+            x = (canvas.width - w) / 2;
+            y = (canvas.height - h) / 2;
+            ctx.drawImage(sourceVideo, 0, 0, sourceVideo.videoWidth, sourceVideo.videoHeight, x, y, w, h);
+        } else if (bgImage) {
+            const hRatio = canvas.width / bgImage.width;
+            const vRatio = canvas.height / bgImage.height;
+            const ratio = Math.min(hRatio, vRatio);
+            w = bgImage.width * ratio;
+            h = bgImage.height * ratio;
+            x = (canvas.width - w) / 2;
+            y = (canvas.height - h) / 2;
+            ctx.drawImage(bgImage, 0, 0, bgImage.width, bgImage.height, x, y, w, h);
         } else {
             ctx.fillStyle = '#111';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
         }
 
-        // 2. Custom Stickers - चारों तरफ (Right, Left, Up, Down) बाउंसिंग मूवमेंट
-        customStickers.forEach(stk => {
-            stk.x += stk.dx * globalSpeedMultiplier;
-            stk.y += stk.dy * globalSpeedMultiplier;
-
-            // स्क्रीन की दीवारों से टकराकर दिशा बदलना
-            if (stk.x <= 0 || stk.x + stk.w >= canvas.width) stk.dx *= -1;
-            if (stk.y <= 0 || stk.y + stk.h >= canvas.height) stk.dy *= -1;
-
-            ctx.drawImage(stk.img, stk.x, stk.y, stk.w, stk.h);
-        });
-
-        // 3. Draw Rain (With Speed Control)
-        if (rainActive) {
-            ctx.strokeStyle = 'rgba(255, 255, 255, 0.7)';
-            ctx.lineWidth = 1.5;
-            ctx.beginPath();
-            drops.forEach(drop => {
-                ctx.moveTo(drop.x, drop.y);
-                ctx.lineTo(drop.x - 1, drop.y + drop.length);
-                drop.y += drop.baseSpeed * globalSpeedMultiplier;
-                if (drop.y > canvas.height) {
-                    drop.y = -20;
-                    drop.x = Math.random() * canvas.width;
-                }
-            });
-            ctx.stroke();
-        }
-
-        // 4. Draw Animated FX Elements (Bird, Flower, Bubble, Star)
-        elements.forEach(el => {
-            ctx.font = `${el.size}px sans-serif`;
-            const currentSpeed = el.baseSpeed * globalSpeedMultiplier;
-
-            if (el.type === 'bird') {
-                ctx.fillText(el.text, el.x, el.y);
-                el.x += currentSpeed;
-                if (el.x > canvas.width + 40) el.x = -40;
-            } else if (el.type === 'flower') {
-                ctx.fillText(el.text, el.x, el.y);
-                el.y += currentSpeed;
-                if (el.y > canvas.height + 40) el.y = -40;
-            } else if (el.type === 'bubble') {
-                ctx.fillText(el.text, el.x, el.y);
-                el.y -= currentSpeed;
-                if (el.y < -40) el.y = canvas.height + 40;
-            } else if (el.type === 'star') {
-                ctx.fillText(el.text, el.x, el.y);
-            }
-        });
-
-        // 5. Text / Lyrics - चारों तरफ (Right, Left, Up, Down) बाउंसिंग मूवमेंट
-        textElements.forEach(tEl => {
-            tEl.x += tEl.dx * globalSpeedMultiplier;
-            tEl.y += tEl.dy * globalSpeedMultiplier;
-
-            // स्क्रीन की दीवारों से टकराकर दिशा बदलना
-            if (tEl.x <= 50 || tEl.x >= canvas.width - 50) tEl.dx *= -1;
-            if (tEl.y <= 30 || tEl.y >= canvas.height - 20) tEl.dy *= -1;
-
-            ctx.font = 'bold 24px Segoe UI';
-            ctx.fillStyle = '#ffffff';
-            ctx.textAlign = 'center';
-            ctx.shadowColor = '#000';
-            ctx.shadowBlur = 8;
-            ctx.fillText(tEl.text, tEl.x, tEl.y);
-            ctx.shadowBlur = 0;
-        });
-
-        // 6. Rox Inten Studio वाटरमार्क और लोगो (ऊपर कोने में हमेशा दिखेगा)
         ctx.save();
-        ctx.fillStyle = "rgba(0, 229, 255, 0.85)";
-        ctx.font = "bold 13px Segoe UI";
-        ctx.textAlign = "left";
-        ctx.shadowColor = "#000";
-        ctx.shadowBlur = 4;
-        
-        // लोगो आइकॉन और टेक्स्ट
-        ctx.fillText("Rox Inten Studio", 32, 28);
-        
-        // छोटा लोगो गोलाकार प्रतीक (Icon)
-        ctx.fillStyle = "#ff007f";
         ctx.beginPath();
-        ctx.arc(18, 23, 7, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.strokeStyle = "#fff";
-        ctx.lineWidth = 1.5;
-        ctx.stroke();
-        ctx.restore();
+        ctx.rect(x, y, w, h);
+        ctx.clip();
 
+        activeOverlays.forEach(ov => {
+            ctx.drawImage(ov.media, ov.x, ov.y, ov.w, ov.h);
+            ctx.strokeStyle = "#00e5ff";
+            ctx.lineWidth = 1.5;
+            ctx.strokeRect(ov.x, ov.y, ov.w, ov.h);
+            ctx.fillStyle = "#ff007f";
+            ctx.fillRect(ov.x + ov.w - resizeHandleSize, ov.y + ov.h - resizeHandleSize, resizeHandleSize, resizeHandleSize);
+        });
+
+        ctx.restore();
         requestAnimationFrame(renderLoop);
     }
     renderLoop();
@@ -482,37 +501,47 @@
 
     async function togglePlayAll() {
         const btn = document.getElementById('btnPlay');
-
         if (isPlaying) {
             stopAudio();
-            btn.innerText = "⚡ Play Project";
+            if (isVideoBg) sourceVideo.pause();
+            btn.innerText = "⚡ Play Preview";
             btn.style.background = "linear-gradient(90deg, #ff007f, #b500ff)";
             isPlaying = false;
         } else {
             initAudioContext();
-            btn.innerText = "⏹️ Stop Playback";
+            if (isVideoBg) sourceVideo.play();
+            btn.innerText = "⏹️ Stop Preview";
             btn.style.background = "#ff4757";
             isPlaying = true;
 
             const file1 = document.getElementById('audio1').files[0];
-            const file2 = document.getElementById('audio2').files[0];
-
             if (file1) {
-                const buf1 = await file1.arrayBuffer().then(b => audioCtx.decodeAudioData(b));
+                let start1 = parseFloat(document.getElementById('audio1Start').value) || 0;
+                let end1Input = document.getElementById('audio1End').value;
+                let buf1 = await file1.arrayBuffer().then(b => audioCtx.decodeAudioData(b));
+                
                 currentSource1 = audioCtx.createBufferSource();
                 currentSource1.buffer = buf1;
                 currentSource1.connect(audioCtx.destination);
                 currentSource1.connect(audioDestinationNode);
-                currentSource1.start(0);
+                
+                let duration1 = end1Input ? parseFloat(end1Input) - start1 : (buf1.duration - start1);
+                currentSource1.start(0, start1, duration1 > 0 ? duration1 : undefined);
             }
 
+            const file2 = document.getElementById('audio2').files[0];
             if (file2) {
-                const buf2 = await file2.arrayBuffer().then(b => audioCtx.decodeAudioData(b));
+                let start2 = parseFloat(document.getElementById('audio2Start').value) || 0;
+                let end2Input = document.getElementById('audio2End').value;
+                let buf2 = await file2.arrayBuffer().then(b => audioCtx.decodeAudioData(b));
+                
                 currentSource2 = audioCtx.createBufferSource();
                 currentSource2.buffer = buf2;
                 currentSource2.connect(audioCtx.destination);
                 currentSource2.connect(audioDestinationNode);
-                currentSource2.start(0);
+                
+                let duration2 = end2Input ? parseFloat(end2Input) - start2 : (buf2.duration - start2);
+                currentSource2.start(0, start2, duration2 > 0 ? duration2 : undefined);
             }
         }
     }
@@ -524,14 +553,14 @@
 
     function toggleRecordCanvasMP4() {
         const btn = document.getElementById('btnDownload');
-
         if (isRecording) {
             if (mediaRecorder) mediaRecorder.stop();
             stopAudio();
+            if (isVideoBg) sourceVideo.pause();
             isPlaying = false;
-            document.getElementById('btnPlay').innerText = "⚡ Play Project";
+            document.getElementById('btnPlay').innerText = "⚡ Play Preview";
             document.getElementById('btnPlay').style.background = "linear-gradient(90deg, #ff007f, #b500ff)";
-            btn.innerHTML = '<i class="fa-solid fa-video"></i> 🎬 Record & Download MP4 (With Sound + FX)';
+            btn.innerHTML = '<i class="fa-solid fa-video"></i> 🎬 Record & Download MP4';
             btn.style.background = "linear-gradient(90deg, #00c853, #00e5ff)";
             isRecording = false;
         } else {
@@ -563,7 +592,7 @@
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
-                a.download = 'Rox_Studio_Video_' + Date.now() + '.mp4';
+                a.download = 'Rox_Upload_Video_' + Date.now() + '.mp4';
                 document.body.appendChild(a);
                 a.click();
                 document.body.removeChild(a);
@@ -571,7 +600,7 @@
 
             mediaRecorder.start();
             isRecording = true;
-            btn.innerHTML = "🛑 Recording... Click to Stop & Save MP4";
+            btn.innerHTML = "🛑 Recording... Click to Stop & Save";
             btn.style.background = "#ff4757";
         }
     }
@@ -580,21 +609,20 @@
         stopAudio();
         isPlaying = false;
         if (isRecording) toggleRecordCanvasMP4();
-        rainActive = false;
-        drops = [];
-        elements = [];
-        customStickers = [];
-        textElements = [];
+        galleryItems = [];
+        activeOverlays = [];
         bgImage = null;
-        globalSpeedMultiplier = 1.0;
-        document.getElementById('speedRange').value = screens = 1.0;
-        document.getElementById('speedRange').value = 1.0;
-        document.getElementById('speedVal').innerText = "1.0x";
+        isVideoBg = false;
+        sourceVideo.pause();
         document.getElementById('bgPhotoInput').value = '';
-        document.getElementById('stickerInput').value = '';
-        document.getElementById('txt').value = '';
+        document.getElementById('galleryInput').value = '';
+        document.getElementById('galleryGrid').innerHTML = '';
         document.getElementById('audio1').value = '';
+        document.getElementById('audio1Start').value = '0';
+        document.getElementById('audio1End').value = '';
         document.getElementById('audio2').value = '';
+        document.getElementById('audio2Start').value = '0';
+        document.getElementById('audio2End').value = '';
     }
 </script>
 </body>
