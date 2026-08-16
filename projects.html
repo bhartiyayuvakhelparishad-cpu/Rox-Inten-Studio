@@ -34,14 +34,24 @@
             width: 100% !important;
         }
         .brand-title {
-            font-size: 20px !important;
+            font-size: 18px !important;
             font-weight: bold !important;
             color: #00e5ff !important;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .brand-title img.logo-icon {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 1px solid #00e5ff;
         }
         .brand-title span {
             color: #ff007f !important;
             font-size: 11px !important;
-            margin-left: 5px !important;
+            margin-left: 2px !important;
         }
 
         .nav-scroller {
@@ -192,6 +202,12 @@
             padding: 8px 12px;
             margin-bottom: 10px;
         }
+
+        .audio-row {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 6px;
+        }
     </style>
 </head>
 <body>
@@ -199,7 +215,10 @@
 <div class="main-container">
 
     <div class="top-header">
-        <div class="brand-title">Rox <span>INTEN STUDIO</span></div>
+        <div class="brand-title">
+            <img src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAP//////////////////////////////////////////////////////////////////////////////////////wgALCAABAAEBAREA/8QAFBABAAAAAAAAAAAAAAAAAAAAAP/aAAgBAQABPxA=" class="logo-icon" alt="Rox Logo">
+            Rox <span>INTEN STUDIO</span>
+        </div>
         <div style="color: #00e5ff; font-size: 11px;"><i class="fa-solid fa-bolt"></i> Mobile Engine Active</div>
     </div>
 
@@ -281,15 +300,25 @@
         </div>
     </div>
 
-    <!-- 3. Audio Cut & Mixer Panel -->
+    <!-- 3. Audio Cut & Mixer Panel with Start/End Time -->
     <div class="proj-panel">
-        <div class="panel-heading"><i class="fa-solid fa-music"></i> 3. ऑडियो ट्रैक (4 Min Supported)</div>
+        <div class="panel-heading"><i class="fa-solid fa-music"></i> 3. ऑडियो ट्रैक (Start & End Time Controls)</div>
         
-        <label style="color:#8a8a9e; font-size:11px;">Track 1:</label>
+        <!-- Track 1 Controls -->
+        <label style="color:#8a8a9e; font-size:11px;">Track 1 (ऑडियो फाइल):</label>
         <input type="file" id="audio1" class="rox-input" accept="audio/*">
+        <div class="audio-row">
+            <input type="number" id="audio1Start" class="rox-input" placeholder="Start (sec) e.g. 0" style="margin:0;" value="0" min="0" step="0.1">
+            <input type="number" id="audio1End" class="rox-input" placeholder="End (sec) e.g. 30" style="margin:0;" value="" min="0" step="0.1">
+        </div>
         
-        <label style="color:#8a8a9e; font-size:11px; margin-top:4px; display:block;">Track 2:</label>
+        <!-- Track 2 Controls -->
+        <label style="color:#8a8a9e; font-size:11px; margin-top:8px; display:block;">Track 2 (ऑडियो फाइल):</label>
         <input type="file" id="audio2" class="rox-input" accept="audio/*">
+        <div class="audio-row">
+            <input type="number" id="audio2Start" class="rox-input" placeholder="Start (sec) e.g. 0" style="margin:0;" value="0" min="0" step="0.1">
+            <input type="number" id="audio2End" class="rox-input" placeholder="End (sec) e.g. 30" style="margin:0;" value="" min="0" step="0.1">
+        </div>
 
         <button class="dark-btn" style="background:#ff4757; color:#fff; width:100%; margin-top:8px;" onclick="resetAll()">🗑️ Reset</button>
     </div>
@@ -401,7 +430,7 @@
     function addText() {
         const txtInput = document.getElementById('txt');
         const val = txtInput.value.trim() || "Rox Studio";
-        let startY = (textDirection === 'down') ? 0 : 700;
+        let startY = (textDirection === 'down') ? -50 : 750;
 
         textElements.push({
             text: val,
@@ -416,7 +445,6 @@
         elements.push({ type: 'bird', text: '🕊️', x: -50, y: 100 + Math.random() * 200, baseSpeed: 2, size: 30 });
     }
 
-    // 4 अलग-अलग रंगों के फूलों को जोड़ने वाला फंक्शन
     function addFlower(color) {
         elements.push({ type: 'flower', color: color, x: Math.random() * (canvas.width - 40), y: -40, baseSpeed: 2.5, size: 28 });
     }
@@ -529,7 +557,7 @@
             ctx.stroke();
         }
 
-        // 3. Elements (Bird / 4-Color Flowers)
+        // 3. Elements (Bird / Flowers)
         elements.forEach(el => {
             let currentSpeed = el.baseSpeed * globalSpeedMultiplier;
             
@@ -539,7 +567,6 @@
                 el.x += currentSpeed;
                 if (el.x > x + w + 40) el.x = x - 40;
             } else if (el.type === 'flower') {
-                // 4 अलग-अलग रंगों के अनुसार फूल सेट करना
                 ctx.save();
                 ctx.font = `${el.size}px sans-serif`;
                 ctx.shadowBlur = 6;
@@ -565,14 +592,14 @@
             }
         });
 
-        // 4. Text Direction
+        // 4. Text Direction Animation Fix
         textElements.forEach(tEl => {
             if (tEl.direction === 'up') {
                 tEl.y -= 2 * globalSpeedMultiplier;
-                if (tEl.y < y - 50) tEl.y = y + h + 50; 
+                if (tEl.y < -50) tEl.y = 750; 
             } else {
                 tEl.y += 2 * globalSpeedMultiplier;
-                if (tEl.y > y + h + 50) tEl.y = y - 50; 
+                if (tEl.y > 750) tEl.y = -50; 
             }
 
             ctx.font = 'bold 28px Segoe UI';
@@ -623,24 +650,33 @@
             isPlaying = true;
 
             const file1 = document.getElementById('audio1').files[0];
-            const file2 = document.getElementById('audio2').files[0];
-
             if (file1) {
-                const buf1 = await file1.arrayBuffer().then(b => audioCtx.decodeAudioData(b));
+                let start1 = parseFloat(document.getElementById('audio1Start').value) || 0;
+                let end1Input = document.getElementById('audio1End').value;
+                let buf1 = await file1.arrayBuffer().then(b => audioCtx.decodeAudioData(b));
+                
                 currentSource1 = audioCtx.createBufferSource();
                 currentSource1.buffer = buf1;
                 currentSource1.connect(audioCtx.destination);
                 currentSource1.connect(audioDestinationNode);
-                currentSource1.start(0);
+                
+                let duration1 = end1Input ? parseFloat(end1Input) - start1 : (buf1.duration - start1);
+                currentSource1.start(0, start1, duration1 > 0 ? duration1 : undefined);
             }
 
+            const file2 = document.getElementById('audio2').files[0];
             if (file2) {
-                const buf2 = await file2.arrayBuffer().then(b => audioCtx.decodeAudioData(b));
+                let start2 = parseFloat(document.getElementById('audio2Start').value) || 0;
+                let end2Input = document.getElementById('audio2End').value;
+                let buf2 = await file2.arrayBuffer().then(b => audioCtx.decodeAudioData(b));
+                
                 currentSource2 = audioCtx.createBufferSource();
                 currentSource2.buffer = buf2;
                 currentSource2.connect(audioCtx.destination);
                 currentSource2.connect(audioDestinationNode);
-                currentSource2.start(0);
+                
+                let duration2 = end2Input ? parseFloat(end2Input) - start2 : (buf2.duration - start2);
+                currentSource2.start(0, start2, duration2 > 0 ? duration2 : undefined);
             }
         }
     }
@@ -722,7 +758,11 @@
         document.getElementById('stickerInput').value = '';
         document.getElementById('txt').value = '';
         document.getElementById('audio1').value = '';
+        document.getElementById('audio1Start').value = '0';
+        document.getElementById('audio1End').value = '';
         document.getElementById('audio2').value = '';
+        document.getElementById('audio2Start').value = '0';
+        document.getElementById('audio2End').value = '';
     }
 </script>
 </body>
