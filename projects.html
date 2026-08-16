@@ -292,7 +292,7 @@
         document.getElementById('speedVal').innerText = globalSpeedMultiplier.toFixed(1) + 'x';
     }
 
-    // बबल की तरह नीचे से ऊपर तैरने वाला PNG स्टिकर
+    // अपलोड किया गया PNG / स्टिकर (चारों तरफ राइट-लेफ्ट-अप-डाउन घूमने वाला लॉजिक)
     function addCustomSticker() {
         const fileInput = document.getElementById('stickerInput');
         const file = fileInput.files[0];
@@ -301,26 +301,28 @@
             img.onload = function() {
                 customStickers.push({
                     img: img,
-                    x: Math.random() * (canvas.width - 120) + 10,
-                    y: canvas.height + 20,
+                    x: Math.random() * (canvas.width - 120),
+                    y: Math.random() * (canvas.height - 150),
                     w: 100,
                     h: 100,
-                    baseSpeed: 1.8
+                    dx: (Math.random() - 0.5) * 4, // X Velocity
+                    dy: (Math.random() - 0.5) * 4  // Y Velocity
                 });
             };
             img.src = URL.createObjectURL(file);
         }
     }
 
-    // बबल की तरह नीचे से ऊपर तैरने वाला टेक्स्ट
+    // टेक्स्ट / लिरिक्स (चारों तरफ राइट-लेफ्ट-अप-डाउन घूमने वाला लॉजिक)
     function addText() {
         const txtInput = document.getElementById('txt');
         const val = txtInput.value.trim() || "Rox Studio";
         textElements.push({
             text: val,
-            x: canvas.width / 2,
-            y: canvas.height + 20,
-            baseSpeed: 1.5
+            x: Math.random() * (canvas.width - 150) + 50,
+            y: Math.random() * (canvas.height - 100) + 50,
+            dx: (Math.random() - 0.5) * 3.5,
+            dy: (Math.random() - 0.5) * 3.5
         });
         txtInput.value = "";
     }
@@ -366,11 +368,16 @@
             ctx.fillRect(0, 0, canvas.width, canvas.height);
         }
 
-        // 2. Draw Custom Mobile PNG Stickers (Bubble-style floating)
+        // 2. Custom Stickers - चारों तरफ (Right, Left, Up, Down) बाउंसिंग मूवमेंट
         customStickers.forEach(stk => {
+            stk.x += stk.dx * globalSpeedMultiplier;
+            stk.y += stk.dy * globalSpeedMultiplier;
+
+            // स्क्रीन की दीवारों से टकराकर दिशा बदलना
+            if (stk.x <= 0 || stk.x + stk.w >= canvas.width) stk.dx *= -1;
+            if (stk.y <= 0 || stk.y + stk.h >= canvas.height) stk.dy *= -1;
+
             ctx.drawImage(stk.img, stk.x, stk.y, stk.w, stk.h);
-            stk.y -= stk.baseSpeed * globalSpeedMultiplier;
-            if (stk.y < -stk.h) stk.y = canvas.height + 20;
         });
 
         // 3. Draw Rain (With Speed Control)
@@ -412,8 +419,15 @@
             }
         });
 
-        // 5. Draw Lyrics Text (Bubble-style floating)
+        // 5. Text / Lyrics - चारों तरफ (Right, Left, Up, Down) बाउंसिंग मूवमेंट
         textElements.forEach(tEl => {
+            tEl.x += tEl.dx * globalSpeedMultiplier;
+            tEl.y += tEl.dy * globalSpeedMultiplier;
+
+            // स्क्रीन की दीवारों से टकराकर दिशा बदलना
+            if (tEl.x <= 50 || tEl.x >= canvas.width - 50) tEl.dx *= -1;
+            if (tEl.y <= 30 || tEl.y >= canvas.height - 20) tEl.dy *= -1;
+
             ctx.font = 'bold 24px Segoe UI';
             ctx.fillStyle = '#ffffff';
             ctx.textAlign = 'center';
@@ -421,10 +435,28 @@
             ctx.shadowBlur = 8;
             ctx.fillText(tEl.text, tEl.x, tEl.y);
             ctx.shadowBlur = 0;
-
-            tEl.y -= tEl.baseSpeed * globalSpeedMultiplier;
-            if (tEl.y < -40) tEl.y = canvas.height + 40;
         });
+
+        // 6. Rox Inten Studio वाटरमार्क और लोगो (ऊपर कोने में हमेशा दिखेगा)
+        ctx.save();
+        ctx.fillStyle = "rgba(0, 229, 255, 0.85)";
+        ctx.font = "bold 13px Segoe UI";
+        ctx.textAlign = "left";
+        ctx.shadowColor = "#000";
+        ctx.shadowBlur = 4;
+        
+        // लोगो आइकॉन और टेक्स्ट
+        ctx.fillText("Rox Inten Studio", 32, 28);
+        
+        // छोटा लोगो गोलाकार प्रतीक (Icon)
+        ctx.fillStyle = "#ff007f";
+        ctx.beginPath();
+        ctx.arc(18, 23, 7, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = "#fff";
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+        ctx.restore();
 
         requestAnimationFrame(renderLoop);
     }
@@ -555,6 +587,7 @@
         textElements = [];
         bgImage = null;
         globalSpeedMultiplier = 1.0;
+        document.getElementById('speedRange').value = screens = 1.0;
         document.getElementById('speedRange').value = 1.0;
         document.getElementById('speedVal').innerText = "1.0x";
         document.getElementById('bgPhotoInput').value = '';
