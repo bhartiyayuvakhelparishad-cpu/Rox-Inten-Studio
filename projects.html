@@ -41,7 +41,6 @@
             align-items: center;
             gap: 10px;
         }
-        /* लोगो का साइज बड़ा और क्लियर किया गया है */
         .brand-title img.logo-icon {
             width: 38px !important;
             height: 38px !important;
@@ -117,7 +116,6 @@
             display: block !important;
         }
 
-        /* 1000 शब्दों के लिरिक्स बॉक्स के लिए खास स्टाइल */
         #txt {
             height: 80px !important;
             resize: vertical !important;
@@ -303,44 +301,40 @@
             <span class="emoji-item" id="txtDirDown" onclick="setTextDirection('down')">⬇️ ऊपर से नीचे</span>
         </div>
 
-        <!-- Text/Lyric Input (1000 Characters Supported) -->
-        <label style="color:#00e5ff; font-size:12px; margin-top:6px; display:block;">🎵 गाने की लिरिक्स (1000 शब्दों तक):</label>
+        <!-- Text/Lyric Input (Line by Line Supported) -->
+        <label style="color:#00e5ff; font-size:12px; margin-top:6px; display:block;">🎵 गाने की लिरिक्स (लाइन-बाय-लाइन पढ़ें):</label>
         <div style="display:flex; gap:6px; margin-top:4px;">
-            <textarea id="txt" placeholder="यहाँ 1000 शब्दों तक की पूरी लिरिक्स लिखें..." class="rox-input" style="margin:0;" maxlength="1000"></textarea>
+            <textarea id="txt" placeholder="हर लाइन में गाने के बोल लिखें..." class="rox-input" style="margin:0;" maxlength="1000"></textarea>
             <button class="dark-btn" style="background:#00e5ff; color:#000; font-weight:bold; width: 30%; height: 80px;" onclick="addText()">➕ Add Text</button>
         </div>
     </div>
 
-    <!-- 4. Overlay Gallery Panel (New Feature) -->
+    <!-- 4. Overlay Gallery Panel -->
     <div class="proj-panel">
         <div class="panel-heading"><i class="fa-solid fa-layer-group"></i> 4. Overlay Gallery (फोटो लेयर्स, Drag & Resize)</div>
         <label style="color:#00e5ff; font-size:12px; margin-bottom:4px; display:block;">गैलरी में कई फोटो जोड़ें:</label>
         <input type="file" id="galleryInput" class="rox-input" accept="image/*" multiple onchange="addToGallery(event)">
         
-        <div id="galleryGrid" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 8px;">
-            <!-- चुनी गई फोटोज यहाँ दिखेंगी -->
-        </div>
-        <div style="font-size: 11px; color: #8a8a9e; margin-top: 6px;">💡 टिप: फोटो पर क्लिक करके वीडियो में लाएं। कोने वाले पिंक हैंडल से साइज बड़ा/छोटा करके बॉक्स में फिट करें और उंगली से कहीं भी खींचें।</div>
+        <div id="galleryGrid" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 8px;"></div>
+        <div style="font-size: 11px; color: #8a8a9e; margin-top: 6px;">💡 टिप: फोटो पर क्लिक करके वीडियो में लाएं। कोने वाले पिंक हैंडल से साइज बड़ा/छोटा करें और उंगली से खींचें।</div>
     </div>
 
-    <!-- 3. Audio Cut & Mixer Panel with Start/End Time -->
+    <!-- 3. Audio Cut & Mixer Panel -->
     <div class="proj-panel">
         <div class="panel-heading"><i class="fa-solid fa-music"></i> 3. ऑडियो ट्रैक (Start & End Time Controls)</div>
         
-        <!-- Track 1 Controls -->
         <label style="color:#8a8a9e; font-size:11px;">Track 1 (ऑडियो फाइल):</label>
         <input type="file" id="audio1" class="rox-input" accept="audio/*">
         <div class="audio-row">
-            <input type="number" id="audio1Start" class="rox-input" placeholder="Start (sec) e.g. 0" style="margin:0;" value="0" min="0" step="0.1">
-            <input type="number" id="audio1End" class="rox-input" placeholder="End (sec) e.g. 30" style="margin:0;" value="" min="0" step="0.1">
+            <input type="number" id="audio1Start" class="rox-input" placeholder="Start (sec)" style="margin:0;" value="0" min="0" step="0.1">
+            <input type="number" id="audio1End" class="rox-input" placeholder="End (sec)" style="margin:0;" value="" min="0" step="0.1">
         </div>
         
-        <!-- Track 2 Controls -->
         <label style="color:#8a8a9e; font-size:11px; margin-top:8px; display:block;">Track 2 (ऑडियो फाइल):</label>
         <input type="file" id="audio2" class="rox-input" accept="audio/*">
         <div class="audio-row">
-            <input type="number" id="audio2Start" class="rox-input" placeholder="Start (sec) e.g. 0" style="margin:0;" value="0" min="0" step="0.1">
-            <input type="number" id="audio2End" class="rox-input" placeholder="End (sec) e.g. 30" style="margin:0;" value="" min="0" step="0.1">
+            <input type="number" id="audio2Start" class="rox-input" placeholder="Start (sec)" style="margin:0;" value="0" min="0" step="0.1">
+            <input type="number" id="audio2End" class="rox-input" placeholder="End (sec)" style="margin:0;" value="" min="0" step="0.1">
         </div>
 
         <button class="dark-btn" style="background:#ff4757; color:#fff; width:100%; margin-top:8px;" onclick="resetAll()">🗑️ Reset</button>
@@ -392,7 +386,6 @@
     function setRainStyle(style) {
         rainStyle = style;
         rainActive = true;
-        
         document.getElementById('btnRainStraight').classList.remove('selected');
         document.getElementById('btnRainSlant').classList.remove('selected');
         document.getElementById('btnRainHeavy').classList.remove('selected');
@@ -400,7 +393,6 @@
         if(style === 'straight') document.getElementById('btnRainStraight').classList.add('selected');
         if(style === 'slant') document.getElementById('btnRainSlant').classList.add('selected');
         if(style === 'heavy') document.getElementById('btnRainHeavy').classList.add('selected');
-
         initRainDrops();
     }
 
@@ -408,7 +400,6 @@
         textDirection = dir;
         document.getElementById('txtDirUp').classList.remove('selected');
         document.getElementById('txtDirDown').classList.remove('selected');
-
         if(dir === 'up') document.getElementById('txtDirUp').classList.add('selected');
         if(dir === 'down') document.getElementById('txtDirDown').classList.add('selected');
     }
@@ -417,7 +408,6 @@
         drops = [];
         let count = (rainStyle === 'heavy') ? 400 : 200;
         let len = (rainStyle === 'heavy') ? 35 : 20;
-        
         for (let i = 0; i < count; i++) {
             drops.push({
                 x: Math.random() * canvas.width,
@@ -496,16 +486,8 @@
     function toggleGalleryOverlay(index) {
         let item = galleryItems[index];
         item.active = !item.active;
-
         if (item.active) {
-            activeOverlays.push({
-                id: item.id,
-                img: item.img,
-                x: 80,
-                y: 120,
-                w: 140,
-                h: 140
-            });
+            activeOverlays.push({ id: item.id, img: item.img, x: 80, y: 120, w: 140, h: 140 });
         } else {
             activeOverlays = activeOverlays.filter(o => o.id !== item.id);
         }
@@ -516,28 +498,20 @@
         const rect = canvas.getBoundingClientRect();
         const clientX = e.clientX || (e.touches && e.touches[0].clientX);
         const clientY = e.clientY || (e.touches && e.touches[0].clientY);
-        
         const scaleX = canvas.width / rect.width;
         const scaleY = canvas.height / rect.height;
-
-        return {
-            x: (clientX - rect.left) * scaleX,
-            y: (clientY - rect.top) * scaleY
-        };
+        return { x: (clientX - rect.left) * scaleX, y: (clientY - rect.top) * scaleY };
     }
 
     canvas.addEventListener('mousedown', startDrag);
     canvas.addEventListener('touchstart', startDrag, { passive: false });
-
     canvas.addEventListener('mousemove', dragMove);
     canvas.addEventListener('touchmove', dragMove, { passive: false });
-
     canvas.addEventListener('mouseup', endDrag);
     canvas.addEventListener('touchend', endDrag);
 
     function startDrag(e) {
         const coords = getCanvasCoordinates(e);
-        
         for (let i = activeOverlays.length - 1; i >= 0; i--) {
             let ov = activeOverlays[i];
             if (coords.x >= ov.x + ov.w - resizeHandleSize && coords.x <= ov.x + ov.w &&
@@ -548,7 +522,6 @@
                 return;
             }
         }
-
         for (let i = activeOverlays.length - 1; i >= 0; i--) {
             let ov = activeOverlays[i];
             if (coords.x >= ov.x && coords.x <= ov.x + ov.w && coords.y >= ov.y && coords.y <= ov.y + ov.h) {
@@ -565,7 +538,6 @@
     function dragMove(e) {
         if (!draggedOverlay) return;
         const coords = getCanvasCoordinates(e);
-        
         if (isResizing) {
             draggedOverlay.w = Math.max(30, coords.x - draggedOverlay.x);
             draggedOverlay.h = Math.max(30, coords.y - draggedOverlay.y);
@@ -581,17 +553,34 @@
         isResizing = false;
     }
 
+    // यहाँ बदलाव किया गया है ताकि हर एक लाइन अलग से सीक्वेंस में मूव करे
     function addText() {
         const txtInput = document.getElementById('txt');
-        const val = txtInput.value.trim() || "Rox Studio";
-        let startY = (textDirection === 'down') ? -50 : 750;
+        let rawText = txtInput.value.trim();
+        if (!rawText) rawText = "Rox Studio";
 
-        textElements.push({
-            text: val,
-            x: canvas.width / 2,
-            y: startY,
-            direction: textDirection
+        // टेक्स्ट को लाइन्स में तोड़ें
+        let lines = rawText.split('\n').filter(line => line.trim() !== "");
+        
+        let startY = (textDirection === 'down') ? -50 : 750;
+        let spacing = 50; // दो लाइनों के बीच की दूरी
+
+        lines.forEach((lineText, index) => {
+            let initialY;
+            if (textDirection === 'up') {
+                initialY = 750 + (index * spacing); // एक के पीछे एक नीचे से शुरू होंगी
+            } else {
+                initialY = -50 - (index * spacing); // एक के पीछे एक ऊपर से शुरू होंगी
+            }
+
+            textElements.push({
+                text: lineText,
+                x: canvas.width / 2,
+                y: initialY,
+                direction: textDirection
+            });
         });
+
         txtInput.value = "";
     }
 
@@ -605,18 +594,14 @@
 
     function drawPondAndWaterEffects(x, y, w, h) {
         if (!transparentWater && !solidWater) return;
-
         ctx.save();
         let pY = y + h - 140; 
-        
         if (transparentWater) {
             ctx.fillStyle = "rgba(0, 150, 255, 0.3)"; 
         } else if (solidWater) {
             ctx.fillStyle = "rgba(0, 80, 180, 1.0)";  
         }
-        
         ctx.fillRect(x, pY, w, (y + h) - pY);
-
         ctx.strokeStyle = "rgba(0, 229, 255, 0.6)";
         ctx.lineWidth = 2;
         ctx.beginPath();
@@ -630,17 +615,12 @@
             ctx.beginPath();
             ctx.ellipse(r.x, r.y, r.radius, r.radius * 0.4, 0, 0, Math.PI * 2);
             ctx.stroke();
-
             r.radius += 0.8 * globalSpeedMultiplier;
             if (r.radius > 35) ripples.splice(index, 1);
         });
 
         if (Math.random() > 0.90) {
-            ripples.push({
-                x: x + Math.random() * w,
-                y: pY + Math.random() * 40,
-                radius: 2
-            });
+            ripples.push({ x: x + Math.random() * w, y: pY + Math.random() * 40, radius: 2 });
         }
         ctx.restore();
     }
@@ -661,7 +641,6 @@
             h = bgImage.height * ratio;
             x = (canvas.width - w) / 2;
             y = (canvas.height - h) / 2;
-            
             ctx.drawImage(bgImage, 0, 0, bgImage.width, bgImage.height, x, y, w, h);
         } else {
             ctx.fillStyle = '#111';
@@ -675,11 +654,9 @@
 
         activeOverlays.forEach(ov => {
             ctx.drawImage(ov.img, ov.x, ov.y, ov.w, ov.h);
-            
             ctx.strokeStyle = "#00e5ff";
             ctx.lineWidth = 1.5;
             ctx.strokeRect(ov.x, ov.y, ov.w, ov.h);
-            
             ctx.fillStyle = "#ff007f";
             ctx.fillRect(ov.x + ov.w - resizeHandleSize, ov.y + ov.h - resizeHandleSize, resizeHandleSize, resizeHandleSize);
         });
@@ -694,24 +671,16 @@
 
         if (rainActive) {
             if (drops.length === 0) initRainDrops();
-
             ctx.strokeStyle = (rainStyle === 'heavy') ? 'rgba(230, 230, 255, 0.7)' : 'rgba(200, 200, 255, 0.45)';
             ctx.lineWidth = (rainStyle === 'heavy') ? 1.8 : 1.1;
             ctx.beginPath();
-            
             drops.forEach(drop => {
-                let xOffset = 0;
-                if (rainStyle === 'slant' || rainStyle === 'heavy') {
-                    xOffset = 5;
-                }
-
+                let xOffset = (rainStyle === 'slant' || rainStyle === 'heavy') ? 5 : 0;
                 ctx.moveTo(drop.x, drop.y);
                 ctx.lineTo(drop.x + xOffset, drop.y + drop.length);
-                
                 let fallMultiplier = (rainStyle === 'heavy') ? 2.5 : 1.5;
                 drop.y += drop.baseSpeed * globalSpeedMultiplier * fallMultiplier;
                 if (xOffset > 0) drop.x += 1.5 * globalSpeedMultiplier;
-
                 if (drop.y > y + h) {
                     drop.y = y;
                     drop.x = x + Math.random() * w;
@@ -722,7 +691,6 @@
 
         elements.forEach(el => {
             let currentSpeed = el.baseSpeed * globalSpeedMultiplier;
-            
             if (el.type === 'bird') {
                 ctx.font = `${el.size}px sans-serif`;
                 ctx.fillText(el.text, el.x, el.y);
@@ -737,12 +705,7 @@
                 else if (el.color === 'red') ctx.shadowColor = '#ff4757';
                 else if (el.color === 'yellow') ctx.shadowColor = '#ffa502';
 
-                let flowerEmoji = '🌸';
-                if (el.color === 'blue') flowerEmoji = '🔷';
-                else if (el.color === 'pink') flowerEmoji = '🌸';
-                else if (el.color === 'red') flowerEmoji = '🌺';
-                else if (el.color === 'yellow') flowerEmoji = '🌼';
-
+                let flowerEmoji = (el.color === 'blue') ? '🔷' : (el.color === 'pink') ? '🌸' : (el.color === 'red') ? '🌺' : '🌼';
                 ctx.fillText(flowerEmoji, el.x, el.y);
                 ctx.restore();
 
@@ -754,16 +717,17 @@
             }
         });
 
+        // हर लाइन को अलग-अलग स्वतंत्र रूप से रेंडर और मूव करना
         textElements.forEach(tEl => {
             if (tEl.direction === 'up') {
-                tEl.y -= 2 * globalSpeedMultiplier;
-                if (tEl.y < -50) tEl.y = 750; 
+                tEl.y -= 1.8 * globalSpeedMultiplier;
+                if (tEl.y < -50) tEl.y = 750 + Math.random() * 50; 
             } else {
-                tEl.y += 2 * globalSpeedMultiplier;
-                if (tEl.y > 750) tEl.y = -50; 
+                tEl.y += 1.8 * globalSpeedMultiplier;
+                if (tEl.y > 750) tEl.y = -50 - Math.random() * 50; 
             }
 
-            ctx.font = 'bold 24px Segoe UI';
+            ctx.font = 'bold 22px Segoe UI';
             ctx.fillStyle = '#ffffff';
             ctx.textAlign = 'center';
             ctx.shadowColor = '#000';
@@ -773,7 +737,6 @@
         });
 
         drawPondAndWaterEffects(x, y, w, h);
-
         ctx.restore();
         requestAnimationFrame(renderLoop);
     }
