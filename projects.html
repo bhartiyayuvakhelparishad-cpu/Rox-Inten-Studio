@@ -134,19 +134,23 @@
 
         .reel-board-container {
             width: 100%;
-            height: 420px;
+            height: 450px;
             position: relative;
             background: #000;
             border: 1px solid #00e5ff;
             border-radius: 10px;
             overflow: hidden;
             margin-bottom: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
 
         #studioCanvas {
             width: 100%;
             height: 100%;
             display: block;
+            object-fit: contain;
         }
 
         .emoji-grid {
@@ -410,9 +414,16 @@
     function renderLoop() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        // 1. Draw Background Photo
+        // 1. Draw Background Photo (Proper Aspect Ratio Fit - No Stretching)
         if (bgImage) {
-            ctx.drawImage(bgImage, 0, 0, canvas.width, canvas.height);
+            const hRatio = canvas.width / bgImage.width;
+            const vRatio = canvas.height / bgImage.height;
+            const ratio = Math.min(hRatio, vRatio);
+            const centerShift_x = (canvas.width - bgImage.width * ratio) / 2;
+            const centerShift_y = (canvas.height - bgImage.height * ratio) / 2;
+            
+            ctx.drawImage(bgImage, 0, 0, bgImage.width, bgImage.height, 
+                          centerShift_x, centerShift_y, bgImage.width * ratio, bgImage.height * ratio);
         } else {
             ctx.fillStyle = '#111';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -431,7 +442,7 @@
 
         // 3. Draw Heavy Rain (Reels Style)
         if (rainActive) {
-            ctx.strokeStyle = 'rgba(255, 255, 255, 0.45);';
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.45)';
             ctx.lineWidth = 1.2;
             ctx.beginPath();
             drops.forEach(drop => {
@@ -490,7 +501,7 @@
         // 6. नीचे तालाब और पानी की बूंदों का इफ़ेक्ट
         drawPondAndWaterEffects();
 
-        // (यहाँ से वाटरमार्क पूरी तरह हटा दिया गया है)
+        // (वाटरमार्क पूरी तरह हटाया गया है)
 
         requestAnimationFrame(renderLoop);
     }
