@@ -219,13 +219,13 @@
     <div class="proj-panel">
         <div class="panel-heading"><i class="fa-solid fa-wand-magic-sparkles"></i> 2. ओरिजिनल एलिमेंट्स और लिरिक्स</div>
         
-        <!-- Emoji Buttons (Includes Bubble) -->
+        <!-- Emoji / Water Effect Buttons (Updated) -->
         <div class="emoji-grid">
             <span class="emoji-item" style="border-color:#00e5ff;" onclick="toggleRain()">🌧️ असली बारिश</span>
             <span class="emoji-item" style="border-color:#ff007f;" onclick="addBird()">🕊️ उड़ती चिड़िया</span>
             <span class="emoji-item" onclick="addFlower()">🌸 गिरता फूल</span>
-            <span class="emoji-item" onclick="addStar()">✨ चमकता तारा</span>
-            <span class="emoji-item" style="border-color:#b500ff;" onclick="addBubble()">💭 थॉट बबल</span>
+            <span class="emoji-item" style="border-color:#00e5ff;" onclick="toggleTransparentWater()">💧 पानी (Transparent)</span>
+            <span class="emoji-item" style="border-color:#b500ff;" onclick="toggleSolidWater()">🌊 पानी (Solid)</span>
         </div>
 
         <!-- Speed Control Slider -->
@@ -281,6 +281,8 @@
     // तालाब और वाटर इफ़ेक्ट के लिए वैरिएबल
     let waterLevel = 560; 
     let ripples = [];
+    let transparentWater = false;
+    let solidWater = false;
 
     function loadBgPhoto(event) {
         const file = event.target.files[0];
@@ -294,6 +296,16 @@
     function changeSpeed(val) {
         globalSpeedMultiplier = parseFloat(val);
         document.getElementById('speedVal').innerText = globalSpeedMultiplier.toFixed(1) + 'x';
+    }
+
+    function toggleTransparentWater() {
+        transparentWater = !transparentWater;
+        solidWater = false; // अगर सॉलिड ऑन है तो बंद हो जाएगा
+    }
+
+    function toggleSolidWater() {
+        solidWater = !solidWater;
+        transparentWater = false; // अगर ट्रांसपेरेंट ऑन है तो बंद हो जाएगा
     }
 
     // स्टिकर / GIF (चारों तरफ राइट-लेफ्ट-अप-डाउन घूमने वाला लॉजिक)
@@ -353,23 +365,19 @@
         elements.push({ type: 'flower', text: '🌸', x: Math.random() * (canvas.width - 40), y: -40, baseSpeed: 2.5, size: 28 });
     }
 
-    function addStar() {
-        elements.push({ type: 'star', text: '✨', x: Math.random() * (canvas.width - 40), y: Math.random() * (waterLevel - 100), baseSpeed: 0, size: 26 });
-    }
-
-    function addBubble() {
-        elements.push({ type: 'bubble', text: '💭', x: Math.random() * (canvas.width - 50), y: waterLevel - 20, baseSpeed: 1.8, size: 32 });
-    }
-
-    // तालाब और पानी की बूंदों (Ripples) को ड्रा करने का फंक्शन
+    // तालाब और पानी की बूंदों (Ripples) को ड्रा करने का अपडेटेड फंक्शन
     function drawPondAndWaterEffects() {
+        if (!transparentWater && !solidWater) return; // अगर कोई वाटर इफ़ेक्ट ऑन नहीं है तो कुछ मत दिखाओ
+
         ctx.save();
-        // ट्रांसपेरेंट तालाब का लुक (नीचे का हिस्सा)
-        let gradient = ctx.createLinearGradient(0, waterLevel, 0, canvas.height);
-        gradient.addColorStop(0, "rgba(0, 150, 255, 0.2)");
-        gradient.addColorStop(1, "rgba(0, 80, 180, 0.5)");
         
-        ctx.fillStyle = gradient;
+        // ट्रांसपेरेंट या सॉलिड रंग सेट करें
+        if (transparentWater) {
+            ctx.fillStyle = "rgba(0, 150, 255, 0.3)"; // ट्रांसपेरेंट पानी
+        } else if (solidWater) {
+            ctx.fillStyle = "rgba(0, 80, 180, 1.0)";  // सॉलिड (Non-Transparent) पानी
+        }
+        
         ctx.fillRect(0, waterLevel, canvas.width, canvas.height - waterLevel);
 
         // तालाब की ऊपरी सतह पर चमकती हुई बॉर्डर लाइन
@@ -381,9 +389,9 @@
         ctx.stroke();
 
         // पानी में गिरती बूंदों की लहरें (Ripples)
+        ctx.strokeStyle = "rgba(255, 255, 255, 0.5)";
         ctx.lineWidth = 1.2;
         ripples.forEach((r, index) => {
-            ctx.strokeStyle = `rgba(255, 255, 255, ${1 - r.radius / 35})`;
             ctx.beginPath();
             ctx.ellipse(r.x, r.y, r.radius, r.radius * 0.4, 0, 0, Math.PI * 2);
             ctx.stroke();
@@ -394,11 +402,11 @@
             }
         });
 
-        // यदि बारिश चालू है तो तालाब में लगातार बूंदें गिरेंगी
-        if (rainActive && Math.random() > 0.6) {
+        // यदि बारिश या पानी का इफ़ेक्ट ऑन है तो तालाब में लगातार बूंदें गिरेंगी
+        if (Math.random() > 0.90) {
             ripples.push({
                 x: Math.random() * canvas.width,
-                y: waterLevel + Math.random() * (canvas.height - waterLevel),
+                y: waterLevel + Math.random() * 40,
                 radius: 2
             });
         }
@@ -421,9 +429,8 @@
             stk.x += stk.dx * globalSpeedMultiplier;
             stk.y += stk.dy * globalSpeedMultiplier;
 
-            // स्क्रीन की दीवारों से टकराकर दिशा बदलना (ऊपर तालाब की सीमा का ध्यान रखते हुए)
             if (stk.x <= 0 || stk.x + stk.w >= canvas.width) stk.dx *= -1;
-            if (stk.y <= 0 || stk.y + stk.h >= waterLevel) stk.dy *= -1;
+            if (stk.y <= 0 || stk.y + stk.h >= (transparentWater || solidWater ? waterLevel : canvas.height)) stk.dy *= -1;
 
             ctx.drawImage(stk.img, stk.x, stk.y, stk.w, stk.h);
         });
@@ -445,7 +452,7 @@
             ctx.stroke();
         }
 
-        // 4. Draw Animated FX Elements (Bird, Flower, Bubble, Star)
+        // 4. Draw Animated FX Elements (Bird, Flower)
         elements.forEach(el => {
             ctx.font = `${el.size}px sans-serif`;
             const currentSpeed = el.baseSpeed * globalSpeedMultiplier;
@@ -457,18 +464,14 @@
             } else if (el.type === 'flower') {
                 ctx.fillText(el.text, el.x, el.y);
                 el.y += currentSpeed;
-                if (el.y > waterLevel) {
-                    // फूल पानी में गिरने पर रिपल बनाएगा
+                if ((transparentWater || solidWater) && el.y > waterLevel) {
                     ripples.push({ x: el.x, y: waterLevel + Math.random() * 20, radius: 2 });
                     el.y = -40;
                     el.x = Math.random() * (canvas.width - 40);
+                } else if (el.y > canvas.height + 40) {
+                    el.y = -40;
+                    el.x = Math.random() * (canvas.width - 40);
                 }
-            } else if (el.type === 'bubble') {
-                ctx.fillText(el.text, el.x, el.y);
-                el.y -= currentSpeed;
-                if (el.y < -40) el.y = waterLevel;
-            } else if (el.type === 'star') {
-                ctx.fillText(el.text, el.x, el.y);
             }
         });
 
@@ -477,9 +480,9 @@
             tEl.x += tEl.dx * globalSpeedMultiplier;
             tEl.y += tEl.dy * globalSpeedMultiplier;
 
-            // स्क्रीन की दीवारों से टकराकर दिशा बदलना
+            let limitY = (transparentWater || solidWater) ? waterLevel - 20 : canvas.height - 20;
             if (tEl.x <= 50 || tEl.x >= canvas.width - 50) tEl.dx *= -1;
-            if (tEl.y <= 30 || tEl.y >= waterLevel - 20) tEl.dy *= -1;
+            if (tEl.y <= 30 || tEl.y >= limitY) tEl.dy *= -1;
 
             ctx.font = 'bold 24px Segoe UI';
             ctx.fillStyle = '#ffffff';
@@ -490,7 +493,7 @@
             ctx.shadowBlur = 0;
         });
 
-        // 6. नीचे ट्रांसपेरेंट तालाब और पानी की बूंदों का इफ़ेक्ट
+        // 6. नीचे तालाब और पानी की बूंदों का इफ़ेक्ट
         drawPondAndWaterEffects();
 
         // 7. Rox Inten Studio वाटरमार्क और लोगो (ऊपर कोने में हमेशा दिखेगा)
@@ -501,10 +504,8 @@
         ctx.shadowColor = "#000";
         ctx.shadowBlur = 4;
         
-        // लोगो टेक्स्ट
         ctx.fillText("Rox Inten Studio", 32, 28);
         
-        // छोटा लोगो गोलाकार प्रतीक (Icon)
         ctx.fillStyle = "#ff007f";
         ctx.beginPath();
         ctx.arc(18, 23, 7, 0, Math.PI * 2);
@@ -637,6 +638,8 @@
         isPlaying = false;
         if (isRecording) toggleRecordCanvasMP4();
         rainActive = false;
+        transparentWater = false;
+        solidWater = false;
         drops = [];
         elements = [];
         customStickers = [];
