@@ -176,10 +176,17 @@
             cursor: pointer !important;
         }
 
-        .audio-row {
+        .timeline-track-box {
+            background: #0a0a12;
+            border: 1px dashed #00e5ff;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+        .timeline-row {
             display: flex;
             gap: 6px;
-            margin-bottom: 6px;
+            margin-top: 6px;
         }
     </style>
 </head>
@@ -206,7 +213,7 @@
 
     <!-- 1. मुख्य बैकग्राउंड वीडियो/फोटो अपलोड -->
     <div class="proj-panel">
-        <div class="panel-heading"><i class="fa-solid5 fa-film"></i> 1. गैलरी से मेन वीडियो/फोटो चुनें</div>
+        <div class="panel-heading"><i class="fa-solid fa-film"></i> 1. गैलरी से मेन वीडियो/फोटो चुनें</div>
         <input type="file" id="bgPhotoInput" class="rox-input" accept="image/*,video/*" onchange="loadMedia(event)">
         
         <div class="reel-board-container">
@@ -229,24 +236,32 @@
         <div style="font-size: 11px; color: #8a8a9e; margin-top: 6px;">💡 टिप: मीडिया पर क्लिक करके स्क्रीन पर लाएं। कोने के पिंक हैंडल से साइज छोटा-बड़ा करें और उंगली से खींचकर कहीं भी सेट करें।</div>
     </div>
 
-    <!-- 3. ऑडियो मिक्सर, कट और रिप्लेस -->
+    <!-- 3. एडवांस ऑडियो ट्रिम, कट और टाइमलाइन मिक्सर -->
     <div class="proj-panel">
-        <div class="panel-heading"><i class="fa-solid fa-music"></i> 3. ऑडियो ट्रैक (गैलरी से जोड़ें, कट और रिप्लेस करें)</div>
+        <div class="panel-heading"><i class="fa-solid fa-music"></i> 3. एडवांस ऑडियो ट्रिम & कट मिक्सर (Exact Timing)</div>
         
         <!-- Track 1 -->
-        <label style="color:#8a8a9e; font-size:11px;">Track 1 ऑडियो:</label>
-        <input type="file" id="audio1" class="rox-input" accept="audio/*">
-        <div class="audio-row">
-            <input type="number" id="audio1Start" class="rox-input" placeholder="Start (sec)" style="margin:0;" value="0" min="0" step="0.1">
-            <input type="number" id="audio1End" class="rox-input" placeholder="End (sec)" style="margin:0;" value="" min="0" step="0.1">
+        <div class="timeline-track-box">
+            <label style="color:#00e5ff; font-size:12px; font-weight:bold;">🎵 Audio Track 1 (Main Song/BGM)</label>
+            <input type="file" id="audio1" class="rox-input" accept="audio/*" style="margin-top:6px;">
+            <div class="timeline-row">
+                <input type="number" id="audio1Start" class="rox-input" placeholder="Cut Start (sec)" value="0" min="0" step="0.1" style="margin:0;">
+                <input type="number" id="audio1End" class="rox-input" placeholder="Cut End (sec)" value="" min="0" step="0.1" style="margin:0;">
+                <input type="number" id="audio1Delay" class="rox-input" placeholder="Delay (sec)" value="0" min="0" step="0.1" style="margin:0;">
+            </div>
+            <div style="font-size: 10px; color: #8a8a9e; margin-top: 4px;">💡 Delay से तय करें कि ऑडियो वीडियो में कितने सेकंड बाद प्ले हो।</div>
         </div>
         
         <!-- Track 2 -->
-        <label style="color:#8a8a9e; font-size:11px; margin-top:8px; display:block;">Track 2 ऑडियो:</label>
-        <input type="file" id="audio2" class="rox-input" accept="audio/*">
-        <div class="audio-row">
-            <input type="number" id="audio2Start" class="rox-input" placeholder="Start (sec)" style="margin:0;" value="0" min="0" step="0.1">
-            <input type="number" id="audio2End" class="rox-input" placeholder="End (sec)" style="margin:0;" value="" min="0" step="0.1">
+        <div class="timeline-track-box">
+            <label style="color:#ff007f; font-size:12px; font-weight:bold;">🎶 Audio Track 2 (Dialogue / Punchline)</label>
+            <input type="file" id="audio2" class="rox-input" accept="audio/*" style="margin-top:6px;">
+            <div class="timeline-row">
+                <input type="number" id="audio2Start" class="rox-input" placeholder="Cut Start (sec)" value="0" min="0" step="0.1" style="margin:0;">
+                <input type="number" id="audio2End" class="rox-input" placeholder="Cut End (sec)" value="" min="0" step="0.1" style="margin:0;">
+                <input type="number" id="audio2Delay" class="rox-input" placeholder="Delay (sec)" value="0" min="0" step="0.1" style="margin:0;">
+            </div>
+            <div style="font-size: 10px; color: #8a8a9e; margin-top: 4px;">💡 रील्स की तरह बीच में पंचline या गाना सटीक सेकंड पर जोड़ने के लिए।</div>
         </div>
 
         <button class="dark-btn" style="background:#ff4757; color:#fff; width:100%; margin-top:8px;" onclick="resetAll()">🗑️ Reset All</button>
@@ -509,15 +524,21 @@
             isPlaying = false;
         } else {
             initAudioContext();
-            if (isVideoBg) sourceVideo.play();
+            if (isVideoBg) {
+                sourceVideo.currentTime = 0;
+                sourceVideo.play();
+            }
             btn.innerText = "⏹️ Stop Preview";
             btn.style.background = "#ff4757";
             isPlaying = true;
 
+            // Audio Track 1 Handling
             const file1 = document.getElementById('audio1').files[0];
             if (file1) {
                 let start1 = parseFloat(document.getElementById('audio1Start').value) || 0;
                 let end1Input = document.getElementById('audio1End').value;
+                let delay1 = parseFloat(document.getElementById('audio1Delay').value) || 0;
+                
                 let buf1 = await file1.arrayBuffer().then(b => audioCtx.decodeAudioData(b));
                 
                 currentSource1 = audioCtx.createBufferSource();
@@ -526,13 +547,17 @@
                 currentSource1.connect(audioDestinationNode);
                 
                 let duration1 = end1Input ? parseFloat(end1Input) - start1 : (buf1.duration - start1);
-                currentSource1.start(0, start1, duration1 > 0 ? duration1 : undefined);
+                let playTime1 = audioCtx.currentTime + delay1;
+                currentSource1.start(playTime1, start1, duration1 > 0 ? duration1 : undefined);
             }
 
+            // Audio Track 2 Handling
             const file2 = document.getElementById('audio2').files[0];
             if (file2) {
                 let start2 = parseFloat(document.getElementById('audio2Start').value) || 0;
                 let end2Input = document.getElementById('audio2End').value;
+                let delay2 = parseFloat(document.getElementById('audio2Delay').value) || 0;
+                
                 let buf2 = await file2.arrayBuffer().then(b => audioCtx.decodeAudioData(b));
                 
                 currentSource2 = audioCtx.createBufferSource();
@@ -541,7 +566,8 @@
                 currentSource2.connect(audioDestinationNode);
                 
                 let duration2 = end2Input ? parseFloat(end2Input) - start2 : (buf2.duration - start2);
-                currentSource2.start(0, start2, duration2 > 0 ? duration2 : undefined);
+                let playTime2 = audioCtx.currentTime + delay2;
+                currentSource2.start(playTime2, start2, duration2 > 0 ? duration2 : undefined);
             }
         }
     }
@@ -620,9 +646,11 @@
         document.getElementById('audio1').value = '';
         document.getElementById('audio1Start').value = '0';
         document.getElementById('audio1End').value = '';
+        document.getElementById('audio1Delay').value = '0';
         document.getElementById('audio2').value = '';
         document.getElementById('audio2Start').value = '0';
         document.getElementById('audio2End').value = '';
+        document.getElementById('audio2Delay').value = '0';
     }
 </script>
 </body>
