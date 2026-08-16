@@ -368,10 +368,13 @@
         elements.push({ type: 'flower', text: '🌸', x: Math.random() * (canvas.width - 40), y: -40, baseSpeed: 2.5, size: 28 });
     }
 
-    function drawPondAndWaterEffects() {
+    function drawPondAndWaterEffects(x, y, w, h) {
         if (!transparentWater && !solidWater) return;
 
         ctx.save();
+        
+        // पानी के एरिया को फोटो की चौड़ाई (w और x) के अंदर ही रखेंगे
+        let pY = y + h - 140; // फोटो के निचले हिस्से में तालाब
         
         if (transparentWater) {
             ctx.fillStyle = "rgba(0, 150, 255, 0.3)"; 
@@ -379,13 +382,13 @@
             ctx.fillStyle = "rgba(0, 80, 180, 1.0)";  
         }
         
-        ctx.fillRect(0, waterLevel, canvas.width, canvas.height - waterLevel);
+        ctx.fillRect(x, pY, w, (y + h) - pY);
 
         ctx.strokeStyle = "rgba(0, 229, 255, 0.6)";
         ctx.lineWidth = 2;
         ctx.beginPath();
-        ctx.moveTo(0, waterLevel);
-        ctx.lineTo(canvas.width, waterLevel);
+        ctx.moveTo(x, pY);
+        ctx.lineTo(x + w, pY);
         ctx.stroke();
 
         ctx.strokeStyle = "rgba(255, 255, 255, 0.5)";
@@ -403,8 +406,8 @@
 
         if (Math.random() > 0.90) {
             ripples.push({
-                x: Math.random() * canvas.width,
-                y: waterLevel + Math.random() * 40,
+                x: x + Math.random() * w,
+                y: pY + Math.random() * 40,
                 radius: 2
             });
         }
@@ -414,33 +417,47 @@
     function renderLoop() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        // 1. Draw Background Photo (Proper Aspect Ratio Fit - No Stretching)
+        // फोटो एरिया कैलकुलेशन (Aspect Ratio Fit)
+        let w = canvas.width;
+        let h = canvas.height;
+        let x = 0;
+        let y = 0;
+
         if (bgImage) {
             const hRatio = canvas.width / bgImage.width;
             const vRatio = canvas.height / bgImage.height;
             const ratio = Math.min(hRatio, vRatio);
-            const centerShift_x = (canvas.width - bgImage.width * ratio) / 2;
-            const centerShift_y = (canvas.height - bgImage.height * ratio) / 2;
+            w = bgImage.width * ratio;
+            h = bgImage.height * ratio;
+            x = (canvas.width - w) / 2;
+            y = (canvas.height - h) / 2;
             
-            ctx.drawImage(bgImage, 0, 0, bgImage.width, bgImage.height, 
-                          centerShift_x, centerShift_y, bgImage.width * ratio, bgImage.height * ratio);
+            ctx.drawImage(bgImage, 0, 0, bgImage.width, bgImage.height, x, y, w, h);
         } else {
             ctx.fillStyle = '#111';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
         }
 
-        // 2. Custom Stickers / GIFs
+        // ==========================================
+        // CLIP MASK: यहाँ से सभी इफ़ेक्ट्स सिर्फ फोटो के अंदर रहेंगे
+        // ==========================================
+        ctx.save();
+        ctx.beginPath();
+        ctx.rect(x, y, w, h);
+        ctx.clip();
+
+        // 1. Custom Stickers / GIFs
         customStickers.forEach(stk => {
             stk.x += stk.dx * globalSpeedMultiplier;
             stk.y += stk.dy * globalSpeedMultiplier;
 
-            if (stk.x <= 0 || stk.x + stk.w >= canvas.width) stk.dx *= -1;
-            if (stk.y <= 0 || stk.y + stk.h >= (transparentWater || solidWater ? waterLevel : canvas.height)) stk.dy *= -1;
+            if (stk.x <= x || stk.x + stk.w >= x + w) stk.dx *= -1;
+            if (stk.y <= y || stk.y + stk.h >= y + h) stk.dy *= -1;
 
             ctx.drawImage(stk.img, stk.x, stk.y, stk.w, stk.h);
         });
 
-        // 3. Draw Heavy Rain (Reels Style)
+        // 2. Draw Heavy Rain (Reels Style - फोटो के अंदर)
         if (rainActive) {
             ctx.strokeStyle = 'rgba(255, 255, 255, 0.45)';
             ctx.lineWidth = 1.2;
@@ -449,15 +466,15 @@
                 ctx.moveTo(drop.x, drop.y);
                 ctx.lineTo(drop.x - 0.5, drop.y + drop.length);
                 drop.y += drop.baseSpeed * globalSpeedMultiplier;
-                if (drop.y > canvas.height) {
-                    drop.y = -20;
-                    drop.x = Math.random() * canvas.width;
+                if (drop.y > y + h) {
+                    drop.y = y;
+                    drop.x = x + Math.random() * w;
                 }
             });
             ctx.stroke();
         }
 
-        // 4. Draw Animated FX Elements
+        // 3. Draw Animated FX Elements (Bird / Flower)
         elements.forEach(el => {
             ctx.font = `${el.size}px sans-serif`;
             const currentSpeed = el.baseSpeed * globalSpeedMultiplier;
@@ -465,29 +482,24 @@
             if (el.type === 'bird') {
                 ctx.fillText(el.text, el.x, el.y);
                 el.x += currentSpeed;
-                if (el.x > canvas.width + 40) el.x = -40;
+                if (el.x > x + w + 40) el.x = x - 40;
             } else if (el.type === 'flower') {
                 ctx.fillText(el.text, el.x, el.y);
                 el.y += currentSpeed;
-                if ((transparentWater || solidWater) && el.y > waterLevel) {
-                    ripples.push({ x: el.x, y: waterLevel + Math.random() * 20, radius: 2 });
-                    el.y = -40;
-                    el.x = Math.random() * (canvas.width - 40);
-                } else if (el.y > canvas.height + 40) {
-                    el.y = -40;
-                    el.x = Math.random() * (canvas.width - 40);
+                if (el.y > y + h + 40) {
+                    el.y = y - 40;
+                    el.x = x + Math.random() * (w - 40);
                 }
             }
         });
 
-        // 5. Text / Lyrics
+        // 4. Text / Lyrics
         textElements.forEach(tEl => {
             tEl.x += tEl.dx * globalSpeedMultiplier;
             tEl.y += tEl.dy * globalSpeedMultiplier;
 
-            let limitY = (transparentWater || solidWater) ? waterLevel - 20 : canvas.height - 20;
-            if (tEl.x <= 50 || tEl.x >= canvas.width - 50) tEl.dx *= -1;
-            if (tEl.y <= 30 || tEl.y >= limitY) tEl.dy *= -1;
+            if (tEl.x <= x + 30 || tEl.x >= x + w - 30) tEl.dx *= -1;
+            if (tEl.y <= y + 30 || tEl.y >= y + h - 30) tEl.dy *= -1;
 
             ctx.font = 'bold 24px Segoe UI';
             ctx.fillStyle = '#ffffff';
@@ -498,10 +510,11 @@
             ctx.shadowBlur = 0;
         });
 
-        // 6. नीचे तालाब और पानी की बूंदों का इफ़ेक्ट
-        drawPondAndWaterEffects();
+        // 5. तालाब और पानी का इफ़ेक्ट फोटो के अंदर
+        drawPondAndWaterEffects(x, y, w, h);
 
-        // (वाटरमार्क पूरी तरह हटाया गया है)
+        ctx.restore(); // Clipping Mask समाप्त
+        // ==========================================
 
         requestAnimationFrame(renderLoop);
     }
