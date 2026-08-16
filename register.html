@@ -3,70 +3,759 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Register - ROX</title>
+    <title>Upload & Studio - Rox Inten Studio</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        html, body {
+            background-color: #0b0b14 !important;
+            color: #fff !important;
+            font-family: 'Segoe UI', sans-serif !important;
+            margin: 0 !important;
+            padding: 10px !important;
+            width: 100% !important;
+            box-sizing: border-box !important;
+            display: block !important;
+        }
+
+        .main-container {
+            display: flex !important;
+            flex-direction: column !important;
+            width: 100% !important;
+            max-width: 500px !important;
+            margin: 0 auto !important;
+        }
+
+        .top-header {
+            display: flex !important;
+            justify-content: space-between !important;
+            align-items: center !important;
+            padding: 5px 0 10px 0 !important;
+            width: 100% !important;
+        }
+        .brand-title {
+            font-size: 19px !important;
+            font-weight: bold !important;
+            color: #00e5ff !important;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .brand-title img.logo-icon {
+            width: 38px !important;
+            height: 38px !important;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #00e5ff;
+            background: #161625;
+            padding: 1px;
+        }
+        .brand-title span {
+            color: #ff007f !important;
+            font-size: 11px !important;
+            margin-left: 2px !important;
+        }
+
+        .nav-scroller {
+            display: flex !important;
+            gap: 8px !important;
+            overflow-x: auto !important;
+            padding-bottom: 12px !important;
+            margin-bottom: 10px !important;
+            white-space: nowrap !important;
+            width: 100% !important;
+        }
+        .nav-scroller::-webkit-scrollbar { display: none; }
+        .nav-item {
+            background: #161625 !important;
+            color: #00e5ff !important;
+            border: 1px solid #28283d !important;
+            padding: 8px 16px !important;
+            border-radius: 8px !important;
+            text-decoration: none !important;
+            font-size: 13px !important;
+            font-weight: 500 !important;
+            display: inline-block !important;
+        }
+        .nav-item.active {
+            background: #00e5ff !important;
+            color: #000 !important;
+            font-weight: bold !important;
+        }
+        .nav-item.setting-btn {
+            background: #ff007f !important;
+            color: #fff !important;
+        }
+
+        .proj-panel {
+            background: #121220 !important;
+            border: 1px solid #232338 !important;
+            border-radius: 12px !important;
+            padding: 14px !important;
+            margin-bottom: 14px !important;
+            width: 100% !important;
+            box-sizing: border-box !important;
+            display: block !important;
+        }
+        .panel-heading {
+            color: #00e5ff !important;
+            font-size: 14px !important;
+            margin: 0 0 12px 0 !important;
+        }
+        
+        .rox-input {
+            background: #0a0a12 !important;
+            border: 1px solid #2b2b40 !important;
+            color: #fff !important;
+            padding: 10px !important;
+            border-radius: 8px !important;
+            width: 100% !important;
+            box-sizing: border-box !important;
+            font-size: 13px !important;
+            margin-bottom: 8px !important;
+            display: block !important;
+        }
+
+        .pink-btn {
+            background: linear-gradient(90deg, #ff007f, #b500ff) !important;
+            color: #fff !important;
+            border: none !important;
+            padding: 12px !important;
+            border-radius: 8px !important;
+            font-weight: bold !important;
+            width: 100% !important;
+            font-size: 13px !important;
+            cursor: pointer !important;
+            margin-top: 5px !important;
+            display: block !important;
+        }
+
+        .download-btn {
+            background: linear-gradient(90deg, #00c853, #00e5ff) !important;
+            color: #000 !important;
+            border: none !important;
+            padding: 12px !important;
+            border-radius: 8px !important;
+            font-weight: bold !important;
+            width: 100% !important;
+            font-size: 13px !important;
+            cursor: pointer !important;
+            margin-top: 8px !important;
+            display: block !important;
+        }
+
+        .reel-board-container {
+            width: 100%;
+            height: 400px;
+            position: relative;
+            background: #000;
+            border: 1px solid #00e5ff;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #studioCanvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+            object-fit: contain;
+            touch-action: none;
+        }
+
+        .dark-btn {
+            background: #1a1a2e !important;
+            color: #fff !important;
+            border: 1px solid #32324e !important;
+            padding: 10px !important;
+            border-radius: 8px !important;
+            font-size: 12px !important;
+            cursor: pointer !important;
+        }
+
+        .timeline-track-box {
+            background: #0a0a12;
+            border: 1px dashed #00e5ff;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+        .timeline-row {
+            display: flex;
+            gap: 6px;
+            margin-top: 6px;
+        }
+
+        /* Lock / Modal Styles */
+        #lockOverlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(11, 11, 20, 0.95);
+            z-index: 9999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .lock-box {
+            background: #161625;
+            border: 2px solid #ff007f;
+            padding: 20px;
+            border-radius: 14px;
+            text-align: center;
+            max-width: 400px;
+            width: 100%;
+        }
+    </style>
 </head>
 <body>
 
-    <div class="mobile-frame">
-        <div class="notch"></div>
-        <div class="app-content">
-            
-            <!-- ऊपर का हेडर -->
-            <div class="header">
-                <a href="index.html" class="back-link"><i class="fa-solid fa-arrow-left"></i> Home</a>
-                <h2 style="margin-top: 10px;"><i class="fa-solid fa-user-plus" style="color: #00ffff;"></i> Register</h2>
-                <p style="color: #666; font-size: 13px;">Create your profile to personalize the app</p>
-            </div>
-
-            <!-- रजिस्ट्रेशन फॉर्म बॉक्स -->
-            <div class="register-form">
-                <div class="input-group">
-                    <label for="userNameInput"><i class="fa-solid fa-user"></i> Apna Naam Dalein:</label>
-                    <input type="text" id="userNameInput" placeholder="Yahan naam likhein..." autocomplete="off">
-                </div>
-                
-                <button class="neon-btn" onclick="saveUserProfile()" style="width: 100%; margin-top: 20px; padding: 15px;">
-                    <i class="fa-solid fa-circle-check"></i> Profile Save Karein
-                </button>
-            </div>
-
-            <!-- नीचे वापस जाने का बटन -->
-            <div class="unlock-area">
-                <a href="index.html" class="pro-btn" style="text-decoration: none;">
-                    <i class="fa-solid fa-house"></i> Wapas Home Par Jayein
-                </a>
-            </div>
+<!-- Lock & Register (3-Days Valid Direct Unlock) Overlay -->
+<div id="lockOverlay" style="display:none;">
+    <div class="lock-box">
+        <h3 style="color:#00e5ff; margin-top:0;">🔒 Register to Unlock (3 Days)</h3>
+        <p style="font-size: 13px; color: #a5a5b5;">Yeh file aur sabhi tools use karne ke liye register karein. Register karte hi ye feature agle **3 dino** ke liye unlock ho jayega.</p>
+        
+        <div>
+            <input type="text" id="regName" class="rox-input" placeholder="Apna Naam Likhein">
+            <input type="email" id="regEmail" class="rox-input" placeholder="Email Address">
+            <button class="pink-btn" onclick="submitRegisterAndUnlock()">✨ Register & Unlock 3 Days</button>
         </div>
     </div>
+</div>
 
-    <!-- लोकल स्टोरेज में नाम सेव करने का लॉजिक -->
-    <script>
-        // अगर पहले से कोई नाम सेव है, तो उसे इनपुट बॉक्स में दिखाओ
-        window.onload = function() {
-            let existingName = localStorage.getItem("user_name");
-            if (existingName) {
-                document.getElementById("userNameInput").value = existingName;
-            }
+<div class="main-container">
+
+    <div class="top-header">
+        <div class="brand-title">
+            <img src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAP//////////////////////////////////////////////////////////////////////////////////////wgALCAABAAEBAREA/8QAFBABAAAAAAAAAAAAAAAAAAAAAP/aAAgBAQABPxA=" class="logo-icon" alt="Rox Logo">
+            Rox <span>INTEN STUDIO</span>
+        </div>
+        <div style="color: #00e5ff; font-size: 11px;"><i class="fa-solid fa-bolt"></i> Upload Engine Active</div>
+    </div>
+
+    <!-- मेनू बार -->
+    <div class="nav-scroller">
+        <a href="index.html" class="nav-item">Home</a>
+        <a href="upload.html" class="nav-item active">Upload</a>
+        <a href="ai-tools.html" class="nav-item">AI Magic</a>
+        <a href="projects.html" class="nav-item">Projects</a>
+        <a href="#" class="nav-item setting-btn"><i class="fa-solid fa-gear"></i> Setting</a>
+    </div>
+
+    <!-- 1. मुख्य बैकग्राउंड वीडियो/फोटो अपलोड -->
+    <div class="proj-panel">
+        <div class="panel-heading"><i class="fa-solid fa-film"></i> 1. गैलरी से मेन वीडियो/फोटो चुनें</div>
+        <input type="file" id="bgPhotoInput" class="rox-input" accept="image/*,video/*" onchange="loadMedia(event)">
+        
+        <div id="mainAudioControl" style="display:none; margin-bottom: 8px;">
+            <button id="btnMuteToggle" class="dark-btn" style="width:100%; background:#161625; color:#00e5ff; border:1px solid #00e5ff;" onclick="toggleMainVideoMute()">🔊 Main Video: Unmuted</button>
+        </div>
+
+        <div class="reel-board-container">
+            <canvas id="studioCanvas" width="400" height="700"></canvas>
+            <video id="sourceVideo" style="display:none;" crossorigin="anonymous" playsinline loop></video>
+        </div>
+
+        <button id="btnPlay" class="pink-btn" onclick="togglePlayAll()">⚡ Play Preview</button>
+        <button id="btnDownload" class="download-btn" onclick="toggleRecordCanvasMP4()"><i class="fa-solid fa-video"></i> 🎬 Record & Download MP4</button>
+    </div>
+
+    <!-- 2. गैलरी ओवरले (ड्रैग, रीसाइज और रिप्लेस) -->
+    <div class="proj-panel">
+        <div class="panel-heading"><i class="fa-solid fa-layer-group"></i> 2. गैलरी से वीडियो/फोटो ओवरले जोड़ें (Drag & Resize)</div>
+        <input type="file" id="galleryInput" class="rox-input" accept="image/*,video/*" multiple onchange="addToGallery(event)">
+        
+        <div id="galleryGrid" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 8px;"></div>
+        <div style="font-size: 11px; color: #8a8a9e; margin-top: 6px;">💡 टिप: मीडिया पर क्लिक करके स्क्रीन पर लाएं। कोने के पिंक हैंडल से साइज छोटा-बड़ा करें।</div>
+    </div>
+
+    <!-- 3. एडवांस ऑडियो ट्रिम, कट और टाइमलाइन मिक्सर -->
+    <div class="proj-panel">
+        <div class="panel-heading"><i class="fa-solid fa-music"></i> 3. एडवांस ऑडियो ट्रिम & कट मिक्सर (Exact Timing)</div>
+        
+        <div class="timeline-track-box">
+            <label style="color:#00e5ff; font-size:12px; font-weight:bold;">🎵 Audio Track 1 (Main Song/BGM)</label>
+            <input type="file" id="audio1" class="rox-input" accept="audio/*" style="margin-top:6px;">
+            <div class="timeline-row">
+                <input type="number" id="audio1Start" class="rox-input" placeholder="Cut Start (sec)" value="0" min="0" step="0.1" style="margin:0;">
+                <input type="number" id="audio1End" class="rox-input" placeholder="Cut End (sec)" value="" min="0" step="0.1" style="margin:0;">
+                <input type="number" id="audio1Delay" class="rox-input" placeholder="Delay (sec)" value="0" min="0" step="0.1" style="margin:0;">
+            </div>
+        </div>
+        
+        <div class="timeline-track-box">
+            <label style="color:#ff007f; font-size:12px; font-weight:bold;">🎶 Audio Track 2 (Dialogue / Punchline)</label>
+            <input type="file" id="audio2" class="rox-input" accept="audio/*" style="margin-top:6px;">
+            <div class="timeline-row">
+                <input type="number" id="audio2Start" class="rox-input" placeholder="Cut Start (sec)" value="0" min="0" step="0.1" style="margin:0;">
+                <input type="number" id="audio2End" class="rox-input" placeholder="Cut End (sec)" value="" min="0" step="0.1" style="margin:0;">
+                <input type="number" id="audio2Delay" class="rox-input" placeholder="Delay (sec)" value="0" min="0" step="0.1" style="margin:0;">
+            </div>
+        </div>
+
+        <button class="dark-btn" style="background:#ff4757; color:#fff; width:100%; margin-top:8px;" onclick="resetAll()">🗑️ Reset All</button>
+    </div>
+
+</div>
+
+<script>
+    // --- 3-Days Direct Register Unlock Logic ---
+    const CURRENT_PAGE_KEY = "rox_upload_3day_expiry"; 
+    const THREE_DAYS_MS = 3 * 24 * 60 * 60 * 1000; // 3 days in milliseconds
+
+    function checkAccess() {
+        const expiryTime = localStorage.getItem(CURRENT_PAGE_KEY);
+        const currentTime = new Date().getTime();
+        const overlay = document.getElementById("lockOverlay");
+
+        // Agar expiry time maujood hai aur abhi 3 din khatam nahi hue hain
+        if (expiryTime && currentTime < parseInt(expiryTime)) {
+            overlay.style.display = "none";
+            return;
         }
 
-        function saveUserProfile() {
-            const nameInput = document.getElementById('userNameInput').value.trim();
+        // Agar time khatam ho gaya hai ya pehli baar aaya hai, toh lock dikhao
+        overlay.style.display = "flex";
+    }
+
+    function submitRegisterAndUnlock() {
+        const name = document.getElementById("regName").value;
+        const email = document.getElementById("regEmail").value;
+        
+        if (!name || !email) {
+            alert("Kripya apna naam aur email bharein!");
+            return;
+        }
+
+        // User data save karein
+        localStorage.setItem("rox_user_registered", "true");
+        localStorage.setItem("rox_user_name", name);
+        localStorage.setItem("rox_user_email", email);
+
+        // Current time se exact 3 din baad ki expiry date set karein
+        const expiryTime = new Date().getTime() + THREE_DAYS_MS;
+        localStorage.setItem(CURRENT_PAGE_KEY, expiryTime);
+
+        alert("🎉 Badhai ho! Registration safal rahi. Yeh feature agle 3 dino ke liye unlock ho gaya hai.");
+        checkAccess();
+    }
+
+    // Page load hote hi check karein
+    window.addEventListener("DOMContentLoaded", () => {
+        checkAccess();
+    });
+
+
+    // --- Studio & Editing JavaScript Code ---
+    const canvas = document.getElementById('studioCanvas');
+    const ctx = canvas.getContext('2d');
+    const sourceVideo = document.getElementById('sourceVideo');
+
+    let bgImage = null;
+    let isVideoBg = false;
+    let galleryItems = [];
+    let activeOverlays = [];
+    let draggedOverlay = null;
+    let isResizing = false;
+    let resizeHandleSize = 25;
+    let dragOffsetX = 0;
+    let dragOffsetY = 0;
+
+    function loadMedia(event) {
+        const file = event.target.files[0];
+        if (file) {
+            const fileURL = URL.createObjectURL(file);
+            const audioControlDiv = document.getElementById('mainAudioControl');
+            if (file.type.startsWith('video/')) {
+                bgImage = null;
+                isVideoBg = true;
+                sourceVideo.src = fileURL;
+                sourceVideo.muted = false;
+                sourceVideo.load();
+                sourceVideo.play();
+                audioControlDiv.style.display = 'block';
+                document.getElementById('btnMuteToggle').innerHTML = "🔊 Main Video: Unmuted";
+            } else {
+                isVideoBg = false;
+                sourceVideo.pause();
+                audioControlDiv.style.display = 'none';
+                const img = new Image();
+                img.onload = function() { bgImage = img; };
+                img.src = fileURL;
+            }
+        }
+    }
+
+    function toggleMainVideoMute() {
+        sourceVideo.muted = !sourceVideo.muted;
+        const btn = document.getElementById('btnMuteToggle');
+        if (sourceVideo.muted) {
+            btn.innerHTML = "🔇 Main Video: Muted";
+            btn.style.color = "#ff4757";
+            btn.style.borderColor = "#ff4757";
+        } else {
+            btn.innerHTML = "🔊 Main Video: Unmuted";
+            btn.style.color = "#00e5ff";
+            btn.style.borderColor = "#00e5ff";
+        }
+    }
+
+    function addToGallery(event) {
+        const files = event.target.files;
+        for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                if (file.type.startsWith('video/')) {
+                    const vid = document.createElement('video');
+                    vid.src = e.target.result;
+                    vid.muted = true;
+                    vid.playsInline = true;
+                    vid.loop = true;
+                    vid.play();
+                    galleryItems.push({ id: Date.now() + Math.random(), type: 'video', media: vid, active: false });
+                    renderGallery();
+                } else {
+                    const img = new Image();
+                    img.onload = function() {
+                        galleryItems.push({ id: Date.now() + Math.random(), type: 'image', media: img, active: false });
+                        renderGallery();
+                    };
+                    img.src = e.target.result;
+                }
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+
+    function renderGallery() {
+        const grid = document.getElementById('galleryGrid');
+        grid.innerHTML = '';
+        galleryItems.forEach((item, index) => {
+            const div = document.createElement('div');
+            div.style.position = 'relative';
+            div.style.border = item.active ? '2px solid #00e5ff' : '1px solid #28283d';
+            div.style.borderRadius = '6px';
+            div.style.overflow = 'hidden';
+            div.style.cursor = 'pointer';
             
-            if (nameInput === "") {
-                alert("❌ कृपया पहले अपना नाम टाइप करें!");
+            if (item.type === 'video') {
+                div.innerHTML = `
+                    <video src="${item.media.src}" style="width:100%; height:55px; object-fit:cover; display:block;" muted autoplay loop></video>
+                    <div style="position:absolute; top:2px; right:2px; background:${item.active ? '#00e5ff' : 'rgba(0,0,0,0.6)'}; color:${item.active ? '#000' : '#fff'}; font-size:10px; padding:1px 4px; border-radius:3px;">${item.active ? 'ON' : 'OFF'}</div>
+                `;
+            } else {
+                div.innerHTML = `
+                    <img src="${item.media.src}" style="width:100%; height:55px; object-fit:cover; display:block;">
+                    <div style="position:absolute; top:2px; right:2px; background:${item.active ? '#00e5ff' : 'rgba(0,0,0,0.6)'}; color:${item.active ? '#000' : '#fff'}; font-size:10px; padding:1px 4px; border-radius:3px;">${item.active ? 'ON' : 'OFF'}</div>
+                `;
+            }
+            div.onclick = () => toggleGalleryOverlay(index);
+            grid.appendChild(div);
+        });
+    }
+
+    function toggleGalleryOverlay(index) {
+        let item = galleryItems[index];
+        item.active = !item.active;
+
+        if (item.active) {
+            activeOverlays.push({
+                id: item.id,
+                type: item.type,
+                media: item.media,
+                x: 80,
+                y: 120,
+                w: 150,
+                h: 150
+            });
+        } else {
+            activeOverlays = activeOverlays.filter(o => o.id !== item.id);
+        }
+        renderGallery();
+    }
+
+    function getCanvasCoordinates(e) {
+        const rect = canvas.getBoundingClientRect();
+        const clientX = e.clientX || (e.touches && e.touches[0].clientX);
+        const clientY = e.clientY || (e.touches && e.touches[0].clientY);
+        
+        const scaleX = canvas.width / rect.width;
+        const scaleY = canvas.height / rect.height;
+
+        return {
+            x: (clientX - rect.left) * scaleX,
+            y: (clientY - rect.top) * scaleY
+        };
+    }
+
+    canvas.addEventListener('mousedown', startDrag);
+    canvas.addEventListener('touchstart', startDrag, { passive: false });
+    canvas.addEventListener('mousemove', dragMove);
+    canvas.addEventListener('touchmove', dragMove, { passive: false });
+    canvas.addEventListener('mouseup', endDrag);
+    canvas.addEventListener('touchend', endDrag);
+
+    function startDrag(e) {
+        const coords = getCanvasCoordinates(e);
+        
+        for (let i = activeOverlays.length - 1; i >= 0; i--) {
+            let ov = activeOverlays[i];
+            if (coords.x >= ov.x + ov.w - resizeHandleSize && coords.x <= ov.x + ov.w + 10 &&
+                coords.y >= ov.y + ov.h - resizeHandleSize && coords.y <= ov.y + ov.h + 10) {
+                draggedOverlay = ov;
+                isResizing = true;
+                if(e.cancelable) e.preventDefault();
                 return;
             }
-
-            // localStorage में नाम सेव करना
-            localStorage.setItem("user_name", nameInput);
-            
-            alert("🎉 बधाई हो! आपका नाम '" + nameInput + "' सेव हो गया है।");
-            
-            // नाम सेव होते ही सीधे होम पेज पर भेजें
-            window.location.href = "index.html";
         }
-    </script>
+
+        for (let i = activeOverlays.length - 1; i >= 0; i--) {
+            let ov = activeOverlays[i];
+            if (coords.x >= ov.x && coords.x <= ov.x + ov.w && coords.y >= ov.y && coords.y <= ov.y + ov.h) {
+                draggedOverlay = ov;
+                isResizing = false;
+                dragOffsetX = coords.x - ov.x;
+                dragOffsetY = coords.y - ov.y;
+                if(e.cancelable) e.preventDefault();
+                break;
+            }
+        }
+    }
+
+    function dragMove(e) {
+        if (!draggedOverlay) return;
+        const coords = getCanvasCoordinates(e);
+        
+        if (isResizing) {
+            draggedOverlay.w = Math.max(40, coords.x - draggedOverlay.x);
+            draggedOverlay.h = Math.max(40, coords.y - draggedOverlay.y);
+        } else {
+            draggedOverlay.x = coords.x - dragOffsetX;
+            draggedOverlay.y = coords.y - dragOffsetY;
+        }
+        if(e.cancelable) e.preventDefault();
+    }
+
+    function endDrag() {
+        draggedOverlay = null;
+        isResizing = false;
+    }
+
+    function renderLoop() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        let w = canvas.width;
+        let h = canvas.height;
+        let x = 0;
+        let y = 0;
+
+        if (isVideoBg && sourceVideo.readyState >= 2) {
+            const hRatio = canvas.width / sourceVideo.videoWidth;
+            const vRatio = canvas.height / sourceVideo.videoHeight;
+            const ratio = Math.min(hRatio, vRatio);
+            w = sourceVideo.videoWidth * ratio;
+            h = sourceVideo.videoHeight * ratio;
+            x = (canvas.width - w) / 2;
+            y = (canvas.height - h) / 2;
+            ctx.drawImage(sourceVideo, 0, 0, sourceVideo.videoWidth, sourceVideo.videoHeight, x, y, w, h);
+        } else if (bgImage) {
+            const hRatio = canvas.width / bgImage.width;
+            const vRatio = canvas.height / bgImage.height;
+            const ratio = Math.min(hRatio, vRatio);
+            w = bgImage.width * ratio;
+            h = bgImage.height * ratio;
+            x = (canvas.width - w) / 2;
+            y = (canvas.height - h) / 2;
+            ctx.drawImage(bgImage, 0, 0, bgImage.width, bgImage.height, x, y, w, h);
+        } else {
+            ctx.fillStyle = '#111';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        }
+
+        ctx.save();
+        ctx.beginPath();
+        ctx.rect(x, y, w, h);
+        ctx.clip();
+
+        activeOverlays.forEach(ov => {
+            ctx.drawImage(ov.media, ov.x, ov.y, ov.w, ov.h);
+            ctx.strokeStyle = "#00e5ff";
+            ctx.lineWidth = 2;
+            ctx.strokeRect(ov.x, ov.y, ov.w, ov.h);
+            ctx.fillStyle = "#ff007f";
+            ctx.fillRect(ov.x + ov.w - 12, ov.y + ov.h - 12, 12, 12);
+        });
+
+        ctx.restore();
+        requestAnimationFrame(renderLoop);
+    }
+    renderLoop();
+
+    let audioCtx = null;
+    let audioDestinationNode = null;
+    let currentSource1 = null;
+    let currentSource2 = null;
+    let isPlaying = false;
+    let mediaRecorder = null;
+    let isRecording = false;
+
+    function initAudioContext() {
+        if (!audioCtx) {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            audioDestinationNode = audioCtx.createMediaStreamDestination();
+        }
+        if (audioCtx.state === 'suspended') {
+            audioCtx.resume();
+        }
+    }
+
+    async function togglePlayAll() {
+        const btn = document.getElementById('btnPlay');
+        if (isPlaying) {
+            stopAudio();
+            if (isVideoBg) sourceVideo.pause();
+            btn.innerText = "⚡ Play Preview";
+            btn.style.background = "linear-gradient(90deg, #ff007f, #b500ff)";
+            isPlaying = false;
+        } else {
+            initAudioContext();
+            if (isVideoBg) {
+                sourceVideo.currentTime = 0;
+                sourceVideo.play();
+            }
+            btn.innerText = "⏹️ Stop Preview";
+            btn.style.background = "#ff4757";
+            isPlaying = true;
+
+            const file1 = document.getElementById('audio1').files[0];
+            if (file1) {
+                let start1 = parseFloat(document.getElementById('audio1Start').value) || 0;
+                let end1Input = document.getElementById('audio1End').value;
+                let delay1 = parseFloat(document.getElementById('audio1Delay').value) || 0;
+                
+                let buf1 = await file1.arrayBuffer().then(b => audioCtx.decodeAudioData(b));
+                currentSource1 = audioCtx.createBufferSource();
+                currentSource1.buffer = buf1;
+                currentSource1.connect(audioCtx.destination);
+                currentSource1.connect(audioDestinationNode);
+                
+                let duration1 = end1Input ? parseFloat(end1Input) - start1 : (buf1.duration - start1);
+                currentSource1.start(audioCtx.currentTime + delay1, start1, duration1 > 0 ? duration1 : undefined);
+            }
+
+            const file2 = document.getElementById('audio2').files[0];
+            if (file2) {
+                let start2 = parseFloat(document.getElementById('audio2Start').value) || 0;
+                let end2Input = document.getElementById('audio2End').value;
+                let delay2 = parseFloat(document.getElementById('audio2Delay').value) || 0;
+                
+                let buf2 = await file2.arrayBuffer().then(b => audioCtx.decodeAudioData(b));
+                currentSource2 = audioCtx.createBufferSource();
+                currentSource2.buffer = buf2;
+                currentSource2.connect(audioCtx.destination);
+                currentSource2.connect(audioDestinationNode);
+                
+                let duration2 = end2Input ? parseFloat(end2Input) - start2 : (buf2.duration - start2);
+                currentSource2.start(audioCtx.currentTime + delay2, start2, duration2 > 0 ? duration2 : undefined);
+            }
+        }
+    }
+
+    function stopAudio() {
+        if (currentSource1) try { currentSource1.stop(); } catch(e){}
+        if (currentSource2) try { currentSource2.stop(); } catch(e){}
+    }
+
+    function toggleRecordCanvasMP4() {
+        const btn = document.getElementById('btnDownload');
+        if (isRecording) {
+            if (mediaRecorder) mediaRecorder.stop();
+            stopAudio();
+            if (isVideoBg) sourceVideo.pause();
+            isPlaying = false;
+            document.getElementById('btnPlay').innerText = "⚡ Play Preview";
+            document.getElementById('btnPlay').style.background = "linear-gradient(90deg, #ff007f, #b500ff)";
+            btn.innerHTML = '<i class="fa-solid fa-video"></i> 🎬 Record & Download MP4';
+            btn.style.background = "linear-gradient(90deg, #00c853, #00e5ff)";
+            isRecording = false;
+        } else {
+            initAudioContext();
+            if (!isPlaying) togglePlayAll();
+
+            const canvasStream = canvas.captureStream(30);
+            let audioTracks = [];
+            if (isVideoBg && !sourceVideo.muted && sourceVideo.captureStream) {
+                try { audioTracks = sourceVideo.captureStream().getAudioTracks(); } catch(e){}
+            }
+            if (audioDestinationNode) {
+                audioTracks.push(...audioDestinationNode.stream.getAudioTracks());
+            }
+
+            const combinedStream = new MediaStream([
+                ...canvasStream.getVideoTracks(),
+                ...audioTracks
+            ]);
+
+            let options = { mimeType: 'video/webm' };
+            if (MediaRecorder.isTypeSupported('video/mp4')) {
+                options = { mimeType: 'video/mp4' };
+            } else if (MediaRecorder.isTypeSupported('video/webm;codecs=vp9')) {
+                options = { mimeType: 'video/webm;codecs=vp9' };
+            }
+
+            mediaRecorder = new MediaRecorder(combinedStream, options);
+            let chunks = [];
+
+            mediaRecorder.ondataavailable = (e) => {
+                if (e.data.size > 0) chunks.push(e.data);
+            };
+
+            mediaRecorder.onstop = () => {
+                const blob = new Blob(chunks, { type: options.mimeType });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'Rox_Upload_Video_' + Date.now() + '.mp4';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+            };
+
+            mediaRecorder.start();
+            isRecording = true;
+            btn.innerHTML = "🛑 Recording... Click to Stop & Save";
+            btn.style.background = "#ff4757";
+        }
+    }
+
+    function resetAll() {
+        stopAudio();
+        isPlaying = false;
+        if (isRecording) toggleRecordCanvasMP4();
+        galleryItems = [];
+        activeOverlays = [];
+        bgImage = null;
+        isVideoBg = false;
+        sourceVideo.pause();
+        document.getElementById('bgPhotoInput').value = '';
+        document.getElementById('mainAudioControl').style.display = 'none';
+        document.getElementById('galleryInput').value = '';
+        document.getElementById('galleryGrid').innerHTML = '';
+        document.getElementById('audio1').value = '';
+        document.getElementById('audio1Start').value = '0';
+        document.getElementById('audio1End').value = '';
+        document.getElementById('audio1Delay').value = '0';
+        document.getElementById('audio2').value = '';
+        document.getElementById('audio2Start').value = '0';
+        document.getElementById('audio2End').value = '';
+        document.getElementById('audio2Delay').value = '0';
+    }
+</script>
 </body>
 </html>
