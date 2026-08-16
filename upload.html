@@ -216,6 +216,11 @@
         <div class="panel-heading"><i class="fa-solid fa-film"></i> 1. गैलरी से मेन वीडियो/फोटो चुनें</div>
         <input type="file" id="bgPhotoInput" class="rox-input" accept="image/*,video/*" onchange="loadMedia(event)">
         
+        <!-- Main Video Mute/Unmute Control -->
+        <div id="mainAudioControl" style="display:none; margin-bottom: 8px;">
+            <button id="btnMuteToggle" class="dark-btn" style="width:100%; background:#161625; color:#00e5ff; border:1px solid #00e5ff;" onclick="toggleMainVideoMute()">🔊 Main Video: Unmuted</button>
+        </div>
+
         <div class="reel-board-container">
             <canvas id="studioCanvas" width="400" height="700"></canvas>
             <video id="sourceVideo" style="display:none;" crossorigin="anonymous" playsinline loop></video>
@@ -280,7 +285,7 @@
     let activeOverlays = [];
     let draggedOverlay = null;
     let isResizing = false;
-    let resizeHandleSize = 20;
+    let resizeHandleSize = 25; // Touch friendly handle size
     let dragOffsetX = 0;
     let dragOffsetY = 0;
 
@@ -288,19 +293,38 @@
         const file = event.target.files[0];
         if (file) {
             const fileURL = URL.createObjectURL(file);
+            const audioControlDiv = document.getElementById('mainAudioControl');
             if (file.type.startsWith('video/')) {
                 bgImage = null;
                 isVideoBg = true;
                 sourceVideo.src = fileURL;
+                sourceVideo.muted = false; // Default unmuted
                 sourceVideo.load();
                 sourceVideo.play();
+                audioControlDiv.style.display = 'block';
+                document.getElementById('btnMuteToggle').innerHTML = "🔊 Main Video: Unmuted";
             } else {
                 isVideoBg = false;
                 sourceVideo.pause();
+                audioControlDiv.style.display = 'none';
                 const img = new Image();
                 img.onload = function() { bgImage = img; };
                 img.src = fileURL;
             }
+        }
+    }
+
+    function toggleMainVideoMute() {
+        sourceVideo.muted = !sourceVideo.muted;
+        const btn = document.getElementById('btnMuteToggle');
+        if (sourceVideo.muted) {
+            btn.innerHTML = "🔇 Main Video: Muted";
+            btn.style.color = "#ff4757";
+            btn.style.borderColor = "#ff4757";
+        } else {
+            btn.innerHTML = "🔊 Main Video: Unmuted";
+            btn.style.color = "#00e5ff";
+            btn.style.borderColor = "#00e5ff";
         }
     }
 
@@ -370,8 +394,8 @@
                 media: item.media,
                 x: 80,
                 y: 120,
-                w: 140,
-                h: 140
+                w: 150,
+                h: 150
             });
         } else {
             activeOverlays = activeOverlays.filter(o => o.id !== item.id);
@@ -403,10 +427,11 @@
     function startDrag(e) {
         const coords = getCanvasCoordinates(e);
         
+        // Check resize handle first (bottom-right corner of overlay)
         for (let i = activeOverlays.length - 1; i >= 0; i--) {
             let ov = activeOverlays[i];
-            if (coords.x >= ov.x + ov.w - resizeHandleSize && coords.x <= ov.x + ov.w &&
-                coords.y >= ov.y + ov.h - resizeHandleSize && coords.y <= ov.y + ov.h) {
+            if (coords.x >= ov.x + ov.w - resizeHandleSize && coords.x <= ov.x + ov.w + 10 &&
+                coords.y >= ov.y + ov.h - resizeHandleSize && coords.y <= ov.y + ov.h + 10) {
                 draggedOverlay = ov;
                 isResizing = true;
                 if(e.cancelable) e.preventDefault();
@@ -414,6 +439,7 @@
             }
         }
 
+        // Check normal drag movement inside overlay box
         for (let i = activeOverlays.length - 1; i >= 0; i--) {
             let ov = activeOverlays[i];
             if (coords.x >= ov.x && coords.x <= ov.x + ov.w && coords.y >= ov.y && coords.y <= ov.y + ov.h) {
@@ -432,8 +458,8 @@
         const coords = getCanvasCoordinates(e);
         
         if (isResizing) {
-            draggedOverlay.w = Math.max(30, coords.x - draggedOverlay.x);
-            draggedOverlay.h = Math.max(30, coords.y - draggedOverlay.y);
+            draggedOverlay.w = Math.max(40, coords.x - draggedOverlay.x);
+            draggedOverlay.h = Math.max(40, coords.y - draggedOverlay.y);
         } else {
             draggedOverlay.x = coords.x - dragOffsetX;
             draggedOverlay.y = coords.y - dragOffsetY;
@@ -485,10 +511,12 @@
         activeOverlays.forEach(ov => {
             ctx.drawImage(ov.media, ov.x, ov.y, ov.w, ov.h);
             ctx.strokeStyle = "#00e5ff";
-            ctx.lineWidth = 1.5;
+            ctx.lineWidth = 2;
             ctx.strokeRect(ov.x, ov.y, ov.w, ov.h);
+            
+            // Draw resize handle visual indicator
             ctx.fillStyle = "#ff007f";
-            ctx.fillRect(ov.x + ov.w - resizeHandleSize, ov.y + ov.h - resizeHandleSize, resizeHandleSize, resizeHandleSize);
+            ctx.fillRect(ov.x + ov.w - 12, ov.y + ov.h - 12, 12, 12);
         });
 
         ctx.restore();
@@ -594,9 +622,19 @@
             if (!isPlaying) togglePlayAll();
 
             const canvasStream = canvas.captureStream(30);
+            
+            // Combine canvas video tracks + audio destination tracks (includes main video audio if unmuted + external audio tracks)
+            let audioTracks = [];
+            if (isVideoBg && !sourceVideo.muted && sourceVideo.captureStream) {
+                try { audioTracks = sourceVideo.captureStream().getAudioTracks(); } catch(e){}
+            }
+            if (audioDestinationNode) {
+                audioTracks.push(...audioDestinationNode.stream.getAudioTracks());
+            }
+
             const combinedStream = new MediaStream([
                 ...canvasStream.getVideoTracks(),
-                ...audioDestinationNode.stream.getAudioTracks()
+                ...audioTracks
             ]);
 
             let options = { mimeType: 'video/webm' };
@@ -641,6 +679,7 @@
         isVideoBg = false;
         sourceVideo.pause();
         document.getElementById('bgPhotoInput').value = '';
+        document.getElementById('mainAudioControl').style.display = 'none';
         document.getElementById('galleryInput').value = '';
         document.getElementById('galleryGrid').innerHTML = '';
         document.getElementById('audio1').value = '';
