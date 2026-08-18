@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Rox INTEN STUDIO - Mobile Audio Video Mixing</title>
+    <title>Rox INTEN STUDIO - Precision Audio Video Mixer</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Arial, sans-serif; touch-action: manipulation; }
         body { background: #0c0c14; color: #fff; min-height: 100vh; display: flex; flex-direction: column; overflow-x: hidden; }
 
-        /* Mobile Navbar */
+        /* Navbar */
         .top-navbar { background: #161625; padding: 10px 12px; border-bottom: 2px solid #28283d; position: sticky; top: 0; z-index: 100; }
         .nav-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
         .logo-area h1 { color: #00e5ff; font-size: 18px; display: inline-block; }
@@ -23,7 +23,7 @@
         /* Main Container */
         .mixing-container { display: flex; flex-direction: column; padding: 10px; gap: 12px; width: 100%; max-width: 600px; margin: 0 auto; }
 
-        /* Mobile Canvas Frame */
+        /* Canvas Frame */
         .preview-box { position: relative; width: 100%; aspect-ratio: 16/9; background: #000; border: 2px solid #00e5ff; border-radius: 8px; overflow: hidden; }
         canvas { width: 100%; height: 100%; object-fit: contain; }
 
@@ -33,16 +33,23 @@
         .btn-play { background: #00e5ff; color: #000; }
         .btn-mix { background: linear-gradient(90deg, #ff007f, #7f00ff); color: #fff; }
 
-        /* Timeline & Touch Drag Area */
+        /* Precision Timeline Area */
         .timeline-tracks { width: 100%; background: #12121c; border-radius: 8px; padding: 10px; border: 1px solid #2e2e48; display: flex; flex-direction: column; gap: 10px; }
+        
+        /* Time Scale Ruler */
+        .time-scale { display: flex; justify-content: space-between; padding: 0 5px; font-size: 9px; color: #00e5ff; font-weight: bold; border-bottom: 1px solid #383852; padding-bottom: 4px; }
+        .scale-mark { position: relative; text-align: center; }
+        .scale-mark::after { content: '|'; display: block; font-size: 8px; color: #ff007f; margin-top: -2px; }
+
         .track { background: #1a1a2b; padding: 8px; border-radius: 6px; border: 1px solid #28283d; }
         .track-title { font-size: 11px; color: #00e5ff; font-weight: bold; margin-bottom: 6px; display: flex; justify-content: space-between; }
-        
+        .time-badge { color: #ff007f; font-size: 10px; background: #09090f; padding: 2px 6px; border-radius: 4px; border: 1px solid #383852; }
+
         .track-lane { position: relative; height: 38px; background: #09090f; border-radius: 5px; overflow: hidden; border: 1px dashed #3e3e5e; }
         .clip-block { position: absolute; top: 2px; height: 32px; background: #00e5ff; color: #000; font-size: 10px; font-weight: bold; display: flex; align-items: center; justify-content: center; border-radius: 4px; touch-action: none; user-select: none; border: 1px solid #fff; }
         .clip-block.audio { background: #ff007f; color: #fff; }
 
-        /* Mobile File Upload & Trim Panel */
+        /* File Upload & Precision Trim Panel */
         .sidebar-panel { background: #12121c; padding: 12px; border-radius: 8px; border: 1px solid #2e2e48; display: flex; flex-direction: column; gap: 10px; }
         .input-group { background: #1a1a2b; padding: 8px; border-radius: 6px; border: 1px solid #28283d; }
         .input-group label { font-size: 11px; color: #ff007f; font-weight: bold; display: block; margin-bottom: 4px; }
@@ -50,7 +57,8 @@
 
         .trim-controls { display: flex; gap: 8px; margin-top: 6px; }
         .trim-controls div { flex: 1; }
-        .trim-controls label { font-size: 9px; color: #aaa; display: block; }
+        .trim-controls label { font-size: 9px; color: #aaa; display: flex; justify-content: space-between; }
+        .trim-controls span { color: #00e5ff; font-weight: bold; }
         input[type="range"] { width: 100%; accent-color: #00e5ff; }
     </style>
 </head>
@@ -62,7 +70,7 @@
             <div class="logo-area">
                 <h1>Rox</h1> <span>INTEN STUDIO</span>
             </div>
-            <div><span style="font-size: 10px; color: #00e5ff;">📱 Mobile Mode</span></div>
+            <div><span style="font-size: 10px; color: #00e5ff;">⏱️ Precision Scale Mode</span></div>
         </div>
         <div class="nav-links">
             <a href="index.html">Home</a>
@@ -78,7 +86,7 @@
 
     <div class="mixing-container">
         
-        <!-- Video Preview Area -->
+        <!-- Video Preview -->
         <div class="preview-box">
             <canvas id="mixCanvas"></canvas>
         </div>
@@ -88,76 +96,107 @@
             <button class="btn btn-mix" onclick="exportMix()">⚡ Merge & Export</button>
         </div>
 
-        <!-- Drag & Drop Timeline Tracks (Mobile Touch Optimized) -->
+        <!-- Precision Timeline with Time Ruler -->
         <div class="timeline-tracks">
-            <h4 style="font-size: 12px; color: #aaa; text-align: center;">👈 Ungli Se Aage-Pichhe Move Karein 👉</h4>
+            <h4 style="font-size: 11px; color: #aaa; text-align: center;">⏱️ Time Scale (Seconds Timeline)</h4>
             
+            <!-- Time Scale Ruler (0s - 60s Scale) -->
+            <div class="time-scale">
+                <span class="scale-mark">0s</span>
+                <span class="scale-mark">10s</span>
+                <span class="scale-mark">20s</span>
+                <span class="scale-mark">30s</span>
+                <span class="scale-mark">40s</span>
+                <span class="scale-mark">50s</span>
+                <span class="scale-mark">60s</span>
+            </div>
+
+            <!-- Video 1 Track -->
             <div class="track">
-                <div class="track-title">📹 Video 1 Track</div>
+                <div class="track-title">
+                    <span>📹 Video 1 Track</span>
+                    <span class="time-badge" id="timeV1">Start: 0.0s</span>
+                </div>
                 <div class="track-lane">
-                    <div class="clip-block" id="clipV1" style="left:0px; width:45%;">Video 1</div>
+                    <div class="clip-block" id="clipV1" style="left:0px; width:40%;">Video 1</div>
                 </div>
             </div>
 
+            <!-- Video 2 Track -->
             <div class="track">
-                <div class="track-title">📹 Video 2 Track</div>
+                <div class="track-title">
+                    <span>📹 Video 2 Track</span>
+                    <span class="time-badge" id="timeV2">Start: 25.0s</span>
+                </div>
                 <div class="track-lane">
-                    <div class="clip-block" id="clipV2" style="left:50%; width:45%;">Video 2</div>
+                    <div class="clip-block" id="clipV2" style="left:41.6%; width:40%;">Video 2</div>
                 </div>
             </div>
 
+            <!-- Audio 1 Track -->
             <div class="track">
-                <div class="track-title">🎵 Audio 1 Track</div>
+                <div class="track-title">
+                    <span>🎵 Audio 1 Track</span>
+                    <span class="time-badge" id="timeA1">Start: 0.0s</span>
+                </div>
                 <div class="track-lane">
                     <div class="clip-block audio" id="clipA1" style="left:0px; width:50%;">Audio 1</div>
                 </div>
             </div>
 
+            <!-- Audio 2 Track -->
             <div class="track">
-                <div class="track-title">🎵 Audio 2 Track</div>
+                <div class="track-title">
+                    <span>🎵 Audio 2 Track</span>
+                    <span class="time-badge" id="timeA2">Start: 30.0s</span>
+                </div>
                 <div class="track-lane">
                     <div class="clip-block audio" id="clipA2" style="left:50%; width:50%;">Audio 2</div>
                 </div>
             </div>
         </div>
 
-        <!-- Media Inputs & Cut Controls -->
+        <!-- Precision Trimming Panel -->
         <div class="sidebar-panel">
-            <h3 style="color:#00e5ff; font-size:13px;">📁 Select Files & Cut (Trim)</h3>
+            <h3 style="color:#00e5ff; font-size:13px;">✂️ Precise Cut Controls (Seconds)</h3>
             
+            <!-- Video 1 Cut -->
             <div class="input-group">
-                <label>📹 Video 1</label>
+                <label>📹 Video 1 Cut</label>
                 <input type="file" id="v1File" accept="video/*">
                 <div class="trim-controls">
-                    <div><label>Cut Start</label><input type="range" id="v1Start" value="0" min="0" max="100"></div>
-                    <div><label>Cut End</label><input type="range" id="v1End" value="100" min="0" max="100"></div>
+                    <div><label>Start Cut: <span id="lblV1Start">0s</span></label><input type="range" id="v1Start" value="0" min="0" max="60" step="0.5" oninput="updateTrim('V1')"></div>
+                    <div><label>End Cut: <span id="lblV1End">60s</span></label><input type="range" id="v1End" value="60" min="0" max="60" step="0.5" oninput="updateTrim('V1')"></div>
                 </div>
             </div>
 
+            <!-- Video 2 Cut -->
             <div class="input-group">
-                <label>📹 Video 2</label>
+                <label>📹 Video 2 Cut</label>
                 <input type="file" id="v2File" accept="video/*">
                 <div class="trim-controls">
-                    <div><label>Cut Start</label><input type="range" id="v2Start" value="0" min="0" max="100"></div>
-                    <div><label>Cut End</label><input type="range" id="v2End" value="100" min="0" max="100"></div>
+                    <div><label>Start Cut: <span id="lblV2Start">0s</span></label><input type="range" id="v2Start" value="0" min="0" max="60" step="0.5" oninput="updateTrim('V2')"></div>
+                    <div><label>End Cut: <span id="lblV2End">60s</span></label><input type="range" id="v2End" value="60" min="0" max="60" step="0.5" oninput="updateTrim('V2')"></div>
                 </div>
             </div>
 
+            <!-- Audio 1 Cut -->
             <div class="input-group">
-                <label>🎵 Audio 1</label>
+                <label>🎵 Audio 1 Cut</label>
                 <input type="file" id="a1File" accept="audio/*">
                 <div class="trim-controls">
-                    <div><label>Cut Start</label><input type="range" id="a1Start" value="0" min="0" max="100"></div>
-                    <div><label>Cut End</label><input type="range" id="a1End" value="100" min="0" max="100"></div>
+                    <div><label>Start Cut: <span id="lblA1Start">0s</span></label><input type="range" id="a1Start" value="0" min="0" max="60" step="0.5" oninput="updateTrim('A1')"></div>
+                    <div><label>End Cut: <span id="lblA1End">60s</span></label><input type="range" id="a1End" value="60" min="0" max="60" step="0.5" oninput="updateTrim('A1')"></div>
                 </div>
             </div>
 
+            <!-- Audio 2 Cut -->
             <div class="input-group">
-                <label>🎵 Audio 2</label>
+                <label>🎵 Audio 2 Cut</label>
                 <input type="file" id="a2File" accept="audio/*">
                 <div class="trim-controls">
-                    <div><label>Cut Start</label><input type="range" id="a2Start" value="0" min="0" max="100"></div>
-                    <div><label>Cut End</label><input type="range" id="a2End" value="100" min="0" max="100"></div>
+                    <div><label>Start Cut: <span id="lblA2Start">0s</span></label><input type="range" id="a2Start" value="0" min="0" max="60" step="0.5" oninput="updateTrim('A2')"></div>
+                    <div><label>End Cut: <span id="lblA2End">60s</span></label><input type="range" id="a2End" value="60" min="0" max="60" step="0.5" oninput="updateTrim('A2')"></div>
                 </div>
             </div>
         </div>
@@ -182,8 +221,9 @@
         const aud2 = document.getElementById('aud2');
 
         let isPlaying = false;
+        const totalScaleSeconds = 60; // 60s timeline scale
 
-        // Load files to hidden elements
+        // Load files
         document.getElementById('v1File').addEventListener('change', (e) => loadMedia(e, vid1, 'clipV1'));
         document.getElementById('v2File').addEventListener('change', (e) => loadMedia(e, vid2, 'clipV2'));
         document.getElementById('a1File').addEventListener('change', (e) => loadMedia(e, aud1, 'clipA1'));
@@ -197,11 +237,29 @@
             }
         }
 
-        // Mobile Touch & Drag Event Listener
+        // Live Trim Values Update (Precision Cutting)
+        function updateTrim(type) {
+            const startVal = document.getElementById(type.toLowerCase() + 'Start').value;
+            const endVal = document.getElementById(type.toLowerCase() + 'End').value;
+
+            document.getElementById('lbl' + type + 'Start').innerText = startVal + 's';
+            document.getElementById('lbl' + type + 'End').innerText = endVal + 's';
+        }
+
+        // Touch & Drag Handling with Scale Time Calculation
         document.querySelectorAll('.clip-block').forEach(clip => {
             clip.addEventListener('touchstart', handleTouchStart, { passive: false });
             clip.addEventListener('mousedown', handleMouseDown);
         });
+
+        function updateTrackTimeBadge(clipId, leftPx, maxPx) {
+            const trackType = clipId.replace('clip', '');
+            const timeBadge = document.getElementById('time' + trackType);
+            const startSeconds = ((leftPx / maxPx) * totalScaleSeconds).toFixed(1);
+            if (timeBadge) {
+                timeBadge.innerText = `Start: ${startSeconds}s`;
+            }
+        }
 
         function handleTouchStart(e) {
             e.preventDefault();
@@ -219,6 +277,7 @@
                 if (newLeft > maxLeft) newLeft = maxLeft;
 
                 clip.style.left = newLeft + 'px';
+                updateTrackTimeBadge(clip.id, newLeft, lane.clientWidth);
             }
 
             function handleTouchEnd() {
@@ -243,6 +302,7 @@
                 if (newLeft > maxLeft) newLeft = maxLeft;
 
                 clip.style.left = newLeft + 'px';
+                updateTrackTimeBadge(clip.id, newLeft, lane.clientWidth);
             }
 
             function handleMouseUp() {
@@ -284,14 +344,14 @@
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
                 ctx.fillStyle = "#00e5ff";
                 ctx.font = "14px Arial";
-                ctx.fillText("Preview Active...", 20, 30);
+                ctx.fillText("Precision Scale Preview...", 20, 30);
             }
 
             requestAnimationFrame(renderLoop);
         }
 
         function exportMix() {
-            alert("Aapki Video Merge Process Ho Rahi Hai!");
+            alert("Aapka Precise Audio-Video Mix Process Ho Raha Hai!");
         }
     </script>
 </body>
