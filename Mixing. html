@@ -1,1 +1,299 @@
 
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Rox INTEN STUDIO - Mobile Audio Video Mixing</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Arial, sans-serif; touch-action: manipulation; }
+        body { background: #0c0c14; color: #fff; min-height: 100vh; display: flex; flex-direction: column; overflow-x: hidden; }
+
+        /* Mobile Navbar */
+        .top-navbar { background: #161625; padding: 10px 12px; border-bottom: 2px solid #28283d; position: sticky; top: 0; z-index: 100; }
+        .nav-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+        .logo-area h1 { color: #00e5ff; font-size: 18px; display: inline-block; }
+        .logo-area span { color: #ff007f; font-size: 9px; font-weight: bold; }
+
+        .nav-links { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px; -webkit-overflow-scrolling: touch; }
+        .nav-links::-webkit-scrollbar { display: none; }
+        .nav-links a { color: #ccc; text-decoration: none; font-size: 11px; padding: 5px 10px; background: #222235; border-radius: 5px; white-space: nowrap; border: 1px solid #383852; }
+        .nav-links a.active { background: #00e5ff; color: #000; font-weight: bold; }
+        .nav-links a.setting-btn { background: linear-gradient(90deg, #ff007f, #7f00ff); color: #fff; border: none; font-weight: bold; }
+
+        /* Main Container */
+        .mixing-container { display: flex; flex-direction: column; padding: 10px; gap: 12px; width: 100%; max-width: 600px; margin: 0 auto; }
+
+        /* Mobile Canvas Frame */
+        .preview-box { position: relative; width: 100%; aspect-ratio: 16/9; background: #000; border: 2px solid #00e5ff; border-radius: 8px; overflow: hidden; }
+        canvas { width: 100%; height: 100%; object-fit: contain; }
+
+        /* Control Buttons */
+        .controls-bar { display: flex; gap: 8px; width: 100%; }
+        .btn { flex: 1; padding: 12px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 13px; text-align: center; }
+        .btn-play { background: #00e5ff; color: #000; }
+        .btn-mix { background: linear-gradient(90deg, #ff007f, #7f00ff); color: #fff; }
+
+        /* Timeline & Touch Drag Area */
+        .timeline-tracks { width: 100%; background: #12121c; border-radius: 8px; padding: 10px; border: 1px solid #2e2e48; display: flex; flex-direction: column; gap: 10px; }
+        .track { background: #1a1a2b; padding: 8px; border-radius: 6px; border: 1px solid #28283d; }
+        .track-title { font-size: 11px; color: #00e5ff; font-weight: bold; margin-bottom: 6px; display: flex; justify-content: space-between; }
+        
+        .track-lane { position: relative; height: 38px; background: #09090f; border-radius: 5px; overflow: hidden; border: 1px dashed #3e3e5e; }
+        .clip-block { position: absolute; top: 2px; height: 32px; background: #00e5ff; color: #000; font-size: 10px; font-weight: bold; display: flex; align-items: center; justify-content: center; border-radius: 4px; touch-action: none; user-select: none; border: 1px solid #fff; }
+        .clip-block.audio { background: #ff007f; color: #fff; }
+
+        /* Mobile File Upload & Trim Panel */
+        .sidebar-panel { background: #12121c; padding: 12px; border-radius: 8px; border: 1px solid #2e2e48; display: flex; flex-direction: column; gap: 10px; }
+        .input-group { background: #1a1a2b; padding: 8px; border-radius: 6px; border: 1px solid #28283d; }
+        .input-group label { font-size: 11px; color: #ff007f; font-weight: bold; display: block; margin-bottom: 4px; }
+        input[type="file"] { width: 100%; font-size: 11px; background: #222235; color: #fff; padding: 6px; border-radius: 4px; border: 1px solid #383852; }
+
+        .trim-controls { display: flex; gap: 8px; margin-top: 6px; }
+        .trim-controls div { flex: 1; }
+        .trim-controls label { font-size: 9px; color: #aaa; display: block; }
+        input[type="range"] { width: 100%; accent-color: #00e5ff; }
+    </style>
+</head>
+<body>
+
+    <!-- Navbar -->
+    <div class="top-navbar">
+        <div class="nav-header">
+            <div class="logo-area">
+                <h1>Rox</h1> <span>INTEN STUDIO</span>
+            </div>
+            <div><span style="font-size: 10px; color: #00e5ff;">📱 Mobile Mode</span></div>
+        </div>
+        <div class="nav-links">
+            <a href="index.html">Home</a>
+            <a href="upload.html">Upload</a>
+            <a href="ai-tools.html">AI Magic</a>
+            <a href="projects.html">Projects</a>
+            <a href="mixing.html" class="active">Mixing</a>
+            <a href="support.html">Support</a>
+            <a href="setting.html" class="setting-btn">⚙️ Setting</a>
+            <a href="result.html">Result</a>
+        </div>
+    </div>
+
+    <div class="mixing-container">
+        
+        <!-- Video Preview Area -->
+        <div class="preview-box">
+            <canvas id="mixCanvas"></canvas>
+        </div>
+
+        <div class="controls-bar">
+            <button class="btn btn-play" onclick="togglePlay()">▶ Play / Pause</button>
+            <button class="btn btn-mix" onclick="exportMix()">⚡ Merge & Export</button>
+        </div>
+
+        <!-- Drag & Drop Timeline Tracks (Mobile Touch Optimized) -->
+        <div class="timeline-tracks">
+            <h4 style="font-size: 12px; color: #aaa; text-align: center;">👈 Ungli Se Aage-Pichhe Move Karein 👉</h4>
+            
+            <div class="track">
+                <div class="track-title">📹 Video 1 Track</div>
+                <div class="track-lane">
+                    <div class="clip-block" id="clipV1" style="left:0px; width:45%;">Video 1</div>
+                </div>
+            </div>
+
+            <div class="track">
+                <div class="track-title">📹 Video 2 Track</div>
+                <div class="track-lane">
+                    <div class="clip-block" id="clipV2" style="left:50%; width:45%;">Video 2</div>
+                </div>
+            </div>
+
+            <div class="track">
+                <div class="track-title">🎵 Audio 1 Track</div>
+                <div class="track-lane">
+                    <div class="clip-block audio" id="clipA1" style="left:0px; width:50%;">Audio 1</div>
+                </div>
+            </div>
+
+            <div class="track">
+                <div class="track-title">🎵 Audio 2 Track</div>
+                <div class="track-lane">
+                    <div class="clip-block audio" id="clipA2" style="left:50%; width:50%;">Audio 2</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Media Inputs & Cut Controls -->
+        <div class="sidebar-panel">
+            <h3 style="color:#00e5ff; font-size:13px;">📁 Select Files & Cut (Trim)</h3>
+            
+            <div class="input-group">
+                <label>📹 Video 1</label>
+                <input type="file" id="v1File" accept="video/*">
+                <div class="trim-controls">
+                    <div><label>Cut Start</label><input type="range" id="v1Start" value="0" min="0" max="100"></div>
+                    <div><label>Cut End</label><input type="range" id="v1End" value="100" min="0" max="100"></div>
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label>📹 Video 2</label>
+                <input type="file" id="v2File" accept="video/*">
+                <div class="trim-controls">
+                    <div><label>Cut Start</label><input type="range" id="v2Start" value="0" min="0" max="100"></div>
+                    <div><label>Cut End</label><input type="range" id="v2End" value="100" min="0" max="100"></div>
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label>🎵 Audio 1</label>
+                <input type="file" id="a1File" accept="audio/*">
+                <div class="trim-controls">
+                    <div><label>Cut Start</label><input type="range" id="a1Start" value="0" min="0" max="100"></div>
+                    <div><label>Cut End</label><input type="range" id="a1End" value="100" min="0" max="100"></div>
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label>🎵 Audio 2</label>
+                <input type="file" id="a2File" accept="audio/*">
+                <div class="trim-controls">
+                    <div><label>Cut Start</label><input type="range" id="a2Start" value="0" min="0" max="100"></div>
+                    <div><label>Cut End</label><input type="range" id="a2End" value="100" min="0" max="100"></div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Hidden Media Elements -->
+    <video id="vid1" style="display:none;" playsinline></video>
+    <video id="vid2" style="display:none;" playsinline></video>
+    <audio id="aud1" style="display:none;"></audio>
+    <audio id="aud2" style="display:none;"></audio>
+
+    <script>
+        const canvas = document.getElementById('mixCanvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = 640;
+        canvas.height = 360;
+
+        const vid1 = document.getElementById('vid1');
+        const vid2 = document.getElementById('vid2');
+        const aud1 = document.getElementById('aud1');
+        const aud2 = document.getElementById('aud2');
+
+        let isPlaying = false;
+
+        // Load files to hidden elements
+        document.getElementById('v1File').addEventListener('change', (e) => loadMedia(e, vid1, 'clipV1'));
+        document.getElementById('v2File').addEventListener('change', (e) => loadMedia(e, vid2, 'clipV2'));
+        document.getElementById('a1File').addEventListener('change', (e) => loadMedia(e, aud1, 'clipA1'));
+        document.getElementById('a2File').addEventListener('change', (e) => loadMedia(e, aud2, 'clipA2'));
+
+        function loadMedia(event, element, clipId) {
+            const file = event.target.files[0];
+            if (file) {
+                element.src = URL.createObjectURL(file);
+                document.getElementById(clipId).innerText = file.name.substring(0, 10) + '..';
+            }
+        }
+
+        // Mobile Touch & Drag Event Listener
+        document.querySelectorAll('.clip-block').forEach(clip => {
+            clip.addEventListener('touchstart', handleTouchStart, { passive: false });
+            clip.addEventListener('mousedown', handleMouseDown);
+        });
+
+        function handleTouchStart(e) {
+            e.preventDefault();
+            const clip = e.target;
+            const lane = clip.parentElement;
+            const touch = e.touches[0];
+            let startX = touch.clientX - clip.offsetLeft;
+
+            function handleTouchMove(e) {
+                const touch = e.touches[0];
+                let newLeft = touch.clientX - startX;
+                let maxLeft = lane.clientWidth - clip.clientWidth;
+
+                if (newLeft < 0) newLeft = 0;
+                if (newLeft > maxLeft) newLeft = maxLeft;
+
+                clip.style.left = newLeft + 'px';
+            }
+
+            function handleTouchEnd() {
+                window.removeEventListener('touchmove', handleTouchMove);
+                window.removeEventListener('touchend', handleTouchEnd);
+            }
+
+            window.addEventListener('touchmove', handleTouchMove, { passive: false });
+            window.addEventListener('touchend', handleTouchEnd);
+        }
+
+        function handleMouseDown(e) {
+            const clip = e.target;
+            const lane = clip.parentElement;
+            let startX = e.clientX - clip.offsetLeft;
+
+            function handleMouseMove(e) {
+                let newLeft = e.clientX - startX;
+                let maxLeft = lane.clientWidth - clip.clientWidth;
+
+                if (newLeft < 0) newLeft = 0;
+                if (newLeft > maxLeft) newLeft = maxLeft;
+
+                clip.style.left = newLeft + 'px';
+            }
+
+            function handleMouseUp() {
+                window.removeEventListener('mousemove', handleMouseMove);
+                window.removeEventListener('mouseup', handleMouseUp);
+            }
+
+            window.addEventListener('mousemove', handleMouseMove);
+            window.addEventListener('mouseup', handleMouseUp);
+        }
+
+        function togglePlay() {
+            isPlaying = !isPlaying;
+            if (isPlaying) {
+                if (vid1.src) vid1.play();
+                if (vid2.src) vid2.play();
+                if (aud1.src) aud1.play();
+                if (aud2.src) aud2.play();
+                renderLoop();
+            } else {
+                vid1.pause();
+                vid2.pause();
+                aud1.pause();
+                aud2.pause();
+            }
+        }
+
+        function renderLoop() {
+            if (!isPlaying) return;
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            if (!vid1.paused && !vid1.ended) {
+                ctx.drawImage(vid1, 0, 0, canvas.width, canvas.height);
+            } else if (!vid2.paused && !vid2.ended) {
+                ctx.drawImage(vid2, 0, 0, canvas.width, canvas.height);
+            } else {
+                ctx.fillStyle = "#111";
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = "#00e5ff";
+                ctx.font = "14px Arial";
+                ctx.fillText("Preview Active...", 20, 30);
+            }
+
+            requestAnimationFrame(renderLoop);
+        }
+
+        function exportMix() {
+            alert("Aapki Video Merge Process Ho Rahi Hai!");
+        }
+    </script>
+</body>
+</html>
