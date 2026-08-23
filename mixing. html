@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Rox INTEN STUDIO - Multi-Track Video Mixer</title>
+    <title>Rox INTEN STUDIO - Split Screen & Cut Merger</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Arial, sans-serif; touch-action: manipulation; }
         body { background: #0c0c14; color: #fff; min-height: 100vh; display: flex; flex-direction: column; overflow-x: hidden; }
@@ -24,6 +24,9 @@
         canvas { width: 100%; height: 100%; object-fit: contain; }
         .time-display { position: absolute; bottom: 8px; right: 10px; background: rgba(0,0,0,0.85); color: #00e5ff; font-size: 11px; padding: 3px 8px; border-radius: 4px; border: 1px solid #00e5ff; }
 
+        .partition-slider-box { background: #1a1a2b; padding: 8px 12px; border-radius: 6px; border: 1px solid #00e5ff; display: flex; align-items: center; gap: 10px; }
+        .partition-slider-box label { font-size: 11px; color: #00e5ff; font-weight: bold; white-space: nowrap; }
+
         .controls-bar { display: flex; gap: 8px; width: 100%; }
         .btn { flex: 1; padding: 12px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 13px; text-align: center; }
         .btn-play { background: #00e5ff; color: #000; }
@@ -32,19 +35,15 @@
         .timeline-tracks { width: 100%; background: #12121c; border-radius: 8px; padding: 10px; border: 1px solid #2e2e48; display: flex; flex-direction: column; gap: 10px; }
         .track { background: #1a1a2b; padding: 8px; border-radius: 6px; border: 1px solid #28283d; }
         .track-title { font-size: 11px; color: #00e5ff; font-weight: bold; margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center; }
-        .track-title span { color: #ff007f; font-size: 10px; }
         
         .track-lane { position: relative; height: 42px; background: #09090f; border-radius: 5px; overflow: hidden; border: 1px dashed #3e3e5e; }
         .clip-block { position: absolute; top: 3px; height: 34px; background: #00e5ff; color: #000; font-size: 10px; font-weight: bold; display: flex; align-items: center; justify-content: center; border-radius: 4px; touch-action: none; user-select: none; border: 1px solid #fff; cursor: grab; }
-        .clip-block.audio { background: #ff007f; color: #fff; }
+        .clip-block.vid2 { background: #ff007f; color: #fff; }
 
         .sidebar-panel { background: #12121c; padding: 12px; border-radius: 8px; border: 1px solid #2e2e48; display: flex; flex-direction: column; gap: 10px; }
         .input-group { background: #1a1a2b; padding: 8px; border-radius: 6px; border: 1px solid #28283d; }
         .input-group label { font-size: 11px; color: #00e5ff; font-weight: bold; display: block; margin-bottom: 4px; }
         input[type="file"] { width: 100%; font-size: 11px; background: #222235; color: #fff; padding: 6px; border-radius: 4px; border: 1px solid #383852; }
-
-        .vol-control { display: flex; align-items: center; gap: 8px; margin-top: 6px; }
-        .vol-control label { font-size: 10px; color: #ff007f; min-width: 70px; }
 
         .trim-controls { display: flex; gap: 8px; margin-top: 6px; }
         .trim-controls div { flex: 1; }
@@ -59,7 +58,7 @@
             <div class="logo-area">
                 <h1>Rox</h1> <span>INTEN STUDIO</span>
             </div>
-            <div><span style="font-size: 10px; color: #00e5ff;">⏱️ Multi-Track Mixer</span></div>
+            <div><span style="font-size: 10px; color: #00e5ff;">✂️ Split Partition Editor</span></div>
         </div>
         <div class="nav-links">
             <a href="index.html">Home</a>
@@ -79,80 +78,60 @@
             <div class="time-display" id="timeDisplay">0.0s / 60.0s</div>
         </div>
 
+        <div class="partition-slider-box">
+            <label>↔ Screen Partition Ratio:</label>
+            <input type="range" id="splitRatio" min="0.1" max="0.9" step="0.05" value="0.5">
+        </div>
+
         <div class="controls-bar">
             <button class="btn btn-play" id="playBtn" onclick="togglePlay()">▶ Play / Pause</button>
-            <button class="btn btn-mix" id="exportBtn" onclick="exportMix()">⚡ Merge & Download</button>
+            <button class="btn btn-mix" id="exportBtn" onclick="exportMix()">⚡ Cut & Merge Download</button>
         </div>
 
         <div class="timeline-tracks">
-            <h4 style="font-size: 11px; color: #aaa; text-align: center;">👈 Ungli Se Block Slide Karke Start Position Set Karein 👉</h4>
+            <h4 style="font-size: 11px; color: #aaa; text-align: center;">👈 Ungli Se Slide Karke Timeline Me Fit Karein 👉</h4>
             
             <div class="track">
-                <div class="track-title">📹 Video 1 Track <span id="v1TimeLabel">Start: 0.0s</span></div>
+                <div class="track-title">📹 Partition 1 (Video 1) <span id="v1TimeLabel">Start: 0.0s</span></div>
                 <div class="track-lane" id="laneV1">
-                    <div class="clip-block" id="clipV1" style="left: 0px; width: 45%;">Video 1</div>
+                    <div class="clip-block" id="clipV1" style="left: 0px; width: 50%;">Video 1 Cut</div>
                 </div>
             </div>
 
             <div class="track">
-                <div class="track-title">📹 Video 2 Track <span id="v2TimeLabel">Start: 15.0s</span></div>
+                <div class="track-title">📹 Partition 2 (Video 2) <span id="v2TimeLabel">Start: 0.0s</span></div>
                 <div class="track-lane" id="laneV2">
-                    <div class="clip-block" id="clipV2" style="left: 150px; width: 45%;">Video 2</div>
-                </div>
-            </div>
-
-            <div class="track">
-                <div class="track-title">🎵 Audio Track <span id="a1TimeLabel">Start: 0.0s</span></div>
-                <div class="track-lane" id="laneA1">
-                    <div class="clip-block audio" id="clipA1" style="left: 0px; width: 50%;">Audio 1</div>
+                    <div class="clip-block vid2" id="clipV2" style="left: 0px; width: 50%;">Video 2 Cut</div>
                 </div>
             </div>
         </div>
 
         <div class="sidebar-panel">
-            <h3 style="color:#00e5ff; font-size:12px;">🔊 Audio Mixer & Volume Control</h3>
+            <h3 style="color:#00e5ff; font-size:12px;">✂️ Cut & Trim Videos</h3>
 
             <div class="input-group">
-                <label>📹 Video 1 Controls</label>
+                <label>📹 Partition 1 Video</label>
                 <input type="file" id="v1File" accept="video/*">
-                <div class="vol-control">
-                    <label>🔊 Volume:</label>
-                    <input type="range" id="v1Vol" min="0" max="1" step="0.1" value="1" oninput="updateVolumes()">
-                </div>
                 <div class="trim-controls">
-                    <div><label>Cut Start (s)</label><input type="range" id="v1Start" value="0" min="0" max="60"></div>
-                    <div><label>Cut End (s)</label><input type="range" id="v1End" value="60" min="0" max="60"></div>
+                    <div><label>Cut From (s)</label><input type="range" id="v1Start" value="0" min="0" max="60"></div>
+                    <div><label>Cut Till (s)</label><input type="range" id="v1End" value="60" min="0" max="60"></div>
                 </div>
             </div>
 
             <div class="input-group">
-                <label>📹 Video 2 Controls</label>
+                <label>📹 Partition 2 Video</label>
                 <input type="file" id="v2File" accept="video/*">
-                <div class="vol-control">
-                    <label>🔊 Volume:</label>
-                    <input type="range" id="v2Vol" min="0" max="1" step="0.1" value="1" oninput="updateVolumes()">
-                </div>
                 <div class="trim-controls">
-                    <div><label>Cut Start (s)</label><input type="range" id="v2Start" value="0" min="0" max="60"></div>
-                    <div><label>Cut End (s)</label><input type="range" id="v2End" value="60" min="0" max="60"></div>
-                </div>
-            </div>
-
-            <div class="input-group">
-                <label>🎵 Audio 1 Background Track</label>
-                <input type="file" id="a1File" accept="audio/*">
-                <div class="vol-control">
-                    <label>🎵 Volume:</label>
-                    <input type="range" id="a1Vol" min="0" max="1" step="0.1" value="1" oninput="updateVolumes()">
+                    <div><label>Cut From (s)</label><input type="range" id="v2Start" value="0" min="0" max="60"></div>
+                    <div><label>Cut Till (s)</label><input type="range" id="v2End" value="60" min="0" max="60"></div>
                 </div>
             </div>
         </div>
 
     </div>
 
-    <video id="vid1" style="display:none;" playsinline></video>
-    <video id="vid2" style="display:none;" playsinline></video>
-    <audio id="aud1" style="display:none;"></audio>
+    <video id="vid1" style="display:none;" playsinline muted></video>
+    <video id="vid2" style="display:none;" playsinline muted></video>
 
     <script>
         const canvas = document.getElementById('mixCanvas');
@@ -162,7 +141,6 @@
 
         const vid1 = document.getElementById('vid1');
         const vid2 = document.getElementById('vid2');
-        const aud1 = document.getElementById('aud1');
 
         let isPlaying = false;
         let isRecording = false;
@@ -171,11 +149,10 @@
         let currentTime = 0;
         const totalTimelineDuration = 60;
 
-        let v1StartSec = 0, v2StartSec = 15, a1StartSec = 0;
+        let v1StartSec = 0, v2StartSec = 0;
 
         document.getElementById('v1File').addEventListener('change', (e) => loadMedia(e, vid1, 'clipV1', 'v1End'));
         document.getElementById('v2File').addEventListener('change', (e) => loadMedia(e, vid2, 'clipV2', 'v2End'));
-        document.getElementById('a1File').addEventListener('change', (e) => loadMedia(e, aud1, 'clipA1', null));
 
         function loadMedia(event, element, clipId, maxRangeId) {
             const file = event.target.files[0];
@@ -183,23 +160,14 @@
                 element.src = URL.createObjectURL(file);
                 document.getElementById(clipId).innerText = file.name.substring(0, 10) + '..';
                 element.onloadedmetadata = () => {
-                    if(maxRangeId) {
-                        document.getElementById(maxRangeId).max = Math.floor(element.duration);
-                        document.getElementById(maxRangeId).value = Math.floor(element.duration);
-                    }
+                    document.getElementById(maxRangeId).max = Math.floor(element.duration);
+                    document.getElementById(maxRangeId).value = Math.floor(element.duration);
                 };
             }
         }
 
-        function updateVolumes() {
-            vid1.volume = parseFloat(document.getElementById('v1Vol').value);
-            vid2.volume = parseFloat(document.getElementById('v2Vol').value);
-            aud1.volume = parseFloat(document.getElementById('a1Vol').value);
-        }
-
         setupDraggable('clipV1', 'laneV1', (sec) => { v1StartSec = sec; document.getElementById('v1TimeLabel').innerText = `Start: ${sec.toFixed(1)}s`; });
         setupDraggable('clipV2', 'laneV2', (sec) => { v2StartSec = sec; document.getElementById('v2TimeLabel').innerText = `Start: ${sec.toFixed(1)}s`; });
-        setupDraggable('clipA1', 'laneA1', (sec) => { a1StartSec = sec; document.getElementById('a1TimeLabel').innerText = `Start: ${sec.toFixed(1)}s`; });
 
         function setupDraggable(clipId, laneId, onMoveCallback) {
             const clip = document.getElementById(clipId);
@@ -250,22 +218,27 @@
             ctx.fillStyle = "#000";
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+            let splitPos = parseFloat(document.getElementById('splitRatio').value);
+            let splitWidth = canvas.width * splitPos;
+
             let v1Active = checkAndPlayVideo(vid1, v1StartSec, 'v1Start', 'v1End');
             let v2Active = checkAndPlayVideo(vid2, v2StartSec, 'v2Start', 'v2End');
-            checkAndPlayAudio(aud1, a1StartSec);
 
-            if (v1Active && v2Active) {
-                ctx.drawImage(vid1, 0, 0, canvas.width / 2, canvas.height);
-                ctx.drawImage(vid2, canvas.width / 2, 0, canvas.width / 2, canvas.height);
-            } else if (v1Active) {
-                ctx.drawImage(vid1, 0, 0, canvas.width, canvas.height);
-            } else if (v2Active) {
-                ctx.drawImage(vid2, 0, 0, canvas.width, canvas.height);
-            } else {
-                ctx.fillStyle = "#00e5ff";
-                ctx.font = "14px Arial";
-                ctx.fillText("Slide Timeline Blocks & Play", 200, 180);
+            // Single Display me Split Partition Render Logic
+            if (v1Active) {
+                ctx.drawImage(vid1, 0, 0, splitWidth, canvas.height);
             }
+            if (v2Active) {
+                ctx.drawImage(vid2, splitWidth, 0, canvas.width - splitWidth, canvas.height);
+            }
+
+            // Divider Line
+            ctx.strokeStyle = "#00e5ff";
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(splitWidth, 0);
+            ctx.lineTo(splitWidth, canvas.height);
+            ctx.stroke();
 
             requestAnimationFrame(renderLoop);
         }
@@ -290,16 +263,6 @@
             }
         }
 
-        function checkAndPlayAudio(audioElem, timelineStart) {
-            if (!audioElem.src) return;
-            if (currentTime >= timelineStart) {
-                if (audioElem.paused) audioElem.play();
-            } else {
-                if (!audioElem.paused) audioElem.pause();
-            }
-        }
-
-        // Real Video Download Logic using Canvas Stream
         function exportMix() {
             if (isRecording) {
                 stopExport();
@@ -307,7 +270,7 @@
             }
 
             recordedChunks = [];
-            const stream = canvas.captureStream(30); // 30 FPS Canvas Recording
+            const stream = canvas.captureStream(30);
 
             mediaRecorder = new MediaRecorder(stream, { mimeType: 'video/webm' });
 
@@ -321,18 +284,18 @@
                 const a = document.createElement('a');
                 a.style.display = 'none';
                 a.href = url;
-                a.download = 'Rox_Mixed_Video.webm';
+                a.download = 'Rox_Split_Partition_Video.webm';
                 document.body.appendChild(a);
                 a.click();
                 window.URL.revokeObjectURL(url);
-                document.getElementById('exportBtn').innerText = "⚡ Merge & Download";
-                alert("Aapki Video File Download Ho Gayi Hai!");
+                document.getElementById('exportBtn').innerText = "⚡ Cut & Merge Download";
+                alert("Aapki Partition Merged Video Download Ho Gayi Hai!");
             };
 
             currentTime = 0;
             isPlaying = true;
             isRecording = true;
-            document.getElementById('exportBtn').innerText = "🔴 Exporting... (Click To Save)";
+            document.getElementById('exportBtn').innerText = "🔴 Saving Split Video...";
             mediaRecorder.start();
             renderLoop();
         }
