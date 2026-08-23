@@ -1,1 +1,612 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Audio/Video Cutter</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      user-select: none;
+      -webkit-user-select: none;
+    }
 
+    body {
+      background-color: #121214;
+      color: #ffffff;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 16px;
+      background-color: #1a1a1e;
+    }
+
+    .header-title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 18px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .btn-save {
+      background-color: #ff4b60;
+      color: white;
+      border: none;
+      padding: 6px 18px;
+      border-radius: 20px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .btn-save:disabled {
+      background-color: #555;
+      cursor: not-allowed;
+    }
+
+    .mode-switch {
+      display: flex;
+      justify-content: center;
+      margin: 16px auto;
+      background: #222226;
+      border-radius: 8px;
+      padding: 4px;
+      width: fit-content;
+    }
+
+    .mode-btn {
+      background: none;
+      border: none;
+      color: #888;
+      padding: 8px 16px;
+      font-weight: 600;
+      cursor: pointer;
+      border-radius: 6px;
+    }
+
+    .mode-btn.active {
+      color: #ff4b60;
+      background-color: #2b2b30;
+    }
+
+    .container {
+      padding: 0 16px;
+      max-width: 600px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .file-input {
+      margin: 10px 0;
+      width: 100%;
+      color: #aaa;
+    }
+
+    .media-preview {
+      width: 100%;
+      height: 220px;
+      background-color: #000;
+      border-radius: 8px;
+      overflow: hidden;
+      margin-bottom: 20px;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    video, audio {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .editor-wrapper {
+      position: relative;
+      height: 120px;
+      background: #222226;
+      border-radius: 8px;
+      overflow: hidden;
+      margin-bottom: 12px;
+      touch-action: none;
+    }
+
+    canvas {
+      width: 100%;
+      height: 100%;
+    }
+
+    .overlay-dim {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.65);
+      pointer-events: none;
+    }
+
+    #dim-left { left: 0; }
+    #dim-right { right: 0; }
+
+    .handle {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 4px;
+      background-color: #ff4b60;
+      cursor: ew-resize;
+      z-index: 10;
+      touch-action: none;
+    }
+
+    .handle-icon {
+      position: absolute;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      width: 32px;
+      height: 32px;
+      background-color: #ff4b60;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: bold;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+    }
+
+    #handle-left { left: 10%; }
+    #handle-right { left: 90%; }
+
+    #handle-left .handle-icon { left: 2px; }
+    #handle-right .handle-icon { left: 2px; }
+
+    .timestamps {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+
+    .time-badge {
+      background: #29292e;
+      color: #ff4b60;
+      padding: 6px 12px;
+      border-radius: 16px;
+      font-size: 14px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .time-btn {
+      cursor: pointer;
+      font-size: 16px;
+      user-select: none;
+      padding: 0 4px;
+    }
+
+    .duration-text {
+      color: #ff4b60;
+      font-weight: 600;
+    }
+
+    .controls {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .btn-circle {
+      background: none;
+      border: none;
+      color: white;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+    }
+
+    .btn-play {
+      width: 56px;
+      height: 56px;
+      background: white;
+      color: black;
+      border-radius: 50%;
+      font-size: 22px;
+    }
+
+    .status-msg {
+      text-align: center;
+      color: #ff4b60;
+      font-size: 14px;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="header-title" onclick="history.back()">
+      <span>&larr;</span> Audio/Video Cutter
+    </div>
+    <button class="btn-save" id="save-btn">SAVE</button>
+  </header>
+
+  <div class="mode-switch">
+    <button class="mode-btn active" id="btn-mode-sides">Trim sides</button>
+    <button class="mode-btn" id="btn-mode-middle">Trim middle</button>
+  </div>
+
+  <div class="container">
+    <input type="file" id="file-input" class="file-input" accept="audio/*,video/*">
+
+    <div class="media-preview">
+      <video id="media-element" playsinline></video>
+    </div>
+
+    <div class="editor-wrapper" id="editor-wrapper">
+      <canvas id="waveform"></canvas>
+      <div id="dim-left" class="overlay-dim"></div>
+      <div id="dim-right" class="overlay-dim"></div>
+      
+      <div id="handle-left" class="handle">
+        <div class="handle-icon">&lt;</div>
+      </div>
+      <div id="handle-right" class="handle">
+        <div class="handle-icon">&gt;</div>
+      </div>
+    </div>
+
+    <div class="timestamps">
+      <div class="time-badge">
+        <span class="time-btn" id="start-minus">-</span>
+        <span id="start-time">00:00.0</span>
+        <span class="time-btn" id="start-plus">+</span>
+      </div>
+      <div class="duration-text" id="total-trim-duration">00:00.0</div>
+      <div class="time-badge">
+        <span class="time-btn" id="end-minus">-</span>
+        <span id="end-time">00:00.0</span>
+        <span class="time-btn" id="end-plus">+</span>
+      </div>
+    </div>
+
+    <div class="controls">
+      <button class="btn-circle" id="btn-prev" title="Jump Start">&#x23EE;</button>
+      <button class="btn-circle" id="btn-back" title="Rewind 5s">&#x21BA;</button>
+      <button class="btn-circle btn-play" id="btn-play">&#x25B6;</button>
+      <button class="btn-circle" id="btn-fwd" title="Forward 5s">&#x21BB;</button>
+      <button class="btn-circle" id="btn-next" title="Jump End">&#x23ED;</button>
+    </div>
+
+    <div class="status-msg" id="status-msg"></div>
+  </div>
+
+  <script>
+    const fileInput = document.getElementById('file-input');
+    const media = document.getElementById('media-element');
+    const canvas = document.getElementById('waveform');
+    const ctx = canvas.getContext('2d');
+    const wrapper = document.getElementById('editor-wrapper');
+
+    const handleLeft = document.getElementById('handle-left');
+    const handleRight = document.getElementById('handle-right');
+    const dimLeft = document.getElementById('dim-left');
+    const dimRight = document.getElementById('dim-right');
+
+    const startTimeLabel = document.getElementById('start-time');
+    const endTimeLabel = document.getElementById('end-time');
+    const durationLabel = document.getElementById('total-trim-duration');
+    const playBtn = document.getElementById('btn-play');
+    const saveBtn = document.getElementById('save-btn');
+    const statusMsg = document.getElementById('status-msg');
+
+    let audioCtx, audioBuffer, currentFile;
+    let duration = 0;
+    let startRatio = 0.1;
+    let endRatio = 0.9;
+    let isDragging = null;
+    let trimMode = 'sides';
+
+    function initLayout() {
+      canvas.width = wrapper.clientWidth || 300;
+      canvas.height = wrapper.clientHeight || 120;
+      updateUI();
+    }
+
+    window.addEventListener('load', initLayout);
+    window.addEventListener('resize', () => {
+      initLayout();
+      if (audioBuffer) drawWaveform();
+    });
+
+    fileInput.addEventListener('change', async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      currentFile = file;
+
+      const fileURL = URL.createObjectURL(file);
+      media.src = fileURL;
+
+      try {
+        const arrayBuffer = await file.arrayBuffer();
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
+        duration = audioBuffer.duration;
+      } catch (err) {
+        console.warn("Audio Context decode fallback:", err);
+      }
+
+      media.onloadedmetadata = () => {
+        if (!duration || isNaN(duration)) duration = media.duration;
+        initLayout();
+        if (audioBuffer) drawWaveform();
+      };
+    });
+
+    function drawWaveform() {
+      if (!audioBuffer) return;
+      const data = audioBuffer.getChannelData(0);
+      const step = Math.ceil(data.length / canvas.width);
+      const amp = canvas.height / 2;
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = '#666666';
+
+      for (let i = 0; i < canvas.width; i++) {
+        let min = 1.0;
+        let max = -1.0;
+        for (let j = 0; j < step; j++) {
+          const datum = data[i * step + j];
+          if (datum < min) min = datum;
+          if (datum > max) max = datum;
+        }
+        ctx.fillRect(i, (1 + min) * amp, 1, Math.max(1, (max - min) * amp));
+      }
+    }
+
+    function formatTime(seconds) {
+      if (isNaN(seconds) || seconds < 0) return "00:00.0";
+      const mins = Math.floor(seconds / 60);
+      const secs = (seconds % 60).toFixed(1);
+      return `${String(mins).padStart(2, '0')}:${String(secs).padStart(4, '0')}`;
+    }
+
+    function updateUI() {
+      const width = wrapper.clientWidth || 300;
+      const leftPos = startRatio * width;
+      const rightPos = endRatio * width;
+
+      handleLeft.style.left = `${leftPos}px`;
+      handleRight.style.left = `${rightPos}px`;
+
+      if (trimMode === 'sides') {
+        dimLeft.style.left = '0px';
+        dimLeft.style.width = `${leftPos}px`;
+        dimRight.style.left = `${rightPos}px`;
+        dimRight.style.width = `${width - rightPos}px`;
+      } else {
+        dimLeft.style.left = `${leftPos}px`;
+        dimLeft.style.width = `${rightPos - leftPos}px`;
+        dimRight.style.width = '0px';
+      }
+
+      const startTime = startRatio * duration;
+      const endTime = endRatio * duration;
+
+      startTimeLabel.textContent = formatTime(startTime);
+      endTimeLabel.textContent = formatTime(endTime);
+      durationLabel.textContent = formatTime(endTime - startTime);
+    }
+
+    function handleMove(e) {
+      if (!isDragging) return;
+      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+      const rect = wrapper.getBoundingClientRect();
+      let ratio = (clientX - rect.left) / rect.width;
+      ratio = Math.max(0, Math.min(1, ratio));
+
+      if (isDragging === 'left') {
+        startRatio = Math.min(ratio, endRatio - 0.02);
+      } else if (isDragging === 'right') {
+        endRatio = Math.max(ratio, startRatio + 0.02);
+      }
+      updateUI();
+    }
+
+    function stopDrag() {
+      isDragging = null;
+      window.removeEventListener('mousemove', handleMove);
+      window.removeEventListener('mouseup', stopDrag);
+      window.removeEventListener('touchmove', handleMove);
+      window.removeEventListener('touchend', stopDrag);
+    }
+
+    function startDrag(type, e) {
+      isDragging = type;
+      window.addEventListener('mousemove', handleMove);
+      window.addEventListener('mouseup', stopDrag);
+      window.addEventListener('touchmove', handleMove);
+      window.addEventListener('touchend', stopDrag);
+    }
+
+    handleLeft.addEventListener('mousedown', (e) => startDrag('left', e));
+    handleLeft.addEventListener('touchstart', (e) => startDrag('left', e));
+    handleRight.addEventListener('mousedown', (e) => startDrag('right', e));
+    handleRight.addEventListener('touchstart', (e) => startDrag('right', e));
+
+    playBtn.addEventListener('click', () => {
+      if (!media.src) return;
+      if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+
+      const startTime = startRatio * duration;
+      const endTime = endRatio * duration;
+
+      if (media.paused) {
+        if (media.currentTime < startTime || media.currentTime >= endTime) {
+          media.currentTime = startTime;
+        }
+        media.play();
+        playBtn.innerHTML = '&#x23F8;';
+      } else {
+        media.pause();
+        playBtn.innerHTML = '&#x25B6;';
+      }
+
+      media.ontimeupdate = () => {
+        if (trimMode === 'sides' && media.currentTime >= endTime) {
+          media.pause();
+          playBtn.innerHTML = '&#x25B6;';
+        }
+      };
+    });
+
+    document.getElementById('btn-prev').onclick = () => { if (media.src) media.currentTime = startRatio * duration; };
+    document.getElementById('btn-next').onclick = () => { if (media.src) media.currentTime = endRatio * duration; };
+    document.getElementById('btn-back').onclick = () => { if (media.src) media.currentTime = Math.max(0, media.currentTime - 5); };
+    document.getElementById('btn-fwd').onclick = () => { if (media.src) media.currentTime = Math.min(duration, media.currentTime + 5); };
+
+    document.getElementById('start-minus').onclick = () => { if (duration) { startRatio = Math.max(0, startRatio - 0.1 / duration); updateUI(); } };
+    document.getElementById('start-plus').onclick = () => { if (duration) { startRatio = Math.min(endRatio - 0.02, startRatio + 0.1 / duration); updateUI(); } };
+    document.getElementById('end-minus').onclick = () => { if (duration) { endRatio = Math.max(startRatio + 0.02, endRatio - 0.1 / duration); updateUI(); } };
+    document.getElementById('end-plus').onclick = () => { if (duration) { endRatio = Math.min(1, endRatio + 0.1 / duration); updateUI(); } };
+
+    document.getElementById('btn-mode-sides').onclick = function() {
+      trimMode = 'sides';
+      this.classList.add('active');
+      document.getElementById('btn-mode-middle').classList.remove('active');
+      updateUI();
+    };
+    document.getElementById('btn-mode-middle').onclick = function() {
+      trimMode = 'middle';
+      this.classList.add('active');
+      document.getElementById('btn-mode-sides').classList.remove('active');
+      updateUI();
+    };
+
+    saveBtn.onclick = async () => {
+      if (!currentFile || !duration) {
+        alert("Pehle koi Audio/Video file select karein.");
+        return;
+      }
+
+      saveBtn.disabled = true;
+      statusMsg.textContent = "Processing & Saving file...";
+
+      const startTime = startRatio * duration;
+      const endTime = endRatio * duration;
+
+      if (currentFile.type.startsWith('audio/') && audioBuffer) {
+        saveAudioTrim(startTime, endTime);
+      } else {
+        saveMediaStream(startTime, endTime);
+      }
+    };
+
+    function saveAudioTrim(startSec, endSec) {
+      const sampleRate = audioBuffer.sampleRate;
+      const startOffset = Math.floor(startSec * sampleRate);
+      const endOffset = Math.floor(endSec * sampleRate);
+      const frameCount = endOffset - startOffset;
+
+      const trimmedBuffer = audioCtx.createBuffer(
+        audioBuffer.numberOfChannels,
+        frameCount,
+        sampleRate
+      );
+
+      for (let i = 0; i < audioBuffer.numberOfChannels; i++) {
+        const channelData = audioBuffer.getChannelData(i);
+        const trimmedData = trimmedBuffer.getChannelData(i);
+        for (let j = 0; j < frameCount; j++) {
+          trimmedData[j] = channelData[startOffset + j];
+        }
+      }
+
+      const wavBlob = audioBufferToWav(trimmedBuffer);
+      downloadBlob(wavBlob, `trimmed_${currentFile.name.replace(/\.[^/.]+$/, "")}.wav`);
+      saveBtn.disabled = false;
+      statusMsg.textContent = "File Saved Successfully!";
+    }
+
+    function saveMediaStream(startSec, endSec) {
+      media.currentTime = startSec;
+      const stream = media.captureStream ? media.captureStream() : media.mozCaptureStream();
+      const recorder = new MediaRecorder(stream);
+      const chunks = [];
+
+      recorder.ondataavailable = (e) => chunks.push(e.data);
+      recorder.onstop = () => {
+        const blob = new Blob(chunks, { type: currentFile.type || 'video/mp4' });
+        downloadBlob(blob, `trimmed_${currentFile.name}`);
+        saveBtn.disabled = false;
+        statusMsg.textContent = "File Saved Successfully!";
+      };
+
+      recorder.start();
+      media.play();
+
+      const checkTime = setInterval(() => {
+        if (media.currentTime >= endSec || media.paused) {
+          clearInterval(checkTime);
+          media.pause();
+          recorder.stop();
+        }
+      }, 100);
+    }
+
+    function downloadBlob(blob, filename) {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
+
+    function audioBufferToWav(buffer) {
+      let numOfChan = buffer.numberOfChannels,
+          length = buffer.length * numOfChan * 2 + 44,
+          out = new DataView(new ArrayBuffer(length)),
+          channels = [], sampleRate = buffer.sampleRate,
+          offset = 0, pos = 0;
+
+      function setUint16(data) { out.setUint16(pos, data, true); pos += 2; }
+      function setUint32(data) { out.setUint32(pos, data, true); pos += 4; }
+
+      setUint32(0x46464952); setUint32(length - 8); setUint32(0x45564157);
+      setUint32(0x20746d66); setUint32(16); setUint16(1); setUint16(numOfChan);
+      setUint32(sampleRate); setUint32(sampleRate * 2 * numOfChan);
+      setUint16(numOfChan * 2); setUint16(16); setUint32(0x61746164);
+      setUint32(length - pos - 4);
+
+      for (let i = 0; i < buffer.numberOfChannels; i++) channels.push(buffer.getChannelData(i));
+
+      while (offset < buffer.length) {
+        for (let i = 0; i < numOfChan; i++) {
+          let sample = Math.max(-1, Math.min(1, channels[i][offset]));
+          sample = (0.5 + sample < 0 ? sample * 32768 : sample * 32767) | 0;
+          out.setInt16(pos, sample, true);
+          pos += 2;
+        }
+        offset++;
+      }
+      return new Blob([out], { type: "audio/wav" });
+    }
+  </script>
+</body>
+</html>
