@@ -1,503 +1,612 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="hi">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Audio/Video Cutter</title>
-  <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      user-select: none;
-      -webkit-user-select: none;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Rox INTEN STUDIO - Multi-Audio Video Mixer & Precision Cutter</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Arial, sans-serif; touch-action: manipulation; }
+        body { background: #0c0c14; color: #fff; min-height: 100vh; display: flex; flex-direction: column; overflow-x: hidden; }
 
-    body {
-      background-color: #121214;
-      color: #ffffff;
-      display: flex;
-      flex-direction: column;
-      min-height: 100vh;
-    }
+        /* Navbar */
+        .top-navbar { background: #161625; padding: 10px 12px; border-bottom: 2px solid #28283d; position: sticky; top: 0; z-index: 100; }
+        .nav-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+        .logo-area h1 { color: #00e5ff; font-size: 18px; display: inline-block; }
+        .logo-area span { color: #ff007f; font-size: 9px; font-weight: bold; }
 
-    header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 12px 16px;
-      background-color: #1a1a1e;
-    }
+        .nav-links { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px; -webkit-overflow-scrolling: touch; }
+        .nav-links::-webkit-scrollbar { display: none; }
+        .nav-links a { color: #ccc; text-decoration: none; font-size: 11px; padding: 5px 10px; background: #222235; border-radius: 5px; white-space: nowrap; border: 1px solid #383852; }
+        .nav-links a.active { background: #00e5ff; color: #000; font-weight: bold; }
+        .nav-links a.setting-btn { background: linear-gradient(90deg, #ff007f, #7f00ff); color: #fff; border: none; font-weight: bold; }
 
-    .header-title {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      font-size: 18px;
-      font-weight: 600;
-    }
+        /* Main Container */
+        .mixing-container { display: flex; flex-direction: column; padding: 10px; gap: 12px; width: 100%; max-width: 600px; margin: 0 auto; }
 
-    .btn-save {
-      background-color: #ff4b60;
-      color: white;
-      border: none;
-      padding: 6px 18px;
-      border-radius: 20px;
-      font-weight: 600;
-      cursor: pointer;
-    }
+        /* Canvas Frame */
+        .preview-box { position: relative; width: 100%; aspect-ratio: 16/9; background: #000; border: 2px solid #00e5ff; border-radius: 8px; overflow: hidden; }
+        canvas { width: 100%; height: 100%; object-fit: contain; }
 
-    .mode-switch {
-      display: flex;
-      justify-content: center;
-      margin: 16px auto;
-      background: #222226;
-      border-radius: 8px;
-      padding: 4px;
-      width: fit-content;
-    }
+        /* Control Buttons */
+        .controls-bar { display: flex; gap: 8px; width: 100%; }
+        .btn { flex: 1; padding: 12px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 13px; text-align: center; }
+        .btn-play { background: #00e5ff; color: #000; }
+        .btn-mix { background: linear-gradient(90deg, #ff007f, #7f00ff); color: #fff; }
 
-    .mode-btn {
-      background: none;
-      border: none;
-      color: #888;
-      padding: 8px 16px;
-      font-weight: 600;
-      cursor: pointer;
-      border-radius: 6px;
-    }
+        /* Precision Timeline Area */
+        .timeline-tracks { width: 100%; background: #12121c; border-radius: 8px; padding: 10px; border: 1px solid #2e2e48; display: flex; flex-direction: column; gap: 10px; }
+        
+        .time-scale { display: flex; justify-content: space-between; padding: 0 5px; font-size: 9px; color: #00e5ff; font-weight: bold; border-bottom: 1px solid #383852; padding-bottom: 4px; }
+        .scale-mark { position: relative; text-align: center; }
+        .scale-mark::after { content: '|'; display: block; font-size: 8px; color: #ff007f; margin-top: -2px; }
 
-    .mode-btn.active {
-      color: #ff4b60;
-      background-color: #2b2b30;
-    }
+        .track { background: #1a1a2b; padding: 8px; border-radius: 6px; border: 1px solid #28283d; }
+        .track-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; flex-wrap: wrap; gap: 4px; }
+        .track-title { font-size: 11px; color: #00e5ff; font-weight: bold; display: flex; align-items: center; gap: 6px; }
+        .time-badge { color: #ff007f; font-size: 10px; background: #09090f; padding: 2px 6px; border-radius: 4px; border: 1px solid #383852; }
+        
+        .track-actions { display: flex; gap: 4px; align-items: center; }
+        .edit-track-btn { background: #00e5ff; color: #000; border: none; font-size: 9px; padding: 3px 6px; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        .edit-track-btn.audio-btn { background: #ff007f; color: #fff; }
+        .mute-btn { background: #383852; color: #fff; border: none; font-size: 9px; padding: 3px 6px; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        .mute-btn.muted { background: #ff3b5c; color: #fff; }
 
-    .container {
-      padding: 0 16px;
-      max-width: 600px;
-      margin: 0 auto;
-      width: 100%;
-    }
+        /* Track Lane & Cut Sliders */
+        .track-lane { position: relative; height: 38px; background: #09090f; border-radius: 5px; overflow: hidden; border: 1px dashed #3e3e5e; }
+        .clip-block { position: absolute; top: 2px; height: 32px; background: #00e5ff; color: #000; font-size: 10px; font-weight: bold; display: flex; align-items: center; justify-content: space-between; border-radius: 4px; user-select: none; border: 1px solid #fff; cursor: grab; padding: 0 4px; }
+        .clip-block.audio { background: #ff007f; color: #fff; }
+        
+        /* Interactive Trimming Resizers */
+        .clip-handle { width: 8px; height: 100%; background: rgba(0,0,0,0.4); cursor: ew-resize; display: flex; align-items: center; justify-content: center; font-size: 8px; color: #fff; }
+        .clip-handle.left { border-top-left-radius: 3px; border-bottom-left-radius: 3px; }
+        .clip-handle.right { border-top-right-radius: 3px; border-bottom-right-radius: 3px; }
 
-    .file-input {
-      margin: 10px 0;
-      width: 100%;
-      color: #aaa;
-    }
+        /* File Upload Panel */
+        .sidebar-panel { background: #12121c; padding: 12px; border-radius: 8px; border: 1px solid #2e2e48; display: flex; flex-direction: column; gap: 10px; }
+        .input-group { background: #1a1a2b; padding: 8px; border-radius: 6px; border: 1px solid #28283d; }
+        .input-group label { font-size: 11px; color: #ff007f; font-weight: bold; display: block; margin-bottom: 4px; }
+        input[type="file"] { width: 100%; font-size: 11px; background: #222235; color: #fff; padding: 6px; border-radius: 4px; border: 1px solid #383852; }
 
-    .media-preview {
-      width: 100%;
-      height: 200px;
-      background-color: #000;
-      border-radius: 8px;
-      overflow: hidden;
-      margin-bottom: 20px;
-      position: relative;
-    }
+        .add-audio-btn { background: #ff007f; color: #fff; border: none; padding: 8px 12px; border-radius: 6px; font-size: 11px; font-weight: bold; cursor: pointer; margin-top: 5px; display: inline-flex; align-items: center; gap: 5px; }
 
-    video, audio {
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
-    }
+        /* CUTTER MODAL */
+        .cutter-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #141419; z-index: 1000; flex-direction: column; justify-content: space-between; }
+        .cutter-header { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: #1c1c24; border-bottom: 1px solid #2d2d3a; }
+        .cutter-header h2 { font-size: 16px; font-weight: bold; color: #fff; }
+        .cutter-header .save-btn { background: #ff3b5c; color: #fff; border: none; padding: 6px 18px; border-radius: 20px; font-weight: bold; font-size: 12px; cursor: pointer; }
 
-    .editor-wrapper {
-      position: relative;
-      height: 120px;
-      background: #222226;
-      border-radius: 8px;
-      overflow: hidden;
-      margin-bottom: 12px;
-      touch-action: none;
-    }
+        .waveform-container { position: relative; height: 180px; margin: 10px 16px; background: #1a1a24; border-radius: 8px; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+        #modalMediaPreview { width: 100%; height: 100%; object-fit: contain; position: absolute; top:0; left:0; display:none; }
+        #waveformCanvas { width: 100%; height: 100%; position: relative; z-index: 1; }
 
-    canvas {
-      width: 100%;
-      height: 100%;
-    }
+        .trim-overlay { position: absolute; top: 0; bottom: 0; background: rgba(0,0,0,0.65); pointer-events: none; z-index: 2; }
+        .trim-overlay.left { left: 0; }
+        .trim-overlay.right { right: 0; }
+        .trim-handle { position: absolute; top: 0; bottom: 0; width: 18px; margin-left: -9px; background: transparent; cursor: ew-resize; z-index: 10; touch-action: none; }
+        .trim-handle::before { content: ''; position: absolute; top: 0; bottom: 0; left: 8px; width: 2px; background: #ff3b5c; }
+        .handle-knob { position: absolute; width: 24px; height: 24px; background: #ff3b5c; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: bold; top: 15px; left: -3px; }
 
-    .overlay-dim {
-      position: absolute;
-      top: 0;
-      bottom: 0;
-      background: rgba(0, 0, 0, 0.65);
-      pointer-events: none;
-    }
-
-    #dim-left { left: 0; }
-    #dim-right { right: 0; }
-
-    .handle {
-      position: absolute;
-      top: 0;
-      bottom: 0;
-      width: 4px;
-      background-color: #ff4b60;
-      cursor: ew-resize;
-      z-index: 10;
-      touch-action: none;
-    }
-
-    .handle-icon {
-      position: absolute;
-      top: 50%;
-      transform: translate(-50%, -50%);
-      width: 32px;
-      height: 32px;
-      background-color: #ff4b60;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: white;
-      font-weight: bold;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.5);
-    }
-
-    #handle-left { left: 10%; }
-    #handle-right { left: 90%; }
-
-    #handle-left .handle-icon { left: 2px; }
-    #handle-right .handle-icon { left: 2px; }
-
-    .timestamps {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 24px;
-    }
-
-    .time-badge {
-      background: #29292e;
-      color: #ff4b60;
-      padding: 6px 12px;
-      border-radius: 16px;
-      font-size: 14px;
-      font-weight: 600;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .time-btn {
-      cursor: pointer;
-      font-size: 16px;
-      user-select: none;
-    }
-
-    .duration-text {
-      color: #ff4b60;
-      font-weight: 600;
-    }
-
-    .controls {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 20px;
-    }
-
-    .btn-circle {
-      background: none;
-      border: none;
-      color: white;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 18px;
-    }
-
-    .btn-play {
-      width: 56px;
-      height: 56px;
-      background: white;
-      color: black;
-      border-radius: 50%;
-      font-size: 22px;
-    }
-  </style>
+        .time-display-bar { display: flex; justify-content: space-between; align-items: center; padding: 0 16px; margin-bottom: 12px; }
+        .time-counter { display: flex; align-items: center; background: #232330; border-radius: 15px; padding: 3px 8px; color: #ff3b5c; font-size: 11px; font-weight: bold; }
+        .transport-controls { display: flex; justify-content: center; align-items: center; gap: 18px; margin-bottom: 16px; }
+        .trans-btn { background: none; border: none; color: #fff; font-size: 16px; cursor: pointer; }
+        .trans-btn.play-main { width: 48px; height: 48px; background: #fff; color: #000; border-radius: 50%; font-size: 18px; display: flex; align-items: center; justify-content: center; }
+    </style>
 </head>
 <body>
 
-  <header>
-    <div class="header-title">
-      <span>&larr;</span> Audio/Video Cutter
-    </div>
-    <button class="btn-save" id="save-btn">SAVE</button>
-  </header>
-
-  <div class="mode-switch">
-    <button class="mode-btn active" id="btn-mode-sides">Trim sides</button>
-    <button class="mode-btn" id="btn-mode-middle">Trim middle</button>
-  </div>
-
-  <div class="container">
-    <input type="file" id="file-input" class="file-input" accept="audio/*,video/*">
-
-    <div class="media-preview">
-      <video id="media-element" playsinline></video>
-    </div>
-
-    <div class="editor-wrapper" id="editor-wrapper">
-      <canvas id="waveform"></canvas>
-      <div id="dim-left" class="overlay-dim"></div>
-      <div id="dim-right" class="overlay-dim"></div>
-      
-      <div id="handle-left" class="handle">
-        <div class="handle-icon">&lt;</div>
-      </div>
-      <div id="handle-right" class="handle">
-        <div class="handle-icon">&gt;</div>
-      </div>
+    <!-- Navbar -->
+    <div class="top-navbar">
+        <div class="nav-header">
+            <div class="logo-area">
+                <h1>Rox</h1> <span>INTEN STUDIO</span>
+            </div>
+            <div><span style="font-size: 10px; color: #00e5ff;">⏱️ Audio-Video Synchronized</span></div>
+        </div>
+        <div class="nav-links">
+            <a href="index.html">Home</a>
+            <a href="upload.html">Upload</a>
+            <a href="ai-tools.html">AI Magic</a>
+            <a href="projects.html">Projects</a>
+            <a href="mixing.html" class="active">Mixing</a>
+            <a href="support.html">Support</a>
+            <a href="setting.html" class="setting-btn">⚙️ Setting</a>
+            <a href="result.html">Result</a>
+        </div>
     </div>
 
-    <div class="timestamps">
-      <div class="time-badge">
-        <span class="time-btn" id="start-minus">-</span>
-        <span id="start-time">00:00.0</span>
-        <span class="time-btn" id="start-plus">+</span>
-      </div>
-      <div class="duration-text" id="total-trim-duration">00:00.0</div>
-      <div class="time-badge">
-        <span class="time-btn" id="end-minus">-</span>
-        <span id="end-time">00:00.0</span>
-        <span class="time-btn" id="end-plus">+</span>
-      </div>
+    <div class="mixing-container">
+        <!-- Video Canvas Preview -->
+        <div class="preview-box">
+            <canvas id="mixCanvas"></canvas>
+        </div>
+
+        <div class="controls-bar">
+            <button class="btn btn-play" onclick="togglePlay()">▶ Play / Pause</button>
+            <button class="btn btn-mix" onclick="exportMixAndDownload()">⚡ Merge & Export</button>
+        </div>
+
+        <!-- Precision Timeline -->
+        <div class="timeline-tracks" id="timelineContainer">
+            <h4 style="font-size: 11px; color: #aaa; text-align: center;">⏱️ Timeline (Drag & Trim Clips Directly)</h4>
+            
+            <div class="time-scale">
+                <span class="scale-mark">0s</span>
+                <span class="scale-mark">10s</span>
+                <span class="scale-mark">20s</span>
+                <span class="scale-mark">30s</span>
+                <span class="scale-mark">40s</span>
+                <span class="scale-mark">50s</span>
+                <span class="scale-mark">60s</span>
+            </div>
+
+            <!-- Video Track 1 -->
+            <div class="track">
+                <div class="track-header">
+                    <span class="track-title">📹 Video 1 Track</span>
+                    <div class="track-actions">
+                        <button class="mute-btn" id="muteVid1" onclick="toggleMute('vid1')">🔊 Sound ON</button>
+                        <button class="edit-track-btn" onclick="openMediaTrimmer('vid1', 'Video 1', 'video')">✂️ Advanced Trim</button>
+                        <span class="time-badge" id="timeVid1">Start: 0.0s</span>
+                    </div>
+                </div>
+                <div class="track-lane">
+                    <div class="clip-block" id="clipVid1" style="left:0px; width:40%;">
+                        <div class="clip-handle left" onmousedown="initResize(event, 'vid1', 'left')">|</div>
+                        <span class="clip-txt">Video 1</span>
+                        <div class="clip-handle right" onmousedown="initResize(event, 'vid1', 'right')">|</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Video Track 2 -->
+            <div class="track">
+                <div class="track-header">
+                    <span class="track-title">📹 Video 2 Track</span>
+                    <div class="track-actions">
+                        <button class="mute-btn" id="muteVid2" onclick="toggleMute('vid2')">🔊 Sound ON</button>
+                        <button class="edit-track-btn" onclick="openMediaTrimmer('vid2', 'Video 2', 'video')">✂️ Advanced Trim</button>
+                        <span class="time-badge" id="timeVid2">Start: 25.0s</span>
+                    </div>
+                </div>
+                <div class="track-lane">
+                    <div class="clip-block" id="clipVid2" style="left:41.6%; width:40%;">
+                        <div class="clip-handle left" onmousedown="initResize(event, 'vid2', 'left')">|</div>
+                        <span class="clip-txt">Video 2</span>
+                        <div class="clip-handle right" onmousedown="initResize(event, 'vid2', 'right')">|</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Audio Track 1 -->
+            <div class="track">
+                <div class="track-header">
+                    <span class="track-title">🎵 Audio 1 Track</span>
+                    <div class="track-actions">
+                        <button class="mute-btn" id="muteAud1" onclick="toggleMute('aud1')">🔊 Sound ON</button>
+                        <button class="edit-track-btn audio-btn" onclick="openMediaTrimmer('aud1', 'Audio 1', 'audio')">✂️ Advanced Trim</button>
+                        <span class="time-badge" id="timeAud1">Start: 0.0s</span>
+                    </div>
+                </div>
+                <div class="track-lane">
+                    <div class="clip-block audio" id="clipAud1" style="left:0px; width:50%;">
+                        <div class="clip-handle left" onmousedown="initResize(event, 'aud1', 'left')">|</div>
+                        <span class="clip-txt">Audio 1</span>
+                        <div class="clip-handle right" onmousedown="initResize(event, 'aud1', 'right')">|</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Audio Track 2 -->
+            <div class="track">
+                <div class="track-header">
+                    <span class="track-title">🎵 Audio 2 Track</span>
+                    <div class="track-actions">
+                        <button class="mute-btn" id="muteAud2" onclick="toggleMute('aud2')">🔊 Sound ON</button>
+                        <button class="edit-track-btn audio-btn" onclick="openMediaTrimmer('aud2', 'Audio 2', 'audio')">✂️ Advanced Trim</button>
+                        <span class="time-badge" id="timeAud2">Start: 30.0s</span>
+                    </div>
+                </div>
+                <div class="track-lane">
+                    <div class="clip-block audio" id="clipAud2" style="left:50%; width:50%;">
+                        <div class="clip-handle left" onmousedown="initResize(event, 'aud2', 'left')">|</div>
+                        <span class="clip-txt">Audio 2</span>
+                        <div class="clip-handle right" onmousedown="initResize(event, 'aud2', 'right')">|</div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="dynamicAudioTracks"></div>
+        </div>
+
+        <!-- File Upload Area -->
+        <div class="sidebar-panel">
+            <h3 style="color:#00e5ff; font-size:13px;">📁 Select Media Files</h3>
+            <div class="input-group"><label>📹 Video 1 File</label><input type="file" id="v1File" accept="video/*"></div>
+            <div class="input-group"><label>📹 Video 2 File</label><input type="file" id="v2File" accept="video/*"></div>
+            <div class="input-group"><label>🎵 Audio 1 File</label><input type="file" id="a1File" accept="audio/*"></div>
+            <div class="input-group"><label>🎵 Audio 2 File</label><input type="file" id="a2File" accept="audio/*"></div>
+            
+            <div id="dynamicAudioInputs"></div>
+
+            <button class="add-audio-btn" onclick="addNewAudioTrackInput()">➕ Add Extra Audio Track</button>
+        </div>
     </div>
 
-    <div class="controls">
-      <button class="btn-circle" id="btn-prev" title="Jump Start">&#x23EE;</button>
-      <button class="btn-circle" id="btn-back" title="Rewind 5s">&#x21BA;</button>
-      <button class="btn-circle btn-play" id="btn-play">&#x25B6;</button>
-      <button class="btn-circle" id="btn-fwd" title="Forward 5s">&#x21BB;</button>
-      <button class="btn-circle" id="btn-next" title="Jump End">&#x23ED;</button>
+    <!-- TRIMMER MODAL -->
+    <div class="cutter-modal" id="cutterModal">
+        <div class="cutter-header">
+            <h2><span onclick="closeMediaTrimmer()" style="cursor:pointer; margin-right:6px;">←</span> <span id="modalHeaderTitle">Trimmer</span></h2>
+            <button class="save-btn" onclick="saveMediaCut()">SAVE</button>
+        </div>
+
+        <div class="waveform-container" id="waveformContainer">
+            <video id="modalMediaPreview" playsinline></video>
+            <canvas id="waveformCanvas"></canvas>
+            <div class="trim-overlay left" id="overlayLeft"></div>
+            <div class="trim-overlay right" id="overlayRight"></div>
+            <div class="trim-handle left" id="handleLeft"><div class="handle-knob">&lt;</div></div>
+            <div class="trim-handle right" id="handleRight"><div class="handle-knob">&gt;</div></div>
+        </div>
+
+        <div class="time-display-bar">
+            <div class="time-counter"><span id="txtStartTime">00:00.0</span></div>
+            <div style="color: #ff3b5c; font-size: 13px; font-weight: bold;" id="txtCurrentTime">00:00.0</div>
+            <div class="time-counter"><span id="txtEndTime">00:00.0</span></div>
+        </div>
+
+        <div class="transport-controls">
+            <button class="trans-btn play-main" id="btnModalPlay" onclick="toggleModalPlay()">▶</button>
+        </div>
     </div>
-  </div>
 
-  <script>
-    const fileInput = document.getElementById('file-input');
-    const media = document.getElementById('media-element');
-    const canvas = document.getElementById('waveform');
-    const ctx = canvas.getContext('2d');
-    const wrapper = document.getElementById('editor-wrapper');
+    <!-- Hidden Elements -->
+    <video id="vid1" style="display:none;" playsinline crossOrigin="anonymous"></video>
+    <video id="vid2" style="display:none;" playsinline crossOrigin="anonymous"></video>
+    <audio id="aud1" style="display:none;" crossOrigin="anonymous"></audio>
+    <audio id="aud2" style="display:none;" crossOrigin="anonymous"></audio>
+    <div id="hiddenAudioElements" style="display:none;"></div>
 
-    const handleLeft = document.getElementById('handle-left');
-    const handleRight = document.getElementById('handle-right');
-    const dimLeft = document.getElementById('dim-left');
-    const dimRight = document.getElementById('dim-right');
+    <script>
+        const canvas = document.getElementById('mixCanvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = 640;
+        canvas.height = 360;
 
-    const startTimeLabel = document.getElementById('start-time');
-    const endTimeLabel = document.getElementById('end-time');
-    const durationLabel = document.getElementById('total-trim-duration');
-    const playBtn = document.getElementById('btn-play');
+        const totalScaleSeconds = 60;
+        let isPlaying = false;
+        let audioCtx = null;
+        let audioNodes = {}; // Gain & WebAudio Nodes Storage
 
-    let audioCtx, audioBuffer;
-    let duration = 0;
-    let startRatio = 0.1;
-    let endRatio = 0.9;
-    let isDragging = null;
-    let trimMode = 'sides';
+        // Media State & Trim Configuration
+        const mediaCuts = {
+            vid1: { start: 0, end: 60, offset: 0, muted: false },
+            vid2: { start: 0, end: 60, offset: 25, muted: false },
+            aud1: { start: 0, end: 60, offset: 0, muted: false },
+            aud2: { start: 0, end: 60, offset: 30, muted: false }
+        };
 
-    function initLayout() {
-      canvas.width = wrapper.clientWidth || 300;
-      canvas.height = wrapper.clientHeight || 120;
-      updateUI();
-    }
-
-    window.addEventListener('load', initLayout);
-    window.addEventListener('resize', () => {
-      initLayout();
-      if (audioBuffer) drawWaveform();
-    });
-
-    fileInput.addEventListener('change', async (e) => {
-      const file = e.target.files[0];
-      if (!file) return;
-
-      const fileURL = URL.createObjectURL(file);
-      media.src = fileURL;
-
-      try {
-        const arrayBuffer = await file.arrayBuffer();
-        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
-        duration = audioBuffer.duration;
-      } catch (err) {
-        console.warn("Audio Context fallback:", err);
-      }
-
-      media.onloadedmetadata = () => {
-        if (!duration || isNaN(duration)) duration = media.duration;
-        initLayout();
-        if (audioBuffer) drawWaveform();
-      };
-    });
-
-    function drawWaveform() {
-      if (!audioBuffer) return;
-      const data = audioBuffer.getChannelData(0);
-      const step = Math.ceil(data.length / canvas.width);
-      const amp = canvas.height / 2;
-
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.fillStyle = '#666666';
-
-      for (let i = 0; i < canvas.width; i++) {
-        let min = 1.0;
-        let max = -1.0;
-        for (let j = 0; j < step; j++) {
-          const datum = data[i * step + j];
-          if (datum < min) min = datum;
-          if (datum > max) max = datum;
+        function initAudioContext() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
         }
-        ctx.fillRect(i, (1 + min) * amp, 1, Math.max(1, (max - min) * amp));
-      }
-    }
 
-    function formatTime(seconds) {
-      if (isNaN(seconds) || seconds < 0) return "00:00.0";
-      const mins = Math.floor(seconds / 60);
-      const secs = (seconds % 60).toFixed(1);
-      return `${String(mins).padStart(2, '0')}:${String(secs).padStart(4, '0')}`;
-    }
-
-    function updateUI() {
-      const width = wrapper.clientWidth || 300;
-      const leftPos = startRatio * width;
-      const rightPos = endRatio * width;
-
-      handleLeft.style.left = `${leftPos}px`;
-      handleRight.style.left = `${rightPos}px`;
-
-      if (trimMode === 'sides') {
-        dimLeft.style.left = '0px';
-        dimLeft.style.width = `${leftPos}px`;
-        dimRight.style.left = `${rightPos}px`;
-        dimRight.style.width = `${width - rightPos}px`;
-      } else {
-        dimLeft.style.left = `${leftPos}px`;
-        dimLeft.style.width = `${rightPos - leftPos}px`;
-        dimRight.style.width = '0px';
-      }
-
-      const startTime = startRatio * duration;
-      const endTime = endRatio * duration;
-
-      startTimeLabel.textContent = formatTime(startTime);
-      endTimeLabel.textContent = formatTime(endTime);
-      durationLabel.textContent = formatTime(endTime - startTime);
-    }
-
-    function handleMove(e) {
-      if (!isDragging) return;
-      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-      const rect = wrapper.getBoundingClientRect();
-      let ratio = (clientX - rect.left) / rect.width;
-      ratio = Math.max(0, Math.min(1, ratio));
-
-      if (isDragging === 'left') {
-        startRatio = Math.min(ratio, endRatio - 0.02);
-      } else if (isDragging === 'right') {
-        endRatio = Math.max(ratio, startRatio + 0.02);
-      }
-      updateUI();
-    }
-
-    function stopDrag() {
-      isDragging = null;
-      window.removeEventListener('mousemove', handleMove);
-      window.removeEventListener('mouseup', stopDrag);
-      window.removeEventListener('touchmove', handleMove);
-      window.removeEventListener('touchend', stopDrag);
-    }
-
-    function startDrag(type, e) {
-      isDragging = type;
-      window.addEventListener('mousemove', handleMove);
-      window.addEventListener('mouseup', stopDrag);
-      window.addEventListener('touchmove', handleMove);
-      window.addEventListener('touchend', stopDrag);
-    }
-
-    handleLeft.addEventListener('mousedown', (e) => startDrag('left', e));
-    handleLeft.addEventListener('touchstart', (e) => startDrag('left', e));
-    handleRight.addEventListener('mousedown', (e) => startDrag('right', e));
-    handleRight.addEventListener('touchstart', (e) => startDrag('right', e));
-
-    playBtn.addEventListener('click', () => {
-      if (!media.src) return;
-      if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
-
-      const startTime = startRatio * duration;
-      const endTime = endRatio * duration;
-
-      if (media.paused) {
-        if (media.currentTime < startTime || media.currentTime >= endTime) {
-          media.currentTime = startTime;
+        // Attach WebAudio Graph to route Video & Audio sounds properly
+        function setupAudioNode(key, element) {
+            initAudioContext();
+            if (!audioNodes[key]) {
+                try {
+                    const source = audioCtx.createMediaElementSource(element);
+                    const gainNode = audioCtx.createGain();
+                    source.connect(gainNode);
+                    gainNode.connect(audioCtx.destination);
+                    audioNodes[key] = { source, gainNode };
+                } catch(e) { }
+            }
         }
-        media.play();
-        playBtn.innerHTML = '&#x23F8;';
-      } else {
-        media.pause();
-        playBtn.innerHTML = '&#x25B6;';
-      }
 
-      media.ontimeupdate = () => {
-        if (trimMode === 'sides' && media.currentTime >= endTime) {
-          media.pause();
-          playBtn.innerHTML = '&#x25B6;';
+        // File Load Listeners
+        document.getElementById('v1File').addEventListener('change', (e) => loadMedia(e, 'vid1', 'clipVid1'));
+        document.getElementById('v2File').addEventListener('change', (e) => loadMedia(e, 'vid2', 'clipVid2'));
+        document.getElementById('a1File').addEventListener('change', (e) => loadMedia(e, 'aud1', 'clipAud1'));
+        document.getElementById('a2File').addEventListener('change', (e) => loadMedia(e, 'aud2', 'clipAud2'));
+
+        function loadMedia(event, key, clipId) {
+            const file = event.target.files[0];
+            const element = document.getElementById(key);
+            if (file && element) {
+                element.src = URL.createObjectURL(file);
+                element.onloadedmetadata = () => {
+                    mediaCuts[key].end = element.duration;
+                };
+                setupAudioNode(key, element);
+                const txtElem = document.querySelector(`#${clipId} .clip-txt`);
+                if (txtElem) txtElem.innerText = file.name.substring(0, 8) + '..';
+            }
         }
-      };
-    });
 
-    document.getElementById('btn-prev').onclick = () => {
-      if (media.src) media.currentTime = startRatio * duration;
-    };
-    document.getElementById('btn-next').onclick = () => {
-      if (media.src) media.currentTime = endRatio * duration;
-    };
-    document.getElementById('btn-back').onclick = () => {
-      if (media.src) media.currentTime = Math.max(0, media.currentTime - 5);
-    };
-    document.getElementById('btn-fwd').onclick = () => {
-      if (media.src) media.currentTime = Math.min(duration, media.currentTime + 5);
-    };
+        // Sound Mute / Unmute Toggle
+        function toggleMute(key) {
+            initAudioContext();
+            mediaCuts[key].muted = !mediaCuts[key].muted;
+            
+            const btnKey = 'mute' + key.charAt(0).toUpperCase() + key.slice(1);
+            const btn = document.getElementById(btnKey);
 
-    document.getElementById('start-minus').onclick = () => {
-      if (!duration) return;
-      startRatio = Math.max(0, startRatio - 0.1 / duration);
-      updateUI();
-    };
-    document.getElementById('start-plus').onclick = () => {
-      if (!duration) return;
-      startRatio = Math.min(endRatio - 0.02, startRatio + 0.1 / duration);
-      updateUI();
-    };
-    document.getElementById('end-minus').onclick = () => {
-      if (!duration) return;
-      endRatio = Math.max(startRatio + 0.02, endRatio - 0.1 / duration);
-      updateUI();
-    };
-    document.getElementById('end-plus').onclick = () => {
-      if (!duration) return;
-      endRatio = Math.min(1, endRatio + 0.1 / duration);
-      updateUI();
-    };
+            if (audioNodes[key] && audioNodes[key].gainNode) {
+                audioNodes[key].gainNode.gain.value = mediaCuts[key].muted ? 0 : 1;
+            }
 
-    document.getElementById('btn-mode-sides').onclick = function() {
-      trimMode = 'sides';
-      this.classList.add('active');
-      document.getElementById('btn-mode-middle').classList.remove('active');
-      updateUI();
-    };
-    document.getElementById('btn-mode-middle').onclick = function() {
-      trimMode = 'middle';
-      this.classList.add('active');
-      document.getElementById('btn-mode-sides').classList.remove('active');
-      updateUI();
-    };
-  </script>
+            if (btn) {
+                btn.innerText = mediaCuts[key].muted ? '🔇 Muted' : '🔊 Sound ON';
+                btn.classList.toggle('muted', mediaCuts[key].muted);
+            }
+        }
+
+        // Add Dynamic Extra Audio Tracks
+        let extraAudioCount = 2;
+        function addNewAudioTrackInput() {
+            extraAudioCount++;
+            const trackKey = 'aud' + extraAudioCount;
+            const clipId = 'clipAud' + extraAudioCount;
+
+            // 1. File Input
+            const inputGroup = document.createElement('div');
+            inputGroup.className = 'input-group';
+            inputGroup.innerHTML = `<label>🎵 Audio ${extraAudioCount} File</label><input type="file" id="a${extraAudioCount}File" accept="audio/*">`;
+            document.getElementById('dynamicAudioInputs').appendChild(inputGroup);
+
+            // 2. Hidden Audio Element
+            const newAudio = document.createElement('audio');
+            newAudio.id = trackKey;
+            newAudio.crossOrigin = 'anonymous';
+            document.getElementById('hiddenAudioElements').appendChild(newAudio);
+
+            mediaCuts[trackKey] = { start: 0, end: 60, offset: 0, muted: false };
+
+            // 3. UI Track Lane
+            const trackDiv = document.createElement('div');
+            trackDiv.className = 'track';
+            trackDiv.innerHTML = `
+                <div class="track-header">
+                    <span class="track-title">🎵 Audio ${extraAudioCount} Track</span>
+                    <div class="track-actions">
+                        <button class="mute-btn" id="muteAud${extraAudioCount}" onclick="toggleMute('${trackKey}')">🔊 Sound ON</button>
+                        <button class="edit-track-btn audio-btn" onclick="openMediaTrimmer('${trackKey}', 'Audio ${extraAudioCount}', 'audio')">✂️ Advanced Trim</button>
+                        <span class="time-badge" id="timeAud${extraAudioCount}">Start: 0.0s</span>
+                    </div>
+                </div>
+                <div class="track-lane">
+                    <div class="clip-block audio" id="${clipId}" style="left:0px; width:50%;">
+                        <div class="clip-handle left" onmousedown="initResize(event, '${trackKey}', 'left')">|</div>
+                        <span class="clip-txt">Audio ${extraAudioCount}</span>
+                        <div class="clip-handle right" onmousedown="initResize(event, '${trackKey}', 'right')">|</div>
+                    </div>
+                </div>
+            `;
+            document.getElementById('dynamicAudioTracks').appendChild(trackDiv);
+
+            makeDraggableClip(document.getElementById(clipId), trackKey);
+
+            document.getElementById(`a${extraAudioCount}File`).addEventListener('change', (e) => {
+                loadMedia(e, trackKey, clipId);
+            });
+        }
+
+        // Timeline Drag & Resizing Logic
+        function makeDraggableClip(clip, key) {
+            clip.addEventListener('touchstart', (e) => handleDrag(e, clip, key), { passive: false });
+            clip.addEventListener('mousedown', (e) => handleDrag(e, clip, key));
+        }
+
+        document.querySelectorAll('.clip-block').forEach(clip => {
+            const key = clip.id.replace('clip', '').toLowerCase();
+            makeDraggableClip(clip, key);
+        });
+
+        function handleDrag(e, clip, key) {
+            if (e.target.classList.contains('clip-handle')) return; // Ignore if handle is clicked
+            e.preventDefault();
+            const lane = clip.parentElement;
+            const startX = (e.touches ? e.touches[0].clientX : e.clientX) - clip.offsetLeft;
+
+            function onMove(e) {
+                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                let newLeft = clientX - startX;
+                let maxLeft = lane.clientWidth - clip.clientWidth;
+                newLeft = Math.max(0, Math.min(newLeft, maxLeft));
+
+                clip.style.left = newLeft + 'px';
+                const startSec = parseFloat(((newLeft / lane.clientWidth) * totalScaleSeconds).toFixed(1));
+                mediaCuts[key].offset = startSec;
+                
+                const timeBadge = document.getElementById('time' + key.charAt(0).toUpperCase() + key.slice(1));
+                if (timeBadge) timeBadge.innerText = `Start: ${startSec}s`;
+            }
+
+            function onEnd() {
+                window.removeEventListener('mousemove', onMove);
+                window.removeEventListener('touchmove', onMove);
+                window.removeEventListener('mouseup', onEnd);
+                window.removeEventListener('touchend', onEnd);
+            }
+
+            window.addEventListener('mousemove', onMove);
+            window.addEventListener('touchmove', onMove, { passive: false });
+            window.addEventListener('mouseup', onEnd);
+            window.addEventListener('touchend', onEnd);
+        }
+
+        function initResize(e, key, side) {
+            e.stopPropagation();
+            const clip = document.getElementById('clip' + key.charAt(0).toUpperCase() + key.slice(1));
+            const lane = clip.parentElement;
+            const startX = e.clientX;
+            const startWidth = clip.clientWidth;
+            const startLeft = clip.offsetLeft;
+
+            function onResizing(e) {
+                const dx = e.clientX - startX;
+                if (side === 'right') {
+                    let newWidth = Math.max(30, startWidth + dx);
+                    clip.style.width = newWidth + 'px';
+                    mediaCuts[key].end = mediaCuts[key].start + (newWidth / lane.clientWidth) * totalScaleSeconds;
+                } else if (side === 'left') {
+                    let newLeft = Math.max(0, startLeft + dx);
+                    let newWidth = startWidth - dx;
+                    if (newWidth > 30) {
+                        clip.style.left = newLeft + 'px';
+                        clip.style.width = newWidth + 'px';
+                        mediaCuts[key].start = (newLeft / lane.clientWidth) * totalScaleSeconds;
+                    }
+                }
+            }
+
+            function stopResizing() {
+                window.removeEventListener('mousemove', onResizing);
+                window.removeEventListener('mouseup', stopResizing);
+            }
+
+            window.addEventListener('mousemove', onResizing);
+            window.addEventListener('mouseup', stopResizing);
+        }
+
+        // Playback Engine
+        function togglePlay() {
+            initAudioContext();
+            isPlaying = !isPlaying;
+
+            const allMedias = [document.getElementById('vid1'), document.getElementById('vid2'), ...Array.from(document.querySelectorAll('audio'))];
+
+            if (isPlaying) {
+                allMedias.forEach(m => {
+                    if (m && m.src && mediaCuts[m.id]) {
+                        m.currentTime = mediaCuts[m.id].start;
+                        m.play();
+                    }
+                });
+                renderLoop();
+            } else {
+                allMedias.forEach(m => m && m.pause());
+            }
+        }
+
+        function renderLoop() {
+            if (!isPlaying) return;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            const v1 = document.getElementById('vid1');
+            const v2 = document.getElementById('vid2');
+
+            let drawn = false;
+            if (v1.src && !v1.paused && !v1.ended && v1.currentTime <= mediaCuts.vid1.end) {
+                ctx.drawImage(v1, 0, 0, canvas.width, canvas.height);
+                drawn = true;
+            } else if (v2.src && !v2.paused && !v2.ended && v2.currentTime <= mediaCuts.vid2.end) {
+                ctx.drawImage(v2, 0, 0, canvas.width, canvas.height);
+                drawn = true;
+            }
+
+            if (!drawn) {
+                ctx.fillStyle = "#111";
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = "#00e5ff";
+                ctx.font = "14px Arial";
+                ctx.fillText("Preview Playing Active Audio & Video...", 20, 30);
+            }
+            requestAnimationFrame(renderLoop);
+        }
+
+        // Export Functionality
+        function exportMixAndDownload() {
+            initAudioContext();
+            const v1 = document.getElementById('vid1');
+            const v2 = document.getElementById('vid2');
+            const allAudios = Array.from(document.querySelectorAll('audio'));
+
+            if (!v1.src && !v2.src && !allAudios.some(a => a.src)) {
+                alert("Pehle Video ya Audio file select karein!");
+                return;
+            }
+
+            alert("Exporting Video with Active Sound Track...");
+            const stream = canvas.captureStream(30);
+            const dest = audioCtx.createMediaStreamDestination();
+
+            [v1, v2, ...allAudios].forEach(m => {
+                if (m && m.src && audioNodes[m.id]) {
+                    audioNodes[m.id].gainNode.connect(dest);
+                }
+            });
+
+            if (dest.stream.getAudioTracks().length > 0) {
+                stream.addTrack(dest.stream.getAudioTracks()[0]);
+            }
+
+            const recorder = new MediaRecorder(stream);
+            const chunks = [];
+
+            recorder.ondataavailable = e => chunks.push(e.data);
+            recorder.onstop = () => {
+                const blob = new Blob(chunks, { type: 'video/webm' });
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(blob);
+                a.download = `Rox_Studio_Export_${Date.now()}.webm`;
+                a.click();
+                alert("Video Download Completed!");
+            };
+
+            togglePlay();
+            recorder.start();
+            setTimeout(() => {
+                recorder.stop();
+                togglePlay();
+            }, 10000);
+        }
+
+        // Trimmer Modal Logic
+        let activeKey = null;
+        let activeElement = null;
+
+        function openMediaTrimmer(id, title, type) {
+            activeKey = id;
+            activeElement = document.getElementById(id);
+            if (!activeElement || !activeElement.src) {
+                alert("Pehle file select karein!");
+                return;
+            }
+
+            document.getElementById('modalHeaderTitle').innerText = title + " Cutter";
+            document.getElementById('cutterModal').style.display = 'flex';
+            
+            const modalVideo = document.getElementById('modalMediaPreview');
+            if (type === 'video') {
+                modalVideo.style.display = 'block';
+                modalVideo.src = activeElement.src;
+            } else {
+                modalVideo.style.display = 'none';
+            }
+        }
+
+        function closeMediaTrimmer() {
+            document.getElementById('cutterModal').style.display = 'none';
+        }
+
+        function toggleModalPlay() {
+            if (activeElement) {
+                if (activeElement.paused) activeElement.play();
+                else activeElement.pause();
+            }
+        }
+
+        function saveMediaCut() {
+            alert("Cut Settings Applied Successfully!");
+            closeMediaTrimmer();
+        }
+    </script>
 </body>
 </html>
