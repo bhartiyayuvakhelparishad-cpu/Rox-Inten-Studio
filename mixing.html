@@ -42,20 +42,25 @@
         .scale-mark::after { content: '|'; display: block; font-size: 8px; color: #ff007f; margin-top: -2px; }
 
         .track { background: #1a1a2b; padding: 8px; border-radius: 6px; border: 1px solid #28283d; }
-        .track-title { font-size: 11px; color: #00e5ff; font-weight: bold; margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center; }
+        .track-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+        .track-title { font-size: 11px; color: #00e5ff; font-weight: bold; display: flex; align-items: center; gap: 8px; }
         .time-badge { color: #ff007f; font-size: 10px; background: #09090f; padding: 2px 6px; border-radius: 4px; border: 1px solid #383852; }
         .edit-track-btn { background: #00e5ff; color: #000; border: none; font-size: 9px; padding: 2px 8px; border-radius: 4px; cursor: pointer; font-weight: bold; }
         .edit-track-btn.audio-btn { background: #ff007f; color: #fff; }
 
         .track-lane { position: relative; height: 38px; background: #09090f; border-radius: 5px; overflow: hidden; border: 1px dashed #3e3e5e; }
-        .clip-block { position: absolute; top: 2px; height: 32px; background: #00e5ff; color: #000; font-size: 10px; font-weight: bold; display: flex; align-items: center; justify-content: center; border-radius: 4px; touch-action: none; user-select: none; border: 1px solid #fff; }
+        .clip-block { position: absolute; top: 2px; height: 32px; background: #00e5ff; color: #000; font-size: 10px; font-weight: bold; display: flex; align-items: center; justify-content: center; border-radius: 4px; touch-action: none; user-select: none; border: 1px solid #fff; cursor: grab; }
         .clip-block.audio { background: #ff007f; color: #fff; }
+        .clip-block:active { cursor: grabbing; opacity: 0.85; }
 
         /* File Upload Panel */
         .sidebar-panel { background: #12121c; padding: 12px; border-radius: 8px; border: 1px solid #2e2e48; display: flex; flex-direction: column; gap: 10px; }
         .input-group { background: #1a1a2b; padding: 8px; border-radius: 6px; border: 1px solid #28283d; }
         .input-group label { font-size: 11px; color: #ff007f; font-weight: bold; display: block; margin-bottom: 4px; }
         input[type="file"] { width: 100%; font-size: 11px; background: #222235; color: #fff; padding: 6px; border-radius: 4px; border: 1px solid #383852; }
+
+        /* Dynamic Add Audio Button */
+        .add-audio-btn { background: #ff007f; color: #fff; border: none; padding: 8px 12px; border-radius: 6px; font-size: 11px; font-weight: bold; cursor: pointer; margin-top: 5px; display: inline-flex; align-items: center; gap: 5px; }
 
         /* ADVANCED CUTTER MODAL */
         .cutter-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #141419; z-index: 1000; flex-direction: column; justify-content: space-between; }
@@ -141,7 +146,7 @@
         </div>
 
         <!-- Precision Timeline with Time Ruler -->
-        <div class="timeline-tracks">
+        <div class="timeline-tracks" id="timelineContainer">
             <h4 style="font-size: 11px; color: #aaa; text-align: center;">⏱️ Time Scale (Seconds Timeline)</h4>
             
             <div class="time-scale">
@@ -154,10 +159,10 @@
                 <span class="scale-mark">60s</span>
             </div>
 
-            <!-- Video Tracks -->
+            <!-- Video Track 1 -->
             <div class="track">
-                <div class="track-title">
-                    <span>📹 Video 1 Track</span>
+                <div class="track-header">
+                    <span class="track-title">📹 Video 1 Track</span>
                     <div>
                         <button class="edit-track-btn" onclick="openMediaTrimmer('vid1', 'Video 1', 'video')">✂️ Trim Video</button>
                         <span class="time-badge" id="timeV1">Start: 0.0s</span>
@@ -168,9 +173,10 @@
                 </div>
             </div>
 
+            <!-- Video Track 2 -->
             <div class="track">
-                <div class="track-title">
-                    <span>📹 Video 2 Track</span>
+                <div class="track-header">
+                    <span class="track-title">📹 Video 2 Track</span>
                     <div>
                         <button class="edit-track-btn" onclick="openMediaTrimmer('vid2', 'Video 2', 'video')">✂️ Trim Video</button>
                         <span class="time-badge" id="timeV2">Start: 25.0s</span>
@@ -181,10 +187,10 @@
                 </div>
             </div>
 
-            <!-- Audio Tracks -->
+            <!-- Audio Track 1 -->
             <div class="track">
-                <div class="track-title">
-                    <span>🎵 Audio 1 Track</span>
+                <div class="track-header">
+                    <span class="track-title">🎵 Audio 1 Track</span>
                     <div>
                         <button class="edit-track-btn audio-btn" onclick="openMediaTrimmer('aud1', 'Audio 1', 'audio')">✂️ Trim Audio</button>
                         <span class="time-badge" id="timeA1">Start: 0.0s</span>
@@ -195,9 +201,10 @@
                 </div>
             </div>
 
+            <!-- Audio Track 2 -->
             <div class="track">
-                <div class="track-title">
-                    <span>🎵 Audio 2 Track</span>
+                <div class="track-header">
+                    <span class="track-title">🎵 Audio 2 Track</span>
                     <div>
                         <button class="edit-track-btn audio-btn" onclick="openMediaTrimmer('aud2', 'Audio 2', 'audio')">✂️ Trim Audio</button>
                         <span class="time-badge" id="timeA2">Start: 30.0s</span>
@@ -207,6 +214,9 @@
                     <div class="clip-block audio" id="clipA2" style="left:50%; width:50%;">Audio 2</div>
                 </div>
             </div>
+
+            <!-- Container for Dynamic Extra Audio Tracks -->
+            <div id="dynamicAudioTracks"></div>
         </div>
 
         <!-- File Upload Panel -->
@@ -216,6 +226,10 @@
             <div class="input-group"><label>📹 Video 2 File</label><input type="file" id="v2File" accept="video/*"></div>
             <div class="input-group"><label>🎵 Audio 1 File</label><input type="file" id="a1File" accept="audio/*"></div>
             <div class="input-group"><label>🎵 Audio 2 File</label><input type="file" id="a2File" accept="audio/*"></div>
+            
+            <div id="dynamicAudioInputs"></div>
+
+            <button class="add-audio-btn" onclick="addNewAudioTrackInput()">➕ Add Multiple Audio Tracks</button>
         </div>
 
     </div>
@@ -294,6 +308,9 @@
     <video id="vid2" style="display:none;" playsinline muted></video>
     <audio id="aud1" style="display:none;"></audio>
     <audio id="aud2" style="display:none;"></audio>
+    
+    <!-- Dynamic Audio Elements Container -->
+    <div id="hiddenAudioElements" style="display:none;"></div>
 
     <script>
         const canvas = document.getElementById('mixCanvas');
@@ -307,6 +324,7 @@
         const aud2 = document.getElementById('aud2');
 
         let sharedAudioCtx = null;
+        let extraAudioCount = 2; // Default 2 tracks already exist
 
         function getAudioContext() {
             if (!sharedAudioCtx) {
@@ -329,7 +347,7 @@
         let isPlaying = false;
         const totalScaleSeconds = 60;
 
-        // File Loading
+        // Base File Loading listeners
         document.getElementById('v1File').addEventListener('change', (e) => loadMedia(e, vid1, 'clipV1', 'vid1'));
         document.getElementById('v2File').addEventListener('change', (e) => loadMedia(e, vid2, 'clipV2', 'vid2'));
         document.getElementById('a1File').addEventListener('change', (e) => loadMedia(e, aud1, 'clipA1', 'aud1'));
@@ -340,16 +358,68 @@
             if (file) {
                 element.src = URL.createObjectURL(file);
                 element.onloadedmetadata = () => {
-                    mediaCuts[key].end = element.duration;
+                    if (mediaCuts[key]) mediaCuts[key].end = element.duration;
                 };
-                document.getElementById(clipId).innerText = file.name.substring(0, 10) + '..';
+                const clipElem = document.getElementById(clipId);
+                if (clipElem) clipElem.innerText = file.name.substring(0, 10) + '..';
             }
         }
 
-        /* Drag & Position Handles in Main Timeline */
-        document.querySelectorAll('.clip-block').forEach(clip => {
+        /* Dynamic Extra Audio Tracks Addition */
+        function addNewAudioTrackInput() {
+            extraAudioCount++;
+            const trackKey = 'aud' + extraAudioCount;
+            const clipId = 'clipA' + extraAudioCount;
+            const timeId = 'timeA' + extraAudioCount;
+
+            // 1. Add File Input
+            const inputGroup = document.createElement('div');
+            inputGroup.className = 'input-group';
+            inputGroup.innerHTML = `<label>🎵 Audio ${extraAudioCount} File</label><input type="file" id="a${extraAudioCount}File" accept="audio/*">`;
+            document.getElementById('dynamicAudioInputs').appendChild(inputGroup);
+
+            // 2. Add Audio Hidden Element
+            const newAudio = document.createElement('audio');
+            newAudio.id = trackKey;
+            document.getElementById('hiddenAudioElements').appendChild(newAudio);
+
+            // 3. Initialize Track Data
+            mediaCuts[trackKey] = { start: 0, end: 60, offset: 0 };
+
+            // 4. Add UI Track Lane
+            const trackDiv = document.createElement('div');
+            trackDiv.className = 'track';
+            trackDiv.innerHTML = `
+                <div class="track-header">
+                    <span class="track-title">🎵 Audio ${extraAudioCount} Track</span>
+                    <div>
+                        <button class="edit-track-btn audio-btn" onclick="openMediaTrimmer('${trackKey}', 'Audio ${extraAudioCount}', 'audio')">✂️ Trim Audio</button>
+                        <span class="time-badge" id="${timeId}">Start: 0.0s</span>
+                    </div>
+                </div>
+                <div class="track-lane">
+                    <div class="clip-block audio" id="${clipId}" style="left:0px; width:50%;">Audio ${extraAudioCount}</div>
+                </div>
+            `;
+            document.getElementById('dynamicAudioTracks').appendChild(trackDiv);
+
+            // Bind Event Listeners
+            const clipBlock = document.getElementById(clipId);
+            makeDraggableClip(clipBlock);
+
+            document.getElementById(`a${extraAudioCount}File`).addEventListener('change', (e) => {
+                loadMedia(e, newAudio, clipId, trackKey);
+            });
+        }
+
+        /* Drag & Position Handles in Timeline */
+        function makeDraggableClip(clip) {
             clip.addEventListener('touchstart', handleTouchStart, { passive: false });
             clip.addEventListener('mousedown', handleMouseDown);
+        }
+
+        document.querySelectorAll('.clip-block').forEach(clip => {
+            makeDraggableClip(clip);
         });
 
         function updateTrackTimeBadge(clipId, leftPx, maxPx) {
@@ -418,14 +488,25 @@
         function togglePlay() {
             getAudioContext();
             isPlaying = !isPlaying;
+            
+            // Collect all tracks dynamically
+            const allAudios = Array.from(document.querySelectorAll('audio'));
+            
             if (isPlaying) {
                 if (vid1.src) { vid1.currentTime = mediaCuts.vid1.start; vid1.play(); }
                 if (vid2.src) { vid2.currentTime = mediaCuts.vid2.start; vid2.play(); }
-                if (aud1.src) { aud1.currentTime = mediaCuts.aud1.start; aud1.play(); }
-                if (aud2.src) { aud2.currentTime = mediaCuts.aud2.start; aud2.play(); }
+
+                allAudios.forEach(aud => {
+                    if (aud.src && mediaCuts[aud.id]) {
+                        aud.currentTime = mediaCuts[aud.id].start;
+                        aud.play();
+                    }
+                });
+
                 renderLoop();
             } else {
-                vid1.pause(); vid2.pause(); aud1.pause(); aud2.pause();
+                vid1.pause(); vid2.pause();
+                allAudios.forEach(aud => aud.pause());
             }
         }
 
@@ -466,7 +547,10 @@
 
         /* REAL EXPORT & MOBILE SAVE FUNCTIONALITY */
         function exportMixAndDownload() {
-            if (!vid1.src && !vid2.src && !aud1.src && !aud2.src) {
+            const allAudios = Array.from(document.querySelectorAll('audio'));
+            const hasAudio = allAudios.some(a => a.src);
+            
+            if (!vid1.src && !vid2.src && !hasAudio) {
                 alert("Pehle kripya koi Video ya Audio file select karein!");
                 return;
             }
@@ -477,7 +561,8 @@
             const stream = canvas.captureStream(30);
             const dest = audioCtx.createMediaStreamDestination();
 
-            [aud1, aud2, vid1, vid2].forEach(media => {
+            // Connect videos and all audio tracks dynamically to destination stream
+            [vid1, vid2, ...allAudios].forEach(media => {
                 if (media.src) {
                     try {
                         const source = audioCtx.createMediaElementSource(media);
@@ -544,7 +629,7 @@
             activeElement = document.getElementById(elementId);
             mediaType = type;
 
-            if (!activeElement.src) {
+            if (!activeElement || !activeElement.src) {
                 alert(`Pehle kripya ${title} file upload karein!`);
                 return;
             }
