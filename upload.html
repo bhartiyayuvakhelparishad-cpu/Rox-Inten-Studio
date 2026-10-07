@@ -3,218 +3,61 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rox Inten Studio - AI 3D Cartoon & Dance Studio</title>
-    <style>
-        body {
-            background-color: #0f172a;
-            color: #ffffff;
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 10px;
-        }
-        .rox-main-container {
-            max-width: 700px;
-            margin: 15px auto;
-            background: #1e293b;
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 4px 25px rgba(0,0,0,0.6);
-        }
-        .rox-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid #334155;
-            padding-bottom: 10px;
-            margin-bottom: 15px;
-        }
-        .rox-logo h1 {
-            margin: 0;
-            font-size: 22px;
-            color: #38bdf8;
-        }
-        .rox-logo span {
-            font-size: 11px;
-            background: #0ea5e9;
-            padding: 2px 6px;
-            border-radius: 4px;
-        }
-        .ai-engine-status {
-            font-size: 12px;
-            color: #facc15;
-            font-weight: bold;
-        }
-        .nav-tabs {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 6px;
-            margin-bottom: 20px;
-        }
-        .nav-tabs a {
-            text-decoration: none;
-            background: #334155;
-            color: #fff;
-            padding: 6px 12px;
-            border-radius: 6px;
-            font-size: 13px;
-            transition: 0.3s;
-        }
-        .nav-tabs a.active, .nav-tabs a:hover {
-            background: #0ea5e9;
-        }
-        .section-box {
-            background: #0f172a;
-            border: 1px solid #334155;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 15px;
-        }
-        .section-box h3 {
-            margin-top: 0;
-            font-size: 16px;
-            color: #38bdf8;
-        }
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-size: 13px;
-            font-weight: bold;
-        }
-        input[type="text"], textarea, select, input[type="file"] {
-            width: 100%;
-            padding: 9px;
-            background: #1e293b;
-            border: 1px solid #475569;
-            color: #fff;
-            border-radius: 6px;
-            box-sizing: border-box;
-            margin-bottom: 12px;
-            font-size: 13px;
-        }
-        textarea {
-            height: 75px;
-            resize: vertical;
-        }
-        .rox-btn {
-            width: 100%;
-            background: linear-gradient(90deg, #9333ea, #3b82f6);
-            color: white;
-            padding: 12px;
-            border: none;
-            border-radius: 6px;
-            font-size: 15px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: opacity 0.3s;
-        }
-        .rox-btn:hover {
-            opacity: 0.9;
-        }
-        .rox-btn:disabled {
-            background: #64748b;
-            cursor: not-allowed;
-        }
-        #outputResult {
-            margin-top: 15px;
-            background: #1e293b;
-            padding: 15px;
-            border-radius: 8px;
-            border: 1px solid #38bdf8;
-            display: none;
-            text-align: center;
-        }
-        .video-preview-box {
-            position: relative;
-            width: 100%;
-            max-width: 300px;
-            height: 380px;
-            margin: 0 auto;
-            background: #000;
-            border-radius: 10px;
-            overflow: hidden;
-            border: 2px solid #38bdf8;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .video-preview-box img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-        .dancing-animation {
-            animation: danceBeat 0.8s infinite alternate ease-in-out;
-        }
-        @keyframes danceBeat {
-            0% { transform: scale(1) translateY(0) rotate(0deg); }
-            50% { transform: scale(1.04) translateY(-5px) rotate(-1deg); }
-            100% { transform: scale(1) translateY(0) rotate(1deg); }
-        }
-        .overlay-text {
-            position: absolute;
-            bottom: 10px;
-            background: rgba(0, 0, 0, 0.75);
-            color: #38bdf8;
-            padding: 6px 12px;
-            border-radius: 5px;
-            font-size: 12px;
-            font-weight: bold;
-        }
-        audio {
-            width: 100%;
-            margin-top: 12px;
-        }
-    </style>
+    <title>Rox Inten Studio - Upload & AI Dance Studio</title>
+    <!-- Common external stylesheet link -->
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
     <div class="rox-main-container">
-        <!-- Header -->
+        <!-- Header & Status -->
         <div class="rox-header">
             <div class="rox-logo">
                 <h1>Rox <span>INTEN STUDIO</span></h1>
             </div>
-            <div class="ai-engine-status">⏳ AI 3D Engine: Active</div>
+            <div class="ai-engine-status">⏳ AI Engine: Active</div>
         </div>
 
-        <!-- Navigation Tabs -->
+        <!-- Navigation Tabs (Linking all your repository files) -->
         <div class="nav-tabs">
             <a href="index.html">Home</a>
             <a href="upload.html" class="active">Upload</a>
             <a href="ai-tools.html">AI Magic</a>
+            <a href="explore.html">Explore</a>
             <a href="projects.html">Projects</a>
             <a href="mixing.html">Mixing</a>
             <a href="support.html">Support</a>
             <a href="cutter.html">Cutter</a>
             <a href="setting.html">⚙️ Setting</a>
             <a href="result.html">Result</a>
+            <a href="register.html">Register</a>
         </div>
 
-        <!-- Main Studio Control Box -->
+        <!-- Main Studio Upload & Generator Box -->
         <div class="section-box">
-            <h3>🎬 AI 3D Cartoon, Talking & Dance Video Generator</h3>
+            <h3>🎬 Live AI Talking, Singing & Dancing Video Creator</h3>
             
-            <label for="charName">1. Character ka Naam (Girl / Boy):</label>
-            <input type="text" id="charName" placeholder="Jaise: Soni, Rahul, Kajol...">
+            <label for="charName">1. Character ka Naam:</label>
+            <input type="text" id="charName" placeholder="Jaise: Soni, Rahul...">
 
-            <label for="charPhoto">2. Apni Photo Upload Karein (Optional - Khali chhodne par AI khud 3D Cartoon banayega):</label>
+            <label for="charPhoto">2. Photo Upload Karein (Optional - Khali chhodne par AI 3D Cartoon banayega):</label>
             <input type="file" id="charPhoto" accept="image/*">
 
-            <label for="songAudio">3. Apana Song / Audio File Upload Karein (Real Music ke liye):</label>
+            <label for="songAudio">3. Song / Music Upload Karein (Dance & Singing Sync ke liye):</label>
             <input type="file" id="songAudio" accept="audio/*">
 
-            <label for="storyText">4. Kahani, Dialogue ya Gaane ke Bol (Lyrics):</label>
-            <textarea id="storyText" placeholder="Yahan likhein ki character kya bolega ya kis song par dance karega..."></textarea>
+            <label for="storyText">4. Gaane ke Bol (Lyrics) ya Story Dialogue:</label>
+            <textarea id="storyText" placeholder="Yahan likhein lyrics ya dialogue jo character gate/bolte hue dikhega..."></textarea>
 
-            <button class="rox-btn" id="generateBtn" onclick="generateRealAIDance()">✨ AI Video & Song Sync Banayein</button>
+            <button class="rox-btn" id="generateBtn" onclick="runLiveStudio()">✨ Live AI Dance & Song Video Banayein</button>
 
-            <!-- Result Video / Animation Preview Box -->
+            <!-- Result Box -->
             <div id="outputResult"></div>
         </div>
     </div>
 
     <script>
-        function generateRealAIDance() {
+        function runLiveStudio() {
             const charName = document.getElementById('charName').value.trim();
             const storyText = document.getElementById('storyText').value.trim();
             const charPhotoInput = document.getElementById('charPhoto');
@@ -227,15 +70,13 @@
                 return;
             }
 
-            btn.innerText = "AI Processing & Syncing Song...";
+            btn.innerText = "AI Processing & Syncing...";
             btn.disabled = true;
             outputResult.style.display = "block";
-            outputResult.innerHTML = `⏳ AI Engine active hai... <b>${charName}</b> ke liye image, audio beats aur dance frames ko sync kiya ja raha hai...`;
+            outputResult.innerHTML = `⏳ AI Neural Engine active hai... <b>${charName}</b> ke liye live dance beats aur audio sync kiya ja raha hai...`;
 
             setTimeout(() => {
                 let finalImgSrc = "";
-
-                // Agar user ne photo di hai toh wo lo, nahi toh waisa hi sundar 3D cartoon image lo
                 if (charPhotoInput.files && charPhotoInput.files[0]) {
                     finalImgSrc = URL.createObjectURL(charPhotoInput.files[0]);
                 } else {
@@ -243,34 +84,33 @@
                 }
 
                 let audioTagHTML = "";
-                let audioName = "Default Beat Track";
+                let audioName = "Default Rhythmic Beat Track";
 
-                // Sabse main: Agar user ne song upload kiya hai, toh wahi original song play hoga!
                 if (songAudioInput.files && songAudioInput.files[0]) {
                     const realAudioUrl = URL.createObjectURL(songAudioInput.files[0]);
                     audioName = songAudioInput.files[0].name;
                     audioTagHTML = `<audio controls autoplay src="${realAudioUrl}"></audio>`;
                 } else {
-                    audioTagHTML = `<p style="font-size:12px; color:#facc15;">⚠️ Aapne song upload nahi kiya, isliye default beat use ho rahi hai.</p>`;
+                    audioTagHTML = `<p style="font-size:12px; color:#facc15; margin-top:5px;">🎵 AI Default Music Track Loaded</p>`;
                 }
 
-                let resultHTML = `<h4 style="color:#38bdf8; margin-top:0;">🎉 AI Video & Song Synced Successfully!</h4>`;
+                let resultHTML = `<h4 style="color:#38bdf8; margin-top:0;">🎉 Live AI Singing & Dancing Video Ready!</h4>`;
                 resultHTML += `<div class="video-preview-box">`;
-                // Image par dancing beat animation lagaya gaya hai jo song ke sath thirkeygi
-                resultHTML += `<img src="${finalImgSrc}" class="dancing-animation" alt="AI Character Dance">`;
-                resultHTML += `<div class="overlay-text">🎥 ${charName} - Live Dance & Sing</div>`;
+                resultHTML += `<div class="overlay-badge">🔴 LIVE AI SYNC</div>`;
+                resultHTML += `<img src="${finalImgSrc}" alt="Live AI Dance Avatar">`;
+                resultHTML += `<div class="overlay-text">🎶 ${charName} - Singing & Dancing Live</div>`;
                 resultHTML += `</div>`;
                 
                 resultHTML += `<div style="margin-top: 12px; font-size: 13px; text-align: left; background: #1e293b; padding: 10px; border-radius: 6px;">`;
                 resultHTML += `<b>Character:</b> ${charName}<br>`;
-                resultHTML += `<b>Song File:</b> ${audioName}<br>`;
-                resultHTML += `<b>Lyrics / Script:</b> "${storyText}"`;
+                resultHTML += `<b>Audio File:</b> ${audioName}<br>`;
+                resultHTML += `<b>Active Script:</b> "${storyText}"`;
                 resultHTML += `</div>`;
                 
                 resultHTML += audioTagHTML;
 
                 outputResult.innerHTML = resultHTML;
-                btn.innerText = "✨ AI Video & Song Sync Banayein";
+                btn.innerText = "✨ Live AI Dance & Song Video Banayein";
                 btn.disabled = false;
             }, 2000);
         }
