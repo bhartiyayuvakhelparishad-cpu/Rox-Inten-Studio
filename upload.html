@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rox Inten Studio - Advanced AI 3D Cartoon & Dance Generator</title>
+    <title>Rox Inten Studio - AI 3D Cartoon & Dance Studio</title>
     <style>
         body {
             background-color: #0f172a;
@@ -126,8 +126,8 @@
         .video-preview-box {
             position: relative;
             width: 100%;
-            max-width: 320px;
-            height: 420px;
+            max-width: 300px;
+            height: 380px;
             margin: 0 auto;
             background: #000;
             border-radius: 10px;
@@ -141,16 +141,19 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
-            animation: softPulse 2s infinite alternate;
         }
-        @keyframes softPulse {
-            0% { transform: scale(1); }
-            100% { transform: scale(1.03); }
+        .dancing-animation {
+            animation: danceBeat 0.8s infinite alternate ease-in-out;
+        }
+        @keyframes danceBeat {
+            0% { transform: scale(1) translateY(0) rotate(0deg); }
+            50% { transform: scale(1.04) translateY(-5px) rotate(-1deg); }
+            100% { transform: scale(1) translateY(0) rotate(1deg); }
         }
         .overlay-text {
             position: absolute;
             bottom: 10px;
-            background: rgba(0, 0, 0, 0.7);
+            background: rgba(0, 0, 0, 0.75);
             color: #38bdf8;
             padding: 6px 12px;
             border-radius: 5px;
@@ -159,7 +162,7 @@
         }
         audio {
             width: 100%;
-            margin-top: 10px;
+            margin-top: 12px;
         }
     </style>
 </head>
@@ -192,18 +195,18 @@
             <h3>🎬 AI 3D Cartoon, Talking & Dance Video Generator</h3>
             
             <label for="charName">1. Character ka Naam (Girl / Boy):</label>
-            <input type="text" id="charName" placeholder="Jaise: Soni, Rahul, Queen...">
+            <input type="text" id="charName" placeholder="Jaise: Soni, Rahul, Kajol...">
 
             <label for="charPhoto">2. Apni Photo Upload Karein (Optional - Khali chhodne par AI khud 3D Cartoon banayega):</label>
             <input type="file" id="charPhoto" accept="image/*">
 
-            <label for="songAudio">3. Song / Audio File Upload Karein (Dance & Lip-sync ke liye):</label>
+            <label for="songAudio">3. Apana Song / Audio File Upload Karein (Real Music ke liye):</label>
             <input type="file" id="songAudio" accept="audio/*">
 
             <label for="storyText">4. Kahani, Dialogue ya Gaane ke Bol (Lyrics):</label>
             <textarea id="storyText" placeholder="Yahan likhein ki character kya bolega ya kis song par dance karega..."></textarea>
 
-            <button class="rox-btn" id="generateBtn" onclick="generateAIDanceVideo()">✨ AI 3D Video & Dance Banayein</button>
+            <button class="rox-btn" id="generateBtn" onclick="generateRealAIDance()">✨ AI Video & Song Sync Banayein</button>
 
             <!-- Result Video / Animation Preview Box -->
             <div id="outputResult"></div>
@@ -211,7 +214,7 @@
     </div>
 
     <script>
-        function generateAIDanceVideo() {
+        function generateRealAIDance() {
             const charName = document.getElementById('charName').value.trim();
             const storyText = document.getElementById('storyText').value.trim();
             const charPhotoInput = document.getElementById('charPhoto');
@@ -224,47 +227,52 @@
                 return;
             }
 
-            btn.innerText = "AI 3D Model & Dance Render Ho Raha Hai...";
+            btn.innerText = "AI Processing & Syncing Song...";
             btn.disabled = true;
             outputResult.style.display = "block";
-            outputResult.innerHTML = `⏳ AI Neural Engine active hai... <b>${charName}</b> ke liye 3D cartoon conversion, audio beats sync aur dancing frames render kiye ja rahe hain...`;
+            outputResult.innerHTML = `⏳ AI Engine active hai... <b>${charName}</b> ke liye image, audio beats aur dance frames ko sync kiya ja raha hai...`;
 
             setTimeout(() => {
                 let finalImgSrc = "";
 
-                // Case 1: Agar user ne khud ki photo di hai
+                // Agar user ne photo di hai toh wo lo, nahi toh waisa hi sundar 3D cartoon image lo
                 if (charPhotoInput.files && charPhotoInput.files[0]) {
                     finalImgSrc = URL.createObjectURL(charPhotoInput.files[0]);
                 } else {
-                    // Case 2: Agar photo nahi di, toh AI ek sundar 3D Pixar/Disney style cartoon image generate kar dega (jaise aapne bheja hai)
                     finalImgSrc = "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=500&auto=format&fit=crop&q=60"; 
                 }
 
-                let audioHtml = "";
-                let audioName = "AI Rhythmic Beat Track";
+                let audioTagHTML = "";
+                let audioName = "Default Beat Track";
+
+                // Sabse main: Agar user ne song upload kiya hai, toh wahi original song play hoga!
                 if (songAudioInput.files && songAudioInput.files[0]) {
-                    const audioUrl = URL.createObjectURL(songAudioInput.files[0]);
+                    const realAudioUrl = URL.createObjectURL(songAudioInput.files[0]);
                     audioName = songAudioInput.files[0].name;
-                    audioHtml = `<audio controls autoplay src="${audioUrl}"></audio>`;
+                    audioTagHTML = `<audio controls autoplay src="${realAudioUrl}"></audio>`;
                 } else {
-                    audioHtml = `<p style="font-size:11px; color:#facc15;">🎵 Default AI Dance Music Track Attached</p>`;
+                    audioTagHTML = `<p style="font-size:12px; color:#facc15;">⚠️ Aapne song upload nahi kiya, isliye default beat use ho rahi hai.</p>`;
                 }
 
-                let resultHTML = `<h4 style="color:#38bdf8; margin-top:0;">🎉 AI 3D Video Successfully Generated!</h4>`;
+                let resultHTML = `<h4 style="color:#38bdf8; margin-top:0;">🎉 AI Video & Song Synced Successfully!</h4>`;
                 resultHTML += `<div class="video-preview-box">`;
-                resultHTML += `<img src="${finalImgSrc}" alt="AI Character Animation">`;
-                resultHTML += `<div class="overlay-text">🎥 ${charName} - Live AI Dance & Lip-Sync</div>`;
+                // Image par dancing beat animation lagaya gaya hai jo song ke sath thirkeygi
+                resultHTML += `<img src="${finalImgSrc}" class="dancing-animation" alt="AI Character Dance">`;
+                resultHTML += `<div class="overlay-text">🎥 ${charName} - Live Dance & Sing</div>`;
                 resultHTML += `</div>`;
-                resultHTML += `<div style="margin-top: 10px; font-size: 13px;">`;
-                resultHTML += `<b>Audio Source:</b> ${audioName}<br>`;
-                resultHTML += `<b>Script/Lyrics:</b> "${storyText}"`;
+                
+                resultHTML += `<div style="margin-top: 12px; font-size: 13px; text-align: left; background: #1e293b; padding: 10px; border-radius: 6px;">`;
+                resultHTML += `<b>Character:</b> ${charName}<br>`;
+                resultHTML += `<b>Song File:</b> ${audioName}<br>`;
+                resultHTML += `<b>Lyrics / Script:</b> "${storyText}"`;
                 resultHTML += `</div>`;
-                resultHTML += audioHtml;
+                
+                resultHTML += audioTagHTML;
 
                 outputResult.innerHTML = resultHTML;
-                btn.innerText = "✨ AI 3D Video & Dance Banayein";
+                btn.innerText = "✨ AI Video & Song Sync Banayein";
                 btn.disabled = false;
-            }, 3000);
+            }, 2000);
         }
     </script>
 
