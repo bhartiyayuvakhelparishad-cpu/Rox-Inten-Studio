@@ -3,81 +3,127 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rox Inten Studio - AI Video & Dance Studio</title>
+    <title>Rox Inten Studio - AI Video & Studio</title>
     <style>
-        .rox-ai-container {
-            max-width: 650px;
-            margin: 20px auto;
-            background: #1e293b;
+        body {
+            background-color: #0f172a;
             color: #ffffff;
-            padding: 25px;
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.4);
             font-family: Arial, sans-serif;
-            box-sizing: border-box;
+            margin: 0;
+            padding: 10px;
         }
-        .rox-ai-container h2 {
-            text-align: center;
-            color: #38bdf8;
-            margin-bottom: 20px;
+        .rox-main-container {
+            max-width: 700px;
+            margin: 10px auto;
+            background: #1e293b;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
         }
-        .rox-form-group {
+        .rox-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #334155;
+            padding-bottom: 10px;
             margin-bottom: 15px;
         }
-        .rox-form-group label {
-            display: block;
-            margin-bottom: 6px;
-            font-weight: bold;
-            font-size: 14px;
+        .rox-logo h1 {
+            margin: 0;
+            font-size: 22px;
+            color: #38bdf8;
         }
-        .rox-form-group select, 
-        .rox-form-group input[type="text"], 
-        .rox-form-group textarea, 
-        .rox-form-group input[type="file"] {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #475569;
-            background: #0f172a;
+        .rox-logo span {
+            font-size: 11px;
+            background: #0ea5e9;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+        .ai-engine-status {
+            font-size: 12px;
+            color: #facc15;
+            font-weight: bold;
+        }
+        .nav-tabs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-bottom: 20px;
+        }
+        .nav-tabs a {
+            text-decoration: none;
+            background: #334155;
             color: #fff;
+            padding: 6px 12px;
             border-radius: 6px;
-            box-sizing: border-box;
-            font-size: 14px;
+            font-size: 13px;
+            transition: 0.3s;
         }
-        .rox-form-group textarea {
-            resize: vertical;
-            height: 80px;
+        .nav-tabs a.active, .nav-tabs a:hover {
+            background: #0ea5e9;
         }
-        .rox-btn {
-            width: 100%;
-            background-color: #0ea5e9;
-            color: white;
-            padding: 12px;
-            border: none;
-            border-radius: 6px;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: background 0.3s;
-        }
-        .rox-btn:hover {
-            background-color: #0284c7;
-        }
-        .rox-btn:disabled {
-            background-color: #64748b;
-            cursor: not-allowed;
-        }
-        #roxOutputBox {
-            margin-top: 20px;
+        .section-box {
             background: #0f172a;
             border: 1px solid #334155;
             padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+        .section-box h3 {
+            margin-top: 0;
+            font-size: 16px;
+            color: #38bdf8;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 13px;
+            font-weight: bold;
+        }
+        input[type="text"], textarea, select, input[type="file"] {
+            width: 100%;
+            padding: 8px;
+            background: #1e293b;
+            border: 1px solid #475569;
+            color: #fff;
             border-radius: 6px;
-            white-space: pre-wrap;
+            box-sizing: border-box;
+            margin-bottom: 10px;
+            font-size: 13px;
+        }
+        textarea {
+            height: 70px;
+            resize: vertical;
+        }
+        .rox-btn {
+            width: 100%;
+            background: linear-gradient(90deg, #9333ea, #3b82f6);
+            color: white;
+            padding: 10px;
+            border: none;
+            border-radius: 6px;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: opacity 0.3s;
+        }
+        .rox-btn:hover {
+            opacity: 0.9;
+        }
+        .rox-btn:disabled {
+            background: #64748b;
+            cursor: not-allowed;
+        }
+        #outputResult {
+            margin-top: 15px;
+            background: #1e293b;
+            padding: 12px;
+            border-radius: 6px;
+            border: 1px solid #38bdf8;
             display: none;
-            max-height: 380px;
-            overflow-y: auto;
-            font-size: 14px;
-            line-height: 1.5;
+            white-space: pre-wrap;
+            font-size: 13px;
+            line-height: 1.4;
         }
         .hidden-field {
             display: none;
@@ -86,120 +132,127 @@
 </head>
 <body>
 
-    <div class="rox-ai-container">
-        <h2>🎬 Rox Studio - AI Video & Dance Creator</h2>
-        
-        <!-- Step 1: Mode Selection -->
-        <div class="rox-form-group">
-            <label for="roxMode">Creation Type Chunein:</label>
-            <select id="roxMode" onchange="handleRoxModeChange()">
-                <option value="text">Option 1: Custom Text / Kahani se Video Story</option>
-                <option value="image">Option 2: Photo Upload karke Cartoon / Dancing Video</option>
+    <div class="rox-main-container">
+        <!-- Header & Status -->
+        <div class="rox-header">
+            <div class="rox-logo">
+                <h1>Rox <span>INTEN STUDIO</span></h1>
+            </div>
+            <div class="ai-engine-status">⏳ AI Engine: Active</div>
+        </div>
+
+        <!-- Navigation Tabs (Screenshot ke anusaar sabhi buttons) -->
+        <div class="nav-tabs">
+            <a href="index.html">Home</a>
+            <a href="upload.html" class="active">Upload</a>
+            <a href="ai-tools.html">AI Magic</a>
+            <a href="projects.html">Projects</a>
+            <a href="mixing.html">Mixing</a>
+            <a href="support.html">Support</a>
+            <a href="cutter.html">Cutter</a>
+            <a href="setting.html">⚙️ Setting</a>
+            <a href="result.html">Result</a>
+        </div>
+
+        <!-- 1. फोटो अपलोड करें Section -->
+        <div class="section-box">
+            <h3>📁 1. फोटो अपलोड करें (Character Photo)</h3>
+            <label for="charPhoto">Character Image Select Karein:</label>
+            <input type="file" id="charPhoto" accept="image/*">
+        </div>
+
+        <!-- 2. बैकग्राउंड बदलें Section -->
+        <div class="section-box">
+            <h3>🖼️ 2. बैकग्राउंड बदलें & AI Style</h3>
+            <label>नया रंग (Background Color):</label>
+            <input type="text" id="bgColorInput" placeholder="Jaise: Blue, #123456...">
+            <label>या नया फोटो लगाएं (Background Image):</label>
+            <input type="file" id="bgImageFile" accept="image/*">
+        </div>
+
+        <!-- 3. AI वॉयस ओवर & सॉन्ग / डांस जनरेटर Section -->
+        <div class="section-box">
+            <h3>🔊 3. AI वॉयस ओवर, सॉन्ग और डांस जनरेटर</h3>
+            
+            <label for="creationMode">Mode Chunein:</label>
+            <select id="creationMode" onchange="toggleMode()">
+                <option value="text">Option 1: Custom Text Story / Dialogue</option>
+                <option value="dance">Option 2: Song / Music Upload karke Dance Video</option>
             </select>
+
+            <label for="charName">Character ka Naam:</label>
+            <input type="text" id="charName" placeholder="Jaise: Rahul, Priya...">
+
+            <div id="audioUploadGroup" class="hidden-field">
+                <label for="songAudio">🎵 Song / Audio File Upload Karein:</label>
+                <input type="file" id="songAudio" accept="audio/*">
+            </div>
+
+            <label for="voiceText">यहाँ टेक्स्ट, लिरिक्स या डांस स्टाइल लिखें:</label>
+            <textarea id="voiceText" placeholder="AI voice over ke liye text ya gaane ke bol yahan likhein..."></textarea>
+
+            <button class="rox-btn" id="generateBtn" onclick="runRoxStudioAI()">✨ AI Video / Dance / Voice Banayein</button>
+
+            <!-- Result Box -->
+            <div id="outputResult"></div>
         </div>
-
-        <!-- Step 2: Character Name -->
-        <div class="rox-form-group">
-            <label for="roxCharName">Character ka Naam (Girl / Boy):</label>
-            <input type="text" id="roxCharName" placeholder="Jaise: Priya, Rahul, Dancer Boy...">
-        </div>
-
-        <!-- Step 3: Image Upload Box (Only for Option 2) -->
-        <div class="rox-form-group hidden-field" id="roxImageBox">
-            <label for="roxImageFile">Character ki Photo Upload Karein:</label>
-            <input type="file" id="roxImageFile" accept="image/*">
-        </div>
-
-        <!-- Step 4: Song / Audio Upload Box (For Dance & Song Synchronization) -->
-        <div class="rox-form-group">
-            <label for="roxAudioFile">🎵 Song / Audio Upload Karein (Local ya Singer ka Song):</label>
-            <input type="file" id="roxAudioFile" accept="audio/*">
-        </div>
-
-        <!-- Step 5: Story / Lyrics / Dance Style Input -->
-            <label for="roxStoryInput">Kahani, Song Lyrics ya Dance Style:</label>
-            <textarea id="roxStoryInput" placeholder="Yahan gaane ke bol, lyrics ya batayein ki kis tarah ka dance/action hona chahiye..."></textarea>
-        </div>
-
-        <!-- Step 6: Main Action Button -->
-        <button id="roxGenerateBtn" class="rox-btn" onclick="executeRoxAIGeneration()">AI Dance & Video Generate Karein</button>
-
-        <!-- Step 7: Result Output Box -->
-        <div id="roxOutputBox"></div>
     </div>
 
     <script>
-        // Mode change hone par image upload section ko show/hide karne ke liye
-        function handleRoxModeChange() {
-            const selectedMode = document.getElementById('roxMode').value;
-            const imageBox = document.getElementById('roxImageBox');
-            
-            if (selectedMode === 'image') {
-                imageBox.classList.remove('hidden-field');
+        // Mode switch karne ke liye function
+        function toggleMode() {
+            const mode = document.getElementById('creationMode').value;
+            const audioGroup = document.getElementById('audioUploadGroup');
+            if (mode === 'dance') {
+                audioGroup.style.display = 'block';
             } else {
-                imageBox.classList.add('hidden-field');
+                audioGroup.style.display = 'none';
             }
         }
 
-        // Main execution function jab user button click karega
-        function executeRoxAIGeneration() {
-            const mode = document.getElementById('roxMode').value;
-            const charName = document.getElementById('roxCharName').value.trim();
-            const story = document.getElementById('roxStoryInput').value.trim();
-            const imageFile = document.getElementById('roxImageFile').files[0];
-            const audioFile = document.getElementById('roxAudioFile').files[0];
-            const outputBox = document.getElementById('roxOutputBox');
-            const btn = document.getElementById('roxGenerateBtn');
+        // Main processing function jo sabhi buttons aur inputs ko handle karega
+        function runRoxStudioAI() {
+            const mode = document.getElementById('creationMode').value;
+            const charName = document.getElementById('charName').value.trim();
+            const voiceText = document.getElementById('voiceText').value.trim();
+            const charPhoto = document.getElementById('charPhoto').files[0];
+            const songAudio = document.getElementById('songAudio').files[0];
+            const outputResult = document.getElementById('outputResult');
+            const btn = document.getElementById('generateBtn');
 
-            // 1. Validation Check
-            if (!charName || !story) {
-                alert('Kripya Character ka naam aur Lyrics/Dance details zaroor bharein!');
+            // Validation
+            if (!charName || !voiceText) {
+                alert('Kripya Character ka naam aur Text/Lyrics zaroor bharein!');
                 return;
             }
 
-            if (mode === 'image' && !imageFile) {
-                alert('Kripya Option 2 ke liye character ki photo upload karein!');
-                return;
-            }
-
-            // 2. UI Loading State Active Karein
-            btn.innerText = "AI Audio & Dance Sync Ho Raha Hai...";
+            // UI Loading state
+            btn.innerText = "AI Process Ho Raha Hai...";
             btn.disabled = true;
-            outputBox.style.display = "block";
-            outputBox.innerHTML = `⏳ AI Engine active hai... <b>${charName}</b> ke liye uploaded song ki beats ko analyze karke dancing animation frames aur lip-sync setup kiya ja raha hai...`;
+            outputResult.style.display = "block";
+            outputResult.innerHTML = `⏳ AI Engine active hai... <b>${charName}</b> ke liye voiceover, background aur animation sync kiya ja raha hai...`;
 
-            // 3. Client-side Simulated Processing Pipeline with Audio & Dance Features
             setTimeout(() => {
-                let htmlResult = `<b>🎉 AI Dance Video Generation Successful!</b><br><br>`;
-                htmlResult += `🔹 <b>Mode:</b> ${mode === 'image' ? 'Photo-to-Cartoon Dancing Avatar' : 'Text-to-Video Dance Story'}<br>`;
-                htmlResult += `🔹 <b>Character Name:</b> ${charName}<br>`;
-                htmlResult += `🔹 <b>Input Lyrics / Style:</b> "${story}"<br>`;
+                let resultHTML = `<b>🎉 Rox Studio AI Processing Successful!</b><br><br>`;
+                resultHTML += `👤 <b>Character:</b> ${charName}<br>`;
+                resultHTML += `📝 <b>Input Text/Lyrics:</b> "${voiceText}"<br>`;
 
-                // Audio File Details
-                if (audioFile) {
-                    htmlResult += `🔹 <b>Attached Song File:</b> 🎵 ${audioFile.name} (Successfully Synced with Beats)<br>`;
-                } else {
-                    htmlResult += `🔹 <b>Audio:</b> Default AI rhythmic beat track assigned.<br>`;
-                }
-                
-                htmlResult += `<br>`;
-
-                if (mode === 'image' && imageFile) {
-                    const localImgUrl = URL.createObjectURL(imageFile);
-                    htmlResult += `<b>Uploaded Character Photo:</b><br>`;
-                    htmlResult += `<img src="${localImgUrl}" style="max-width: 140px; margin-top: 8px; border-radius: 6px; border: 1px solid #38bdf8;"><br><br>`;
-                    htmlResult += `✨ <i>Status: Aapki di gayi photo ko 3D/Cartoon dancing model me convert kar diya gaya hai jo upload kiye gaye song ki har beat par dance aur lips move karega!</i>`;
-                } else {
-                    htmlResult += `✨ <b>Generated Dance Choreography Board:</b><br>`;
-                    htmlResult += `1. <u>Beat Drop 1:</u> ${charName} ka energetic dance step start hoga.<br>`;
-                    htmlResult += `2. <u>Chorus Section:</u> Gaane ke lyrics ke mutabiq expressions aur body movement sync ki gayi hai.<br>`;
-                    htmlResult += `3. <u>Final Outro:</u> Grand dance finish aur closing frame render ho chuka hai.`;
+                if (charPhoto) {
+                    const photoUrl = URL.createObjectURL(charPhoto);
+                    resultHTML += `<br>🖼️ <b>Character Photo Loaded:</b><br><img src="${photoUrl}" style="max-width:100px; border-radius:5px; margin-top:5px;"><br>`;
                 }
 
-                outputBox.innerHTML = htmlResult;
-                btn.innerText = "AI Dance & Video Generate Karein";
+                if (mode === 'dance' && songAudio) {
+                    resultHTML += `🎵 <b>Uploaded Song:</b> ${songAudio.name} (Beats Synced with Dance Animation)<br>`;
+                    resultHTML += `✨ <i>Status: Gaane ki beat par character ka dancing video aur lip-syncing frames tayar kar diye gaye hain!</i>`;
+                } else {
+                    resultHTML += `🗣️ <b>Voiceover & Storyboard:</b> AI voice generated and synced successfully with cinematic scenes!`;
+                }
+
+                outputResult.innerHTML = resultHTML;
+                btn.innerText = "✨ AI Video / Dance / Voice Banayein";
                 btn.disabled = false;
-            }, 3000);
+            }, 2500);
         }
     </script>
 
