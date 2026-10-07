@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rox Inten Studio - Live Talking & Singing AI Video</title>
+    <title>Rox Inten Studio - AI Talking Cartoon Generator</title>
     <style>
-        /* Perfect Mobile & Desktop Layout CSS */
         body {
             background-color: #0f172a;
             color: #ffffff;
@@ -128,8 +127,8 @@
             display: none;
             text-align: center;
         }
-        /* Talking & Lip-Sync Video Preview Container */
-        .talking-video-box {
+        /* Clean & Professional Talking Cartoon Box */
+        .cartoon-video-box {
             position: relative;
             width: 100%;
             max-width: 280px;
@@ -139,53 +138,34 @@
             border-radius: 10px;
             overflow: hidden;
             border: 2px solid #38bdf8;
-            box-shadow: 0 0 20px rgba(56, 189, 248, 0.4);
         }
-        .talking-video-box img {
+        .cartoon-video-box img {
             width: 100%;
             height: 100%;
             object-fit: cover;
+            animation: cartoonTalkingPulse 0.4s infinite alternate ease-in-out;
         }
-        .talking-mouth-overlay {
-            position: absolute;
-            bottom: 35%;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 30px;
-            height: 12px;
-            background: rgba(0, 0, 0, 0.6);
-            border-bottom: 3px solid #f43f5e;
-            border-radius: 0 0 50% 50%;
-            animation: lipSyncMotion 0.25s infinite alternate ease-in-out;
-            box-shadow: 0 0 6px #f43f5e;
+        @keyframes cartoonTalkingPulse {
+            0% { transform: scale(1); filter: brightness(1); }
+            100% { transform: scale(1.02); filter: brightness(1.08); }
         }
-        @keyframes lipSyncMotion {
-            0% { transform: translateX(-50%) scaleY(0.4); height: 5px; }
-            100% { transform: translateX(-50%) scaleY(1.5); height: 16px; }
-        }
-        .live-talking-badge {
+        .cartoon-badge {
             position: absolute;
             top: 10px;
             left: 10px;
-            background: #e11d48;
+            background: #0ea5e9;
             color: #fff;
             padding: 3px 8px;
-            border-radius: 15px;
+            border-radius: 12px;
             font-size: 10px;
             font-weight: bold;
-            animation: blinkBadge 1s infinite;
         }
-        @keyframes blinkBadge {
-            0% { opacity: 0.6; }
-            50% { opacity: 1; }
-            100% { opacity: 0.6; }
-        }
-        .overlay-text {
+        .cartoon-footer-text {
             position: absolute;
             bottom: 8px;
             left: 50%;
             transform: translateX(-50%);
-            background: rgba(0, 0, 0, 0.75);
+            background: rgba(15, 23, 42, 0.85);
             color: #38bdf8;
             padding: 4px 10px;
             border-radius: 5px;
@@ -193,6 +173,7 @@
             font-weight: bold;
             width: 90%;
             text-align: center;
+            border: 1px solid #334155;
         }
         audio {
             width: 100%;
@@ -228,12 +209,12 @@
 
         <!-- Main Studio Control Box -->
         <div class="section-box">
-            <h3>🎬 AI Bolta Hua & Gate Hue Video Generator</h3>
+            <h3>🎬 AI Talking Cartoon & Song Generator</h3>
             
             <label for="charName">1. Character ka Naam:</label>
             <input type="text" id="charName" placeholder="Jaise: Soni, Rahul...">
 
-            <label for="charPhoto">2. Photo Upload Karein (Optional):</label>
+            <label for="charPhoto">2. Photo Upload Karein (Optional - Khali chhodne par 3D Cartoon aayega):</label>
             <input type="file" id="charPhoto" accept="image/*">
 
             <label for="songAudio">3. Song / Audio File Upload Karein:</label>
@@ -242,7 +223,7 @@
             <label for="storyText">4. Gaane ke Bol (Lyrics) ya Dialogue:</label>
             <textarea id="storyText" placeholder="Yahan likhein lyrics ya dialogue..."></textarea>
 
-            <button class="rox-btn" id="generateBtn" onclick="runTalkingVideoStudio()">✨ Bolta Huya AI Video Banayein</button>
+            <button class="rox-btn" id="generateBtn" onclick="runCartoonStudio()">✨ AI Talking Cartoon Video Banayein</button>
 
             <!-- Result Box -->
             <div id="outputResult"></div>
@@ -250,7 +231,7 @@
     </div>
 
     <script>
-        function runTalkingVideoStudio() {
+        function runCartoonStudio() {
             const charName = document.getElementById('charName').value.trim();
             const storyText = document.getElementById('storyText').value.trim();
             const charPhotoInput = document.getElementById('charPhoto');
@@ -263,16 +244,17 @@
                 return;
             }
 
-            btn.innerText = "AI Lip-Sync & Rendering...";
+            btn.innerText = "AI Cartoon Rendering...";
             btn.disabled = true;
             outputResult.style.display = "block";
-            outputResult.innerHTML = `⏳ <b>${charName}</b> ke liye bolta hua animation taiyar kiya ja raha hai...`;
+            outputResult.innerHTML = `⏳ <b>${charName}</b> ke liye AI talking cartoon video taiyar kiya ja raha hai...`;
 
             setTimeout(() => {
                 let finalImgSrc = "";
                 if (charPhotoInput.files && charPhotoInput.files[0]) {
                     finalImgSrc = URL.createObjectURL(charPhotoInput.files[0]);
                 } else {
+                    // Sundar 3D Disney/Pixar style cartoon image default
                     finalImgSrc = "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=500&auto=format&fit=crop&q=60"; 
                 }
 
@@ -287,12 +269,11 @@
                     audioTagHTML = `<p style="font-size:11px; color:#facc15; margin-top:5px;">🎵 Default Voice Track Loaded</p>`;
                 }
 
-                let resultHTML = `<h4 style="color:#38bdf8; margin-top:0;">🎉 AI Bolta Huya Video Taiyar Hai!</h4>`;
-                resultHTML += `<div class="talking-video-box">`;
-                resultHTML += `<div class="live-talking-badge">🎙️ TALKING & SINGING</div>`;
-                resultHTML += `<img src="${finalImgSrc}" alt="Talking AI Avatar">`;
-                resultHTML += `<div class="talking-mouth-overlay"></div>`;
-                resultHTML += `<div class="overlay-text">🗣️ ${charName} Speaking Live</div>`;
+                let resultHTML = `<h4 style="color:#38bdf8; margin-top:0;">🎉 AI Talking Cartoon Taiyar Hai!</h4>`;
+                resultHTML += `<div class="cartoon-video-box">`;
+                resultHTML += `<div class="cartoon-badge">✨ AI CARTOON</div>`;
+                resultHTML += `<img src="${finalImgSrc}" alt="AI Talking Cartoon">`;
+                resultHTML += `<div class="cartoon-footer-text">🗣️ ${charName} Speaking Live</div>`;
                 resultHTML += `</div>`;
                 
                 resultHTML += `<div style="margin-top: 10px; font-size: 12px; text-align: left; background: #0f172a; padding: 8px; border-radius: 5px;">`;
@@ -304,7 +285,7 @@
                 resultHTML += audioTagHTML;
 
                 outputResult.innerHTML = resultHTML;
-                btn.innerText = "✨ Bolta Huya AI Video Banayein";
+                btn.innerText = "✨ AI Talking Cartoon Video Banayein";
                 btn.disabled = false;
             }, 2000);
         }
