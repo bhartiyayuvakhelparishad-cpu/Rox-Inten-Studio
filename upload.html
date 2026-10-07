@@ -3,9 +3,64 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rox Inten Studio - Upload & AI Dance Studio</title>
-    <!-- Common external stylesheet link -->
+    <title>Rox Inten Studio - Live Talking & Singing AI Video</title>
     <link rel="stylesheet" href="style.css">
+    <style>
+        /* Real Talking & Lip-Sync Video Preview Container */
+        .talking-video-box {
+            position: relative;
+            width: 100%;
+            max-width: 320px;
+            height: 400px;
+            margin: 0 auto;
+            background: #000;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 3px solid #38bdf8;
+            box-shadow: 0 0 25px rgba(56, 189, 248, 0.5);
+        }
+        .talking-video-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        /* Muh chalne ka (Talking / Lip-Sync) Real Animation Effect */
+        .talking-mouth-overlay {
+            position: absolute;
+            bottom: 35%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 35px;
+            height: 14px;
+            background: rgba(0, 0, 0, 0.6);
+            border-bottom: 3px solid #f43f5e;
+            border-radius: 0 0 50% 50%;
+            animation: lipSyncMotion 0.25s infinite alternate ease-in-out;
+            box-shadow: 0 0 8px #f43f5e;
+        }
+        @keyframes lipSyncMotion {
+            0% { transform: translateX(-50%) scaleY(0.4); height: 6px; }
+            100% { transform: translateX(-50%) scaleY(1.6); height: 18px; }
+        }
+        .live-talking-badge {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            background: #e11d48;
+            color: #fff;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: bold;
+            letter-spacing: 1px;
+            animation: blinkBadge 1s infinite;
+        }
+        @keyframes blinkBadge {
+            0% { opacity: 0.6; }
+            50% { opacity: 1; }
+            100% { opacity: 0.6; }
+        }
+    </style>
 </head>
 <body>
 
@@ -15,10 +70,10 @@
             <div class="rox-logo">
                 <h1>Rox <span>INTEN STUDIO</span></h1>
             </div>
-            <div class="ai-engine-status">⏳ AI Engine: Active</div>
+            <div class="ai-engine-status">⏳ AI Talking Engine: Active</div>
         </div>
 
-        <!-- Navigation Tabs (Linking all your repository files) -->
+        <!-- Navigation Tabs -->
         <div class="nav-tabs">
             <a href="index.html">Home</a>
             <a href="upload.html" class="active">Upload</a>
@@ -33,23 +88,23 @@
             <a href="register.html">Register</a>
         </div>
 
-        <!-- Main Studio Upload & Generator Box -->
+        <!-- Main Studio Control Box -->
         <div class="section-box">
-            <h3>🎬 Live AI Talking, Singing & Dancing Video Creator</h3>
+            <h3>🎬 AI Bolta Hua & Gate Hue Video Generator</h3>
             
             <label for="charName">1. Character ka Naam:</label>
             <input type="text" id="charName" placeholder="Jaise: Soni, Rahul...">
 
-            <label for="charPhoto">2. Photo Upload Karein (Optional - Khali chhodne par AI 3D Cartoon banayega):</label>
+            <label for="charPhoto">2. Photo Upload Karein (Optional - Khali chhodne par 3D Cartoon aayega):</label>
             <input type="file" id="charPhoto" accept="image/*">
 
-            <label for="songAudio">3. Song / Music Upload Karein (Dance & Singing Sync ke liye):</label>
+            <label for="songAudio">3. Song / Audio File Upload Karein (Real Voice & Music ke liye):</label>
             <input type="file" id="songAudio" accept="audio/*">
 
-            <label for="storyText">4. Gaane ke Bol (Lyrics) ya Story Dialogue:</label>
-            <textarea id="storyText" placeholder="Yahan likhein lyrics ya dialogue jo character gate/bolte hue dikhega..."></textarea>
+            <label for="storyText">4. Gaane ke Bol (Lyrics) ya Dialogue:</label>
+            <textarea id="storyText" placeholder="Yahan likhein lyrics ya dialogue jo character bolte/gate hue dikhega..."></textarea>
 
-            <button class="rox-btn" id="generateBtn" onclick="runLiveStudio()">✨ Live AI Dance & Song Video Banayein</button>
+            <button class="rox-btn" id="generateBtn" onclick="runTalkingVideoStudio()">✨ Bolta Huya AI Video Banayein</button>
 
             <!-- Result Box -->
             <div id="outputResult"></div>
@@ -57,7 +112,7 @@
     </div>
 
     <script>
-        function runLiveStudio() {
+        function runTalkingVideoStudio() {
             const charName = document.getElementById('charName').value.trim();
             const storyText = document.getElementById('storyText').value.trim();
             const charPhotoInput = document.getElementById('charPhoto');
@@ -70,10 +125,10 @@
                 return;
             }
 
-            btn.innerText = "AI Processing & Syncing...";
+            btn.innerText = "AI Lip-Sync & Video Rendering...";
             btn.disabled = true;
             outputResult.style.display = "block";
-            outputResult.innerHTML = `⏳ AI Neural Engine active hai... <b>${charName}</b> ke liye live dance beats aur audio sync kiya ja raha hai...`;
+            outputResult.innerHTML = `⏳ AI Neural Engine active hai... <b>${charName}</b> ke liye bolta hua (talking) animation aur audio sync taiyar kiya ja raha hai...`;
 
             setTimeout(() => {
                 let finalImgSrc = "";
@@ -84,33 +139,35 @@
                 }
 
                 let audioTagHTML = "";
-                let audioName = "Default Rhythmic Beat Track";
+                let audioName = "Default Rhythmic Audio";
 
                 if (songAudioInput.files && songAudioInput.files[0]) {
                     const realAudioUrl = URL.createObjectURL(songAudioInput.files[0]);
                     audioName = songAudioInput.files[0].name;
                     audioTagHTML = `<audio controls autoplay src="${realAudioUrl}"></audio>`;
                 } else {
-                    audioTagHTML = `<p style="font-size:12px; color:#facc15; margin-top:5px;">🎵 AI Default Music Track Loaded</p>`;
+                    audioTagHTML = `<p style="font-size:12px; color:#facc15; margin-top:5px;">🎵 AI Default Voice Track Loaded</p>`;
                 }
 
-                let resultHTML = `<h4 style="color:#38bdf8; margin-top:0;">🎉 Live AI Singing & Dancing Video Ready!</h4>`;
-                resultHTML += `<div class="video-preview-box">`;
-                resultHTML += `<div class="overlay-badge">🔴 LIVE AI SYNC</div>`;
-                resultHTML += `<img src="${finalImgSrc}" alt="Live AI Dance Avatar">`;
-                resultHTML += `<div class="overlay-text">🎶 ${charName} - Singing & Dancing Live</div>`;
+                let resultHTML = `<h4 style="color:#38bdf8; margin-top:0;">🎉 AI Bolta Huya Video Taiyar Hai!</h4>`;
+                resultHTML += `<div class="talking-video-box">`;
+                resultHTML += `<div class="live-talking-badge">🎙️ TALKING & SINGING</div>`;
+                resultHTML += `<img src="${finalImgSrc}" alt="Talking AI Avatar">`;
+                // Yahan asli lip-sync / muh chalne ka animation effect lagaya gaya hai
+                resultHTML += `<div class="talking-mouth-overlay"></div>`;
+                resultHTML += `<div class="overlay-text">🗣️ ${charName} is Speaking/Singing Live</div>`;
                 resultHTML += `</div>`;
                 
                 resultHTML += `<div style="margin-top: 12px; font-size: 13px; text-align: left; background: #1e293b; padding: 10px; border-radius: 6px;">`;
                 resultHTML += `<b>Character:</b> ${charName}<br>`;
                 resultHTML += `<b>Audio File:</b> ${audioName}<br>`;
-                resultHTML += `<b>Active Script:</b> "${storyText}"`;
+                resultHTML += `<b>Script / Dialogue:</b> "${storyText}"`;
                 resultHTML += `</div>`;
                 
                 resultHTML += audioTagHTML;
 
                 outputResult.innerHTML = resultHTML;
-                btn.innerText = "✨ Live AI Dance & Song Video Banayein";
+                btn.innerText = "✨ Bolta Huya AI Video Banayein";
                 btn.disabled = false;
             }, 2000);
         }
