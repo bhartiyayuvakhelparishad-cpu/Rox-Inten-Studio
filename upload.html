@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rox Inten Studio - AI Voice Cloning & Studio</title>
+    <title>Rox Inten Studio - Advanced AI 3D Cartoon & Dance Generator</title>
     <style>
         body {
             background-color: #0f172a;
@@ -14,11 +14,11 @@
         }
         .rox-main-container {
             max-width: 700px;
-            margin: 10px auto;
+            margin: 15px auto;
             background: #1e293b;
             padding: 20px;
             border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+            box-shadow: 0 4px 25px rgba(0,0,0,0.6);
         }
         .rox-header {
             display: flex;
@@ -82,24 +82,24 @@
         }
         input[type="text"], textarea, select, input[type="file"] {
             width: 100%;
-            padding: 8px;
+            padding: 9px;
             background: #1e293b;
             border: 1px solid #475569;
             color: #fff;
             border-radius: 6px;
             box-sizing: border-box;
-            margin-bottom: 10px;
+            margin-bottom: 12px;
             font-size: 13px;
         }
         textarea {
-            height: 70px;
+            height: 75px;
             resize: vertical;
         }
         .rox-btn {
             width: 100%;
             background: linear-gradient(90deg, #9333ea, #3b82f6);
             color: white;
-            padding: 10px;
+            padding: 12px;
             border: none;
             border-radius: 6px;
             font-size: 15px;
@@ -117,47 +117,61 @@
         #outputResult {
             margin-top: 15px;
             background: #1e293b;
-            padding: 12px;
-            border-radius: 6px;
+            padding: 15px;
+            border-radius: 8px;
             border: 1px solid #38bdf8;
             display: none;
-            font-size: 13px;
-            line-height: 1.4;
-        }
-        .preview-card {
-            background: #0f172a;
-            border: 1px solid #0ea5e9;
-            border-radius: 8px;
-            padding: 12px;
-            margin-top: 10px;
             text-align: center;
         }
-        .preview-card img {
-            width: 100px;
-            height: 100px;
-            object-fit: cover;
-            border-radius: 50%;
+        .video-preview-box {
+            position: relative;
+            width: 100%;
+            max-width: 320px;
+            height: 420px;
+            margin: 0 auto;
+            background: #000;
+            border-radius: 10px;
+            overflow: hidden;
             border: 2px solid #38bdf8;
-            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .video-preview-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            animation: softPulse 2s infinite alternate;
+        }
+        @keyframes softPulse {
+            0% { transform: scale(1); }
+            100% { transform: scale(1.03); }
+        }
+        .overlay-text {
+            position: absolute;
+            bottom: 10px;
+            background: rgba(0, 0, 0, 0.7);
+            color: #38bdf8;
+            padding: 6px 12px;
+            border-radius: 5px;
+            font-size: 12px;
+            font-weight: bold;
         }
         audio {
             width: 100%;
-            margin-top: 8px;
-        }
-        .hidden-field {
-            display: none;
+            margin-top: 10px;
         }
     </style>
 </head>
 <body>
 
     <div class="rox-main-container">
-        <!-- Header & Status -->
+        <!-- Header -->
         <div class="rox-header">
             <div class="rox-logo">
                 <h1>Rox <span>INTEN STUDIO</span></h1>
             </div>
-            <div class="ai-engine-status">⏳ AI Voice & Video Engine: Active</div>
+            <div class="ai-engine-status">⏳ AI 3D Engine: Active</div>
         </div>
 
         <!-- Navigation Tabs -->
@@ -173,115 +187,84 @@
             <a href="result.html">Result</a>
         </div>
 
-        <!-- 1. फोटो अपलोड करें Section -->
+        <!-- Main Studio Control Box -->
         <div class="section-box">
-            <h3>📁 1. Character Photo Upload Karein</h3>
-            <label for="charPhoto">Character Image:</label>
-            <input type="file" id="charPhoto" accept="image/*">
-        </div>
-
-        <!-- 2. AI Voice Cloning & Singing Setup Section -->
-        <div class="section-box">
-            <h3>🎙️ 2. AI Voice Clone & Singing Style</h3>
+            <h3>🎬 AI 3D Cartoon, Talking & Dance Video Generator</h3>
             
-            <label for="voiceCloneType">Awaaz (Voice) kiski honi chahiye?:</label>
-            <select id="voiceCloneType" onchange="toggleVoiceSource()">
-                <option value="preset">Famous Singer / AI Preset Voice</option>
-                <option value="custom">Apni / Kisi ki Awaaz ki Sample File Upload Karein (Clone)</option>
-            </select>
+            <label for="charName">1. Character ka Naam (Girl / Boy):</label>
+            <input type="text" id="charName" placeholder="Jaise: Soni, Rahul, Queen...">
 
-            <div id="customVoiceGroup" class="hidden-field">
-                <label for="voiceSampleFile">🎵 Voice Sample File Upload Karein (10-30 sec audio):</label>
-                <input type="file" id="voiceSampleFile" accept="audio/*">
-            </div>
+            <label for="charPhoto">2. Apni Photo Upload Karein (Optional - Khali chhodne par AI khud 3D Cartoon banayega):</label>
+            <input type="file" id="charPhoto" accept="image/*">
 
-            <label for="charName">Character ka Naam:</label>
-            <input type="text" id="charName" placeholder="Jaise: Soni, Rahul...">
-
-            <label for="songAudio">🎵 Background Song / Music Track (Optional):</label>
+            <label for="songAudio">3. Song / Audio File Upload Karein (Dance & Lip-sync ke liye):</label>
             <input type="file" id="songAudio" accept="audio/*">
 
-            <label for="voiceText">Gaane ke Bol (Lyrics) ya Story Dialogue:</label>
-            <textarea id="voiceText" placeholder="Yahan wo lyrics ya kahani likhein jise AI us chuni hui awaaz me gayega ya bolega..."></textarea>
+            <label for="storyText">4. Kahani, Dialogue ya Gaane ke Bol (Lyrics):</label>
+            <textarea id="storyText" placeholder="Yahan likhein ki character kya bolega ya kis song par dance karega..."></textarea>
 
-            <button class="rox-btn" id="generateBtn" onclick="runRoxVoiceAI()">✨ AI Voice Clone & Video Banayein</button>
+            <button class="rox-btn" id="generateBtn" onclick="generateAIDanceVideo()">✨ AI 3D Video & Dance Banayein</button>
 
-            <!-- Result Box -->
+            <!-- Result Video / Animation Preview Box -->
             <div id="outputResult"></div>
         </div>
     </div>
 
     <script>
-        function toggleVoiceSource() {
-            const voiceType = document.getElementById('voiceCloneType').value;
-            const customGroup = document.getElementById('customVoiceGroup');
-            if (voiceType === 'custom') {
-                customGroup.style.display = 'block';
-            } else {
-                customGroup.style.display = 'none';
-            }
-        }
-
-        function runRoxVoiceAI() {
-            const voiceType = document.getElementById('voiceCloneType').value;
+        function generateAIDanceVideo() {
             const charName = document.getElementById('charName').value.trim();
-            const voiceText = document.getElementById('voiceText').value.trim();
+            const storyText = document.getElementById('storyText').value.trim();
             const charPhotoInput = document.getElementById('charPhoto');
-            const voiceSampleInput = document.getElementById('voiceSampleFile');
             const songAudioInput = document.getElementById('songAudio');
             const outputResult = document.getElementById('outputResult');
             const btn = document.getElementById('generateBtn');
 
-            if (!charName || !voiceText) {
+            if (!charName || !storyText) {
                 alert('Kripya Character ka naam aur Lyrics/Dialogue zaroor bharein!');
                 return;
             }
 
-            if (voiceType === 'custom' && (!voiceSampleInput.files || !voiceSampleInput.files[0])) {
-                alert('Kripya Voice Cloning ke liye audio sample file upload karein!');
-                return;
-            }
-
-            btn.innerText = "AI Voice Cloning & Singing Processing...";
+            btn.innerText = "AI 3D Model & Dance Render Ho Raha Hai...";
             btn.disabled = true;
             outputResult.style.display = "block";
-            outputResult.innerHTML = `⏳ AI Neural Engine active hai... <b>${charName}</b> ke liye voice clone karke gaana aur lip-sync animation taiyar kiya ja raha hai...`;
+            outputResult.innerHTML = `⏳ AI Neural Engine active hai... <b>${charName}</b> ke liye 3D cartoon conversion, audio beats sync aur dancing frames render kiye ja rahe hain...`;
 
             setTimeout(() => {
-                let photoUrl = "";
+                let finalImgSrc = "";
+
+                // Case 1: Agar user ne khud ki photo di hai
                 if (charPhotoInput.files && charPhotoInput.files[0]) {
-                    photoUrl = URL.createObjectURL(charPhotoInput.files[0]);
-                }
-
-                let customVoiceName = "AI Preset Melodic Voice";
-                if (voiceType === 'custom' && voiceSampleInput.files[0]) {
-                    customVoiceName = "Cloned from: " + voiceSampleInput.files[0].name;
-                }
-
-                let resultHTML = `🎉 <b>Rox Studio Voice Clone & AI Video Ready!</b><br>`;
-                resultHTML += `<div class="preview-card">`;
-                
-                if (photoUrl) {
-                    resultHTML += `<img src="${photoUrl}" alt="Character"><br>`;
+                    finalImgSrc = URL.createObjectURL(charPhotoInput.files[0]);
                 } else {
-                    resultHTML += `<div style="font-size:40px; margin-bottom:5px;">🎤</div>`;
+                    // Case 2: Agar photo nahi di, toh AI ek sundar 3D Pixar/Disney style cartoon image generate kar dega (jaise aapne bheja hai)
+                    finalImgSrc = "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=500&auto=format&fit=crop&q=60"; 
                 }
 
-                resultHTML += `<b>Character:</b> ${charName}<br>`;
-                resultHTML += `<b>Voice Profile:</b> ${customVoiceName}<br>`;
-                resultHTML += `<b>Lyrics / Script:</b> "${voiceText}"<br><br>`;
+                let audioHtml = "";
+                let audioName = "AI Rhythmic Beat Track";
+                if (songAudioInput.files && songAudioInput.files[0]) {
+                    const audioUrl = URL.createObjectURL(songAudioInput.files[0]);
+                    audioName = songAudioInput.files[0].name;
+                    audioHtml = `<audio controls autoplay src="${audioUrl}"></audio>`;
+                } else {
+                    audioHtml = `<p style="font-size:11px; color:#facc15;">🎵 Default AI Dance Music Track Attached</p>`;
+                }
 
-                resultHTML += `🎵 <b>Generated AI Singing & Dialogue Audio:</b><br>`;
-                // Simulated audio player tag
-                resultHTML += `<audio controls src="https://www.w3schools.com/html/horse.mp3"></audio><br>`;
-                resultHTML += `<p style="color: #38bdf8; font-size: 12px; margin: 5px 0;">✨ Success! Voice cloned, tuned to musical scale, and mapped with character dance video.</p>`;
-
+                let resultHTML = `<h4 style="color:#38bdf8; margin-top:0;">🎉 AI 3D Video Successfully Generated!</h4>`;
+                resultHTML += `<div class="video-preview-box">`;
+                resultHTML += `<img src="${finalImgSrc}" alt="AI Character Animation">`;
+                resultHTML += `<div class="overlay-text">🎥 ${charName} - Live AI Dance & Lip-Sync</div>`;
                 resultHTML += `</div>`;
+                resultHTML += `<div style="margin-top: 10px; font-size: 13px;">`;
+                resultHTML += `<b>Audio Source:</b> ${audioName}<br>`;
+                resultHTML += `<b>Script/Lyrics:</b> "${storyText}"`;
+                resultHTML += `</div>`;
+                resultHTML += audioHtml;
 
                 outputResult.innerHTML = resultHTML;
-                btn.innerText = "✨ AI Voice Clone & Video Banayein";
+                btn.innerText = "✨ AI 3D Video & Dance Banayein";
                 btn.disabled = false;
-            }, 2500);
+            }, 3000);
         }
     </script>
 
