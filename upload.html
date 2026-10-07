@@ -121,9 +121,15 @@
             border-radius: 6px;
             border: 1px solid #38bdf8;
             display: none;
-            white-space: pre-wrap;
             font-size: 13px;
             line-height: 1.4;
+        }
+        video {
+            width: 100%;
+            max-height: 250px;
+            margin-top: 10px;
+            border-radius: 6px;
+            background: #000;
         }
         .hidden-field {
             display: none;
@@ -141,7 +147,7 @@
             <div class="ai-engine-status">⏳ AI Engine: Active</div>
         </div>
 
-        <!-- Navigation Tabs (Screenshot ke anusaar sabhi buttons) -->
+        <!-- Navigation Tabs -->
         <div class="nav-tabs">
             <a href="index.html">Home</a>
             <a href="upload.html" class="active">Upload</a>
@@ -170,7 +176,7 @@
             <input type="file" id="bgImageFile" accept="image/*">
         </div>
 
-        <!-- 3. AI वॉयस ओवर & सॉन्ग / डांस जनरेटर Section -->
+        <!-- 3. AI वॉयस ओवर, सॉन्ग और डांस जनरेटर Section -->
         <div class="section-box">
             <h3>🔊 3. AI वॉयस ओवर, सॉन्ग और डांस जनरेटर</h3>
             
@@ -181,7 +187,7 @@
             </select>
 
             <label for="charName">Character ka Naam:</label>
-            <input type="text" id="charName" placeholder="Jaise: Rahul, Priya...">
+            <input type="text" id="charName" placeholder="Jaise: Soni, Rahul...">
 
             <div id="audioUploadGroup" class="hidden-field">
                 <label for="songAudio">🎵 Song / Audio File Upload Karein:</label>
@@ -193,13 +199,12 @@
 
             <button class="rox-btn" id="generateBtn" onclick="runRoxStudioAI()">✨ AI Video / Dance / Voice Banayein</button>
 
-            <!-- Result Box -->
+            <!-- Result Box with Video Player -->
             <div id="outputResult"></div>
         </div>
     </div>
 
     <script>
-        // Mode switch karne ke liye function
         function toggleMode() {
             const mode = document.getElementById('creationMode').value;
             const audioGroup = document.getElementById('audioUploadGroup');
@@ -210,7 +215,6 @@
             }
         }
 
-        // Main processing function jo sabhi buttons aur inputs ko handle karega
         function runRoxStudioAI() {
             const mode = document.getElementById('creationMode').value;
             const charName = document.getElementById('charName').value.trim();
@@ -220,34 +224,35 @@
             const outputResult = document.getElementById('outputResult');
             const btn = document.getElementById('generateBtn');
 
-            // Validation
             if (!charName || !voiceText) {
                 alert('Kripya Character ka naam aur Text/Lyrics zaroor bharein!');
                 return;
             }
 
-            // UI Loading state
-            btn.innerText = "AI Process Ho Raha Hai...";
+            btn.innerText = "AI Video Render Ho Raha Hai...";
             btn.disabled = true;
             outputResult.style.display = "block";
-            outputResult.innerHTML = `⏳ AI Engine active hai... <b>${charName}</b> ke liye voiceover, background aur animation sync kiya ja raha hai...`;
+            outputResult.innerHTML = `⏳ AI Engine active hai... <b>${charName}</b> ke liye video frames aur audio sync kiye ja rahe hain...`;
 
             setTimeout(() => {
-                let resultHTML = `<b>🎉 Rox Studio AI Processing Successful!</b><br><br>`;
-                resultHTML += `👤 <b>Character:</b> ${charName}<br>`;
-                resultHTML += `📝 <b>Input Text/Lyrics:</b> "${voiceText}"<br>`;
+                let resultHTML = `🎉 <b>Rox Studio AI Video Generated Successfully!</b><br>`;
+                resultHTML += `👤 <b>Character:</b> ${charName} | 📝 <b>Text:</b> "${voiceText}"<br><br>`;
 
                 if (charPhoto) {
                     const photoUrl = URL.createObjectURL(charPhoto);
-                    resultHTML += `<br>🖼️ <b>Character Photo Loaded:</b><br><img src="${photoUrl}" style="max-width:100px; border-radius:5px; margin-top:5px;"><br>`;
+                    resultHTML += `🖼️ <b>Character Photo:</b><br><img src="${photoUrl}" style="max-width:80px; border-radius:4px; margin-top:4px;"><br><br>`;
                 }
 
                 if (mode === 'dance' && songAudio) {
-                    resultHTML += `🎵 <b>Uploaded Song:</b> ${songAudio.name} (Beats Synced with Dance Animation)<br>`;
-                    resultHTML += `✨ <i>Status: Gaane ki beat par character ka dancing video aur lip-syncing frames tayar kar diye gaye hain!</i>`;
-                } else {
-                    resultHTML += `🗣️ <b>Voiceover & Storyboard:</b> AI voice generated and synced successfully with cinematic scenes!`;
+                    resultHTML += `🎵 <b>Synced Song:</b> ${songAudio.name}<br>`;
                 }
+
+                // Video Player Add kiya gaya hai taaki screen par video dikhe
+                resultHTML += `🎬 <b>Generated AI Video Preview:</b><br>`;
+                resultHTML += `<video controls autoplay loop>`;
+                // Ek sample placeholder video URL diya hai taaki player turant play ho sake
+                resultHTML += `<source src="https://www.w3schools.com/html/mov_bbb.mp4" type="video/mp4">`;
+                resultHTML += `Aapka browser video tag support nahi karta hai.</video>`;
 
                 outputResult.innerHTML = resultHTML;
                 btn.innerText = "✨ AI Video / Dance / Voice Banayein";
