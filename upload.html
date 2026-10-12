@@ -120,6 +120,14 @@
         }
         .rox-btn-secondary {
             background: linear-gradient(90deg, #059669, #10b981);
+            color: white;
+            padding: 10px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 8px;
         }
         .rox-btn-danger {
             background: linear-gradient(90deg, #dc2626, #ef4444);
@@ -249,6 +257,9 @@
     <script>
         let selfieSegmentation;
         let animationFrameId;
+        let bgImageObj = null;
+        let mediaRecorder;
+        let recordedChunks = [];
 
         // Initialize MediaPipe AI Model
         function initAIModel() {
@@ -286,13 +297,22 @@
 
             html += `<div style="margin-top: 12px; font-size: 12px; text-align: left; background: #0f172a; padding: 10px; border-radius: 6px; border: 1px solid #475569;">`;
             html += `<b style="color:#38bdf8;">⚡ Live Video Controls:</b><br><br>`;
+            
             html += `<label>Dance Karti Ladki Ka Video Select Karein:</label>`;
             html += `<input type="file" accept="video/*" onchange="loadUserVideo(event)" style="margin-bottom:8px;">`;
+
+            // New Background Change Option
+            html += `<label>Naya Background Image Select Karein:</label>`;
+            html += `<input type="file" accept="image/*" onchange="loadCustomBackground(event)" style="margin-bottom:8px;">`;
             
-            html += `<div style="display:flex; justify-content:space-between; align-items:center; background:#1e293b; padding:8px; border-radius:5px;">`;
+            html += `<div style="display:flex; justify-content:space-between; align-items:center; background:#1e293b; padding:8px; border-radius:5px; margin-bottom:8px;">`;
             html += `<span><b>🔊 Added Video Sound:</b></span>`;
             html += `<button class="rox-btn-danger" id="muteBtn" onclick="toggleVideoMute()">🔇 Mute Video Sound</button>`;
             html += `</div>`;
+
+            // Video Recording & Download Controls
+            html += `<button class="rox-btn-secondary" onclick="startRecording()">🔴 Video Record Karein</button>`;
+            html += `<button class="rox-btn" style="background:linear-gradient(90deg, #d97706, #f59e0b); display:none;" id="downloadBtn" onclick="downloadVideo()">⬇️ Video Download Karein</button>`;
             html += `</div>`;
 
             html += audioTagHTML;
@@ -305,7 +325,7 @@
 
             const hiddenVideo = document.getElementById('hiddenVideo');
             hiddenVideo.src = URL.createObjectURL(file);
-            hiddenVideo.muted = true; // By default mute for clean background audio
+            hiddenVideo.muted = true; 
             hiddenVideo.play();
 
             const canvas = document.getElementById('outputCanvas');
@@ -324,7 +344,22 @@
             };
         }
 
-        // MediaPipe AI result renderer (Erase Background, Keep Only Person)
+        // Custom Background Image Loader
+        function loadCustomBackground(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    bgImageObj = img;
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // MediaPipe AI result renderer (Background Change & Cutout)
         function onResults(results) {
             const canvas = document.getElementById('outputCanvas');
             if (!canvas) return;
@@ -333,10 +368,19 @@
             ctx.save();
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            // Draw segment mask (AI detects girl)
-            ctx.drawImage(results.segmentationMask, 0, 0, canvas.width, canvas.height);
+            // Agar user ne background image select ki hai toh pehle use draw karein, warna transparent/default
+            if (bgImageObj) {
+                ctx.drawImage(bgImageObj, 0, 0, canvas.width, canvas.height);
+            }
 
-            // Keep only the person using composite operation
+            // Draw segment mask (AI detects person)
+            ctx.save();
+            ctx.globalCompositeOperation = 'destination-atop';
+            // Agar background image nahi hai toh mask ke peeche default gradient/transparent rahega
+            ctx.drawImage(results.segmentationMask, 0, 0, canvas.width, canvas.height);
+            ctx.restore();
+
+            // Draw the actual person over the background
             ctx.globalCompositeOperation = 'source-in';
             ctx.drawImage(results.image, 0, 0, canvas.width, canvas.height);
 
@@ -357,6 +401,48 @@
                 muteBtn.innerText = "🔇 Mute Video Sound";
                 muteBtn.style.background = "linear-gradient(90deg, #dc2626, #ef4444)";
             }
+        }
+
+        // Canvas Video Recording Function
+        function startRecording() {
+            const canvas = document.getElementById('outputCanvas');
+            const stream = canvas.captureStream(30); // 30 FPS
+            recordedChunks = [];
+
+            try {
+                mediaRecorder = new MediaRecorder(stream, { mimeType: 'video/webm; codecs=vp9' });
+            } catch (e) {
+                mediaRecorder = new MediaRecorder(stream);
+            }
+
+            mediaRecorder.ondataavailable = function(event) {
+                if (event.data.size > 0) {
+                    recordedChunks.push(event.data);
+                }
+            };
+
+            mediaRecorder.onstop = function() {
+                const blob = new Blob(recordedChunks, { type: 'video/webm' });
+                const videoUrl = URL.createObjectURL(blob);
+                const downloadBtn = document.getElementById('downloadBtn');
+                downloadBtn.style.display = "block";
+                downloadBtn.onclick = function() {
+                    const a = document.createElement('a');
+                    a.style.display = 'none';
+                    a.href = videoUrl;
+                    a.download = 'rox-ai-dance-video.webm';
+                    document.body.appendChild(a);
+                    a.click();
+                    setTimeout(() => {
+                        document.body.removeChild(a);
+                        window.URL.revokeObjectURL(videoUrl);
+                    }, 100);
+                };
+                alert("Recording complete! Ab aap 'Video Download Karein' button par click karke video save kar sakte hain.");
+            };
+
+            mediaRecorder.start();
+            alert("Recording shuru ho chuki hai! Video play hone dein, phir jab poori ho jaye toh dobara Studio controls ya kuch seconds baad rok sakte hain (auto record ke liye video ke end hone ka wait karein ya custom stop logic use karein).");
         }
     </script>
 </body>
