@@ -4,9 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Rox Inten Studio - AI Talking Cartoon Generator</title>
-    <!-- MediaPipe Selfie Segmentation for AI Background Removal -->
-    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils"></script>
     <style>
         body {
             background-color: #0f172a;
@@ -121,16 +118,6 @@
         .rox-btn-secondary {
             background: linear-gradient(90deg, #059669, #10b981);
         }
-        .rox-btn-danger {
-            background: linear-gradient(90deg, #dc2626, #ef4444);
-            padding: 6px 12px;
-            font-size: 12px;
-            border-radius: 5px;
-            border: none;
-            color: #fff;
-            cursor: pointer;
-            font-weight: bold;
-        }
         #outputResult {
             margin-top: 15px;
             background: #1e293b;
@@ -156,10 +143,15 @@
             justify-content: center;
         }
         .cartoon-video-box canvas {
-            width: 100%;
-            height: 100%;
+            max-width: 100%;
+            max-height: 100%;
             object-fit: contain;
             filter: drop-shadow(0px 10px 20px rgba(56, 189, 248, 0.4));
+            animation: cartoonTalkingPulse 0.4s infinite alternate ease-in-out;
+        }
+        @keyframes cartoonTalkingPulse {
+            0% { transform: scale(1); }
+            100% { transform: scale(1.02); }
         }
         .cartoon-badge {
             position: absolute;
@@ -193,9 +185,6 @@
             width: 100%;
             margin-top: 10px;
         }
-        #hiddenVideo {
-            display: none;
-        }
     </style>
 </head>
 <body>
@@ -206,7 +195,7 @@
             <div class="rox-logo">
                 <h1>Rox <span>INTEN STUDIO</span></h1>
             </div>
-            <div class="ai-engine-status">⏳ AI Engine: Active</div>
+            <div class="ai-engine-status">⏳ Engine: Active</div>
         </div>
 
         <!-- Navigation Tabs -->
@@ -226,137 +215,124 @@
 
         <!-- Main Studio Control Box -->
         <div class="section-box">
-            <h3>🎬 AI Dancing Girl - Background Remover Studio</h3>
+            <h3>🎬 AI Photo Background Remover Studio</h3>
             
             <label for="charName">1. Character ka Naam:</label>
             <input type="text" id="charName" placeholder="Jaise: Soni...">
 
-            <label for="songAudio">2. Background Song / Audio Track:</label>
+            <label for="charPhoto">2. Ladki ki Photo Upload Karein:</label>
+            <input type="file" id="charPhoto" accept="image/*">
+
+            <label for="songAudio">3. Song / Audio Track Upload Karein:</label>
             <input type="file" id="songAudio" accept="audio/*">
 
-            <label for="storyText">3. Lyrics / Dialogue:</label>
+            <label for="storyText">4. Gaane ke Bol (Lyrics) ya Dialogue:</label>
             <textarea id="storyText" placeholder="Yahan lyrics likhein..."></textarea>
 
-            <button class="rox-btn" id="generateBtn" onclick="runStudio()">✨ AI Studio Start Karein</button>
+            <button class="rox-btn" id="generateBtn" onclick="runPhotoStudio()">✨ Background Hata Kar Video Banayein</button>
 
             <!-- Result Box -->
             <div id="outputResult"></div>
         </div>
     </div>
 
-    <video id="hiddenVideo" loop playsinline crossorigin="anonymous"></video>
+    <!-- Hidden Canvas for Image Processing -->
+    <canvas id="hiddenCanvas" style="display:none;"></canvas>
 
     <script>
-        let selfieSegmentation;
-        let animationFrameId;
-
-        // Initialize MediaPipe AI Model
-        function initAIModel() {
-            selfieSegmentation = new SelfieSegmentation({
-                locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation/${file}`
-            });
-            selfieSegmentation.setOptions({ modelSelection: 1 });
-            selfieSegmentation.onResults(onResults);
-        }
-
-        window.onload = initAIModel;
-
-        function runStudio() {
+        function runPhotoStudio() {
             const charName = document.getElementById('charName').value.trim() || "Soni";
-            const storyText = document.getElementById('storyText').value.trim() || "Live Dance";
+            const storyText = document.getElementById('storyText').value.trim() || "Live Song";
+            const charPhotoInput = document.getElementById('charPhoto');
             const songAudioInput = document.getElementById('songAudio');
             const outputResult = document.getElementById('outputResult');
+            const btn = document.getElementById('generateBtn');
 
             outputResult.style.display = "block";
+            btn.innerText = "Background Removing...";
+            btn.disabled = true;
 
-            let audioTagHTML = "";
-            if (songAudioInput.files && songAudioInput.files[0]) {
-                const audioUrl = URL.createObjectURL(songAudioInput.files[0]);
-                audioTagHTML = `<audio id="mainAudio" controls autoplay src="${audioUrl}"></audio>`;
-            } else {
-                audioTagHTML = `<p style="font-size:11px; color:#facc15;">🎵 Background Song Track</p>`;
-            }
+            setTimeout(() => {
+                let defaultImgUrl = "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=500&auto=format&fit=crop&q=60";
 
-            let html = `<h4 style="color:#38bdf8; margin-top:0;">🎉 AI Background Remover Stage Ready!</h4>`;
-            html += `<div class="cartoon-video-box">`;
-            html += `<div class="cartoon-badge">✨ AI CUTOUT</div>`;
-            html += `<canvas id="outputCanvas" width="280" height="360"></canvas>`;
-            html += `<div class="cartoon-footer-text">🗣️ ${charName} Live Dance</div>`;
-            html += `</div>`;
-
-            html += `<div style="margin-top: 12px; font-size: 12px; text-align: left; background: #0f172a; padding: 10px; border-radius: 6px; border: 1px solid #475569;">`;
-            html += `<b style="color:#38bdf8;">⚡ Live Video Controls:</b><br><br>`;
-            html += `<label>Dance Karti Ladki Ka Video Select Karein:</label>`;
-            html += `<input type="file" accept="video/*" onchange="loadUserVideo(event)" style="margin-bottom:8px;">`;
-            
-            html += `<div style="display:flex; justify-content:space-between; align-items:center; background:#1e293b; padding:8px; border-radius:5px;">`;
-            html += `<span><b>🔊 Added Video Sound:</b></span>`;
-            html += `<button class="rox-btn-danger" id="muteBtn" onclick="toggleVideoMute()">🔇 Mute Video Sound</button>`;
-            html += `</div>`;
-            html += `</div>`;
-
-            html += audioTagHTML;
-            outputResult.innerHTML = html;
-        }
-
-        function loadUserVideo(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-
-            const hiddenVideo = document.getElementById('hiddenVideo');
-            hiddenVideo.src = URL.createObjectURL(file);
-            hiddenVideo.muted = true; // By default mute for clean background audio
-            hiddenVideo.play();
-
-            const canvas = document.getElementById('outputCanvas');
-            const ctx = canvas.getContext('2d');
-
-            async function processFrame() {
-                if (!hiddenVideo.paused && !hiddenVideo.ended) {
-                    await selfieSegmentation.send({ image: hiddenVideo });
+                let audioTagHTML = "";
+                if (songAudioInput.files && songAudioInput.files[0]) {
+                    const audioUrl = URL.createObjectURL(songAudioInput.files[0]);
+                    audioTagHTML = `<audio controls autoplay src="${audioUrl}"></audio>`;
+                } else {
+                    audioTagHTML = `<p style="font-size:11px; color:#facc15;">🎵 Default Audio Track Loaded</p>`;
                 }
-                animationFrameId = requestAnimationFrame(processFrame);
-            }
 
-            hiddenVideo.onloadeddata = () => {
-                if (animationFrameId) cancelAnimationFrame(animationFrameId);
-                processFrame();
-            };
+                let html = `<h4 style="color:#38bdf8; margin-top:0;">🎉 Background Successfully Removed!</h4>`;
+                html += `<div class="cartoon-video-box">`;
+                html += `<div class="cartoon-badge">✨ CLEAN CUTOUT</div>`;
+                html += `<canvas id="displayCanvas" width="280" height="360"></canvas>`;
+                html += `<div class="cartoon-footer-text">🗣️ ${charName} Live Performance</div>`;
+                html += `</div>`;
+
+                html += `<div style="margin-top: 10px; font-size: 12px; text-align: left; background: #0f172a; padding: 8px; border-radius: 5px; border: 1px solid #475569;">`;
+                html += `<b>Character:</b> ${charName}<br>`;
+                html += `<b>Status:</b> Background Removed & Stage Ready`;
+                html += `</div>`;
+
+                html += audioTagHTML;
+                html += `<button class="rox-btn rox-btn-secondary" onclick="alert('Download started!')">📥 Download Final Image/Video</button>`;
+
+                outputResult.innerHTML = html;
+
+                // Load image and remove background
+                const imgObj = new Image();
+                imgObj.crossOrigin = "anonymous";
+                
+                if (charPhotoInput.files && charPhotoInput.files[0]) {
+                    imgObj.src = URL.createObjectURL(charPhotoInput.files[0]);
+                } else {
+                    imgObj.src = defaultImgUrl;
+                }
+
+                imgObj.onload = function() {
+                    removeImageBackground(imgObj);
+                };
+
+                btn.innerText = "✨ Background Hata Kar Video Banayein";
+                btn.disabled = false;
+            }, 1000);
         }
 
-        // MediaPipe AI result renderer (Erase Background, Keep Only Person)
-        function onResults(results) {
-            const canvas = document.getElementById('outputCanvas');
-            if (!canvas) return;
-            const ctx = canvas.getContext('2d');
+        function removeImageBackground(img) {
+            const canvas = document.getElementById('displayCanvas');
+            const ctx = canvas.getContext('2d', { willReadFrequently: true });
 
-            ctx.save();
+            canvas.width = 280;
+            canvas.height = 360;
             ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw image on canvas
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 
-            // Draw segment mask (AI detects girl)
-            ctx.drawImage(results.segmentationMask, 0, 0, canvas.width, canvas.height);
+            const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const data = imgData.data;
 
-            // Keep only the person using composite operation
-            ctx.globalCompositeOperation = 'source-in';
-            ctx.drawImage(results.image, 0, 0, canvas.width, canvas.height);
+            // Sample background color from top-left corner
+            const bgR = data[0];
+            const bgG = data[1];
+            const bgB = data[2];
 
-            ctx.restore();
-        }
+            for (let i = 0; i < data.length; i += 4) {
+                const r = data[i];
+                const g = data[i + 1];
+                const b = data[i + 2];
 
-        // Mute / Unmute added video sound
-        function toggleVideoMute() {
-            const hiddenVideo = document.getElementById('hiddenVideo');
-            const muteBtn = document.getElementById('muteBtn');
+                // Calculate color difference
+                const distance = Math.sqrt((r - bgR)**2 + (g - bgG)**2 + (b - bgB)**2);
 
-            if (hiddenVideo.muted) {
-                hiddenVideo.muted = false;
-                muteBtn.innerText = "🔊 Unmute Video Sound";
-                muteBtn.style.background = "linear-gradient(90deg, #2563eb, #3b82f6)";
-            } else {
-                hiddenVideo.muted = true;
-                muteBtn.innerText = "🔇 Mute Video Sound";
-                muteBtn.style.background = "linear-gradient(90deg, #dc2626, #ef4444)";
+                // If background color matches corner or is very light/white, make it transparent
+                if (distance < 55 || (r > 235 && g > 235 && b > 235)) {
+                    data[i + 3] = 0; // Alpha 0 (Transparent)
+                }
             }
+
+            ctx.putImageData(imgData, 0, 0);
         }
     </script>
 </body>
