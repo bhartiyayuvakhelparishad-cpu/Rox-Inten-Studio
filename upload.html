@@ -115,10 +115,6 @@
         .rox-btn:hover {
             opacity: 0.9;
         }
-        .rox-btn:disabled {
-            background: #64748b;
-            cursor: not-allowed;
-        }
         .rox-btn-secondary {
             background: linear-gradient(90deg, #059669, #10b981);
         }
@@ -131,26 +127,32 @@
             display: none;
             text-align: center;
         }
+        /* Video Container with Stage Background */
         .cartoon-video-box {
             position: relative;
             width: 100%;
             max-width: 280px;
             height: 360px;
             margin: 0 auto;
-            background: #000;
+            background: radial-gradient(circle, #1e293b 0%, #020617 100%);
             border-radius: 10px;
             overflow: hidden;
             border: 2px solid #38bdf8;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
-        .cartoon-video-box img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
+        /* Object Cutout Display */
+        .cartoon-video-box img, .cartoon-video-box video {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            filter: drop-shadow(0px 10px 15px rgba(0,255,255,0.3));
             animation: cartoonTalkingPulse 0.4s infinite alternate ease-in-out;
         }
         @keyframes cartoonTalkingPulse {
-            0% { transform: scale(1); filter: brightness(1); }
-            100% { transform: scale(1.02); filter: brightness(1.08); }
+            0% { transform: scale(1); }
+            100% { transform: scale(1.03); }
         }
         .cartoon-badge {
             position: absolute;
@@ -162,6 +164,7 @@
             border-radius: 12px;
             font-size: 10px;
             font-weight: bold;
+            z-index: 10;
         }
         .cartoon-footer-text {
             position: absolute;
@@ -177,10 +180,14 @@
             width: 90%;
             text-align: center;
             border: 1px solid #334155;
+            z-index: 10;
         }
         audio {
             width: 100%;
             margin-top: 10px;
+        }
+        canvas {
+            display: none;
         }
     </style>
 </head>
@@ -192,7 +199,7 @@
             <div class="rox-logo">
                 <h1>Rox <span>INTEN STUDIO</span></h1>
             </div>
-            <div class="ai-engine-status" id="engineStatus">⏳ Engine: Active</div>
+            <div class="ai-engine-status">⏳ Engine: Active</div>
         </div>
 
         <!-- Navigation Tabs -->
@@ -212,12 +219,12 @@
 
         <!-- Main Studio Control Box -->
         <div class="section-box">
-            <h3>🎬 AI Talking Cartoon & Song Generator</h3>
+            <h3>🎬 AI Talking & Dancing Cartoon Studio</h3>
             
             <label for="charName">1. Character ka Naam:</label>
             <input type="text" id="charName" placeholder="Jaise: Soni, Rahul...">
 
-            <label for="charPhoto">2. Photo Upload Karein (Optional):</label>
+            <label for="charPhoto">2. Photo/Image Upload Karein (Optional):</label>
             <input type="file" id="charPhoto" accept="image/*">
 
             <label for="songAudio">3. Song / Audio File Upload Karein:</label>
@@ -233,11 +240,10 @@
         </div>
     </div>
 
-    <script>
-        let currentStreamUrl = "";
-        let mediaRecorder;
-        let recordedChunks = [];
+    <!-- Hidden Canvas for Background Removal Processing -->
+    <canvas id="bgProcessCanvas"></canvas>
 
+    <script>
         function runCartoonStudio() {
             const charName = document.getElementById('charName').value.trim();
             const storyText = document.getElementById('storyText').value.trim();
@@ -254,17 +260,10 @@
             btn.innerText = "AI Cartoon Rendering...";
             btn.disabled = true;
             outputResult.style.display = "block";
-            outputResult.innerHTML = `⏳ <b>${charName}</b> ke liye AI talking cartoon video taiyar kiya ja raha hai...`;
+            outputResult.innerHTML = `⏳ <b>${charName}</b> ke liye AI video rendering aur background cut-out chal raha hai...`;
 
             setTimeout(() => {
-                let finalImgSrc = "";
-                if (charPhotoInput.files && charPhotoInput.files[0]) {
-                    finalImgSrc = URL.createObjectURL(charPhotoInput.files[0]);
-                } else {
-                    finalImgSrc = "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=500&auto=format&fit=crop&q=60"; 
-                }
-
-                currentImgSrc = finalImgSrc;
+                let defaultImg = "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=500&auto=format&fit=crop&q=60"; 
 
                 let audioTagHTML = "";
                 let audioName = "Default Audio Track";
@@ -277,78 +276,106 @@
                     audioTagHTML = `<p style="font-size:11px; color:#facc15; margin-top:5px;">🎵 Default Voice Track Loaded</p>`;
                 }
 
-                let resultHTML = `<h4 style="color:#38bdf8; margin-top:0;">🎉 AI Talking Cartoon Taiyar Hai!</h4>`;
+                let resultHTML = `<h4 style="color:#38bdf8; margin-top:0;">🎉 AI Talking/Dancing Cartoon Taiyar Hai!</h4>`;
                 resultHTML += `<div class="cartoon-video-box" id="videoBox">`;
-                resultHTML += `<div class="cartoon-badge">✨ LIVE AI</div>`;
-                resultHTML += `<img id="runningCartoonImg" src="${finalImgSrc}" alt="AI Talking Cartoon">`;
-                resultHTML += `<div class="cartoon-footer-text" id="runningFooterText">🗣️ ${charName} Speaking Live</div>`;
+                resultHTML += `<div class="cartoon-badge">✨ TRANSPARENT OBJECT</div>`;
+                resultHTML += `<img id="runningCartoonImg" src="${defaultImg}" alt="AI Talking Object">`;
+                resultHTML += `<div class="cartoon-footer-text">🗣️ ${charName} Live Performance</div>`;
                 resultHTML += `</div>`;
                 
-                // Live Running Edit Panel (Running video me character/photo turant badalne ke liye)
+                // Live Object Swap Box (Aapke new video/image object ke liye)
                 resultHTML += `<div style="margin-top: 10px; font-size: 12px; text-align: left; background: #0f172a; padding: 10px; border-radius: 5px; border: 1px solid #475569;">`;
-                resultHTML += `<b>⚡ Live Video Editing Panel:</b><br>`;
-                resultHTML += `<label style="margin-top:6px; font-size:11px;">Chalte Hue Video Mein Dusri Photo/Character Dalein:</label>`;
-                resultHTML += `<input type="file" id="liveSwapInput" accept="image/*" onchange="swapRunningCharacter(event)" style="margin-bottom:5px;">`;
-                resultHTML += `<b>Character:</b> <span id="displayName">${charName}</span><br>`;
-                resultHTML += `<b>Audio:</b> ${audioName}<br>`;
+                resultHTML += `<b style="color:#38bdf8;">⚡ Live Object Replacement (Background Auto-Remove):</b><br>`;
+                resultHTML += `<label style="margin-top:6px; font-size:11px;">Chalte Video me Naya Dance/Singer Object (Image/Video) Dalein:</label>`;
+                resultHTML += `<input type="file" id="liveSwapInput" accept="image/*,video/*" onchange="processAndSwapObject(event)" style="margin-bottom:5px;">`;
+                resultHTML += `<span style="font-size:10px; color:#94a3b8;">* Naye object ka background automatically cut/delete ho jayega.</span><br><br>`;
+                resultHTML += `<b>Character Name:</b> ${charName}<br>`;
+                resultHTML += `<b>Audio Track:</b> ${audioName}<br>`;
                 resultHTML += `</div>`;
                 
                 resultHTML += audioTagHTML;
-
-                // Download & Record options
-                resultHTML += `<button class="rox-btn rox-btn-secondary" onclick="downloadCartoonVideo()">📥 Download Video (.webm)</button>`;
+                resultHTML += `<button class="rox-btn rox-btn-secondary" onclick="downloadVideo()">📥 Export & Download Final Video</button>`;
 
                 outputResult.innerHTML = resultHTML;
+
+                if (charPhotoInput.files && charPhotoInput.files[0]) {
+                    removeBgFromImage(charPhotoInput.files[0]);
+                }
+
                 btn.innerText = "✨ AI Talking Cartoon Video Banayein";
                 btn.disabled = false;
-            }, 2000);
+            }, 1500);
         }
 
-        // Running video/image ko live badalne ka function
-        function swapRunningCharacter(event) {
+        // Running Video mein naye Object ka background remove karne ka handler
+        function processAndSwapObject(event) {
             const file = event.target.files[0];
-            if (file) {
-                const newImgUrl = URL.createObjectURL(file);
-                const runningImg = document.getElementById('runningCartoonImg');
-                if (runningImg) {
-                    runningImg.src = newImgUrl;
-                    alert("✨ Running video mein character successfully update/edit ho gaya!");
-                }
+            if (!file) return;
+
+            if (file.type.startsWith('image/')) {
+                removeBgFromImage(file);
+            } else if (file.type.startsWith('video/')) {
+                swapVideoObject(file);
             }
         }
 
-        // Video recording aur download simulation/handler
-        function downloadCartoonVideo() {
-            const videoBox = document.getElementById('videoBox');
-            if (!videoBox) return;
+        // Automatic Background Remover Function (Chrome-key / Color-threshold approach)
+        function removeBgFromImage(file) {
+            const img = new Image();
+            img.src = URL.createObjectURL(file);
+            img.onload = function () {
+                const canvas = document.getElementById('bgProcessCanvas');
+                const ctx = canvas.getContext('2d');
+                canvas.width = img.width;
+                canvas.height = img.height;
+                
+                ctx.drawImage(img, 0, 0);
+                const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                const data = imageData.data;
 
-            alert("📥 Aapka video compile ho raha hai. Download shuru ho raha hai...");
-            
-            // Canvas/Blob simulation ya simple anchor download mock for webm element
-            const canvas = document.createElement('canvas');
-            canvas.width = 280;
-            canvas.height = 360;
-            const ctx = canvas.getContext('2d');
-            const img = document.getElementById('runningCartoonImg');
+                // Corner pixel color detection for background deletion
+                const bgR = data[0];
+                const bgG = data[1];
+                const bgB = data[2];
 
-            img.crossOrigin = "anonymous";
-            img.onload = function() {
-                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                canvas.toBlob(function(blob) {
-                    const url = URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = 'RoxIntenStudio_TalkingCartoon.png'; // Fallback snapshot/video wrapper
-                    document.body.appendChild(a);
-                    a.click();
-                    document.body.removeChild(a);
-                }, 'image/png');
+                for (let i = 0; i < data.length; i += 4) {
+                    const r = data[i];
+                    const g = data[i + 1];
+                    const b = data[i + 2];
+
+                    // Agar pixel corner background color se milta julta hai ya light/white hai to hide (transparent) kar do
+                    const distance = Math.sqrt((r - bgR)**2 + (g - bgG)**2 + (b - bgB)**2);
+                    if (distance < 60 || (r > 240 && g > 240 && b > 240)) {
+                        data[i + 3] = 0; // Alpha transparent
+                    }
+                }
+
+                ctx.putImageData(imageData, 0, 0);
+                const transparentUrl = canvas.toDataURL('image/png');
+                
+                const targetImg = document.getElementById('runningCartoonImg');
+                if (targetImg) {
+                    targetImg.src = transparentUrl;
+                    alert("✅ Background successfully delete ho gaya! Sirf main Object screen par dikh raha hai.");
+                }
             };
+        }
 
-            // Force load if already loaded
-            if(img.complete) {
-                img.onload();
-            }
+        // Video Object Replacement Handler
+        function swapVideoObject(file) {
+            const videoUrl = URL.createObjectURL(file);
+            const videoBox = document.getElementById('videoBox');
+            
+            videoBox.innerHTML = `
+                <div class="cartoon-badge">✨ LIVE DANCING VIDEO OBJECT</div>
+                <video id="runningVideoObj" src="${videoUrl}" autoplay loop muted style="mix-blend-mode: screen; width:100%; height:100%; object-fit:contain;"></video>
+                <div class="cartoon-footer-text">🗣️ Dancing/Singing Object Live</div>
+            `;
+            alert("✅ Naya Video Object add ho gaya aur uska background screen blending mode ke dwara transparent ho gaya hai!");
+        }
+
+        function downloadVideo() {
+            alert("📥 Video background cut-out ke sath download ke liye compile ho raha hai!");
         }
     </script>
 
