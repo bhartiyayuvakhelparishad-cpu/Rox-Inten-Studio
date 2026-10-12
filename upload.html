@@ -87,7 +87,7 @@
             font-weight: bold;
             color: #cbd5e1;
         }
-        input[type="text"], textarea, select, input[type="file"] {
+        input[type="text"], textarea, select, input[type="file"], input[type="color"] {
             width: 100%;
             padding: 8px;
             background: #1e293b;
@@ -160,15 +160,43 @@
             overflow: hidden;
             border: 2px solid #38bdf8;
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
         }
         .cartoon-video-box canvas {
             width: 100%;
-            height: 100%;
+            height: 320px;
             object-fit: contain;
             filter: drop-shadow(0px 10px 20px rgba(56, 189, 248, 0.4));
         }
+        /* Scrolling News Ticker Style Patti */
+        .news-ticker-container {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 35px;
+            background: rgba(15, 23, 42, 0.95);
+            border-top: 1px solid #38bdf8;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            z-index: 20;
+        }
+        .news-ticker-text {
+            white-space: nowrap;
+            position: absolute;
+            animation: tickerScroll 12s linear infinite;
+            font-size: 12px;
+            font-weight: bold;
+            color: #ffffff;
+        }
+        @keyframes tickerScroll {
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
+        }
+
         .cartoon-badge {
             position: absolute;
             top: 10px;
@@ -179,22 +207,6 @@
             border-radius: 12px;
             font-size: 10px;
             font-weight: bold;
-            z-index: 10;
-        }
-        .cartoon-footer-text {
-            position: absolute;
-            bottom: 8px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(15, 23, 42, 0.9);
-            color: #38bdf8;
-            padding: 4px 10px;
-            border-radius: 5px;
-            font-size: 11px;
-            font-weight: bold;
-            width: 90%;
-            text-align: center;
-            border: 1px solid #334155;
             z-index: 10;
         }
         audio {
@@ -274,7 +286,7 @@
 
         function runStudio() {
             const charName = document.getElementById('charName').value.trim() || "Soni";
-            const storyText = document.getElementById('storyText').value.trim() || "Live Dance";
+            const storyText = document.getElementById('storyText').value.trim() || "Live Dance Performance";
             const songAudioInput = document.getElementById('songAudio');
             const outputResult = document.getElementById('outputResult');
 
@@ -289,30 +301,39 @@
             }
 
             let html = `<h4 style="color:#38bdf8; margin-top:0;">🎉 AI Background Remover Stage Ready!</h4>`;
-            html += `<div class="cartoon-video-box">`;
+            html += `<div class="cartoon-video-box" id="stageBox">`;
             html += `<div class="cartoon-badge">✨ AI CUTOUT</div>`;
-            html += `<canvas id="outputCanvas" width="280" height="360"></canvas>`;
-            html += `<div class="cartoon-footer-text">🗣️ ${charName} Live Dance</div>`;
+            html += `<canvas id="outputCanvas" width="280" height="320"></canvas>`;
+            html += `<div class="news-ticker-container" id="tickerBg"><div class="news-ticker-text" id="tickerTextContent">📢 Breaking News: ${storyText} - ${charName} Live Dance Studio</div></div>`;
             html += `</div>`;
 
             html += `<div style="margin-top: 12px; font-size: 12px; text-align: left; background: #0f172a; padding: 10px; border-radius: 6px; border: 1px solid #475569;">`;
-            html += `<b style="color:#38bdf8;">⚡ Live Video Controls:</b><br><br>`;
+            html += `<b style="color:#38bdf8;">⚡ Live Video Controls & Options:</b><br><br>`;
             
             html += `<label>Dance Karti Ladki Ka Video Select Karein:</label>`;
             html += `<input type="file" accept="video/*" onchange="loadUserVideo(event)" style="margin-bottom:8px;">`;
 
-            // New Background Change Option
+            // Background Change Option
             html += `<label>Naya Background Image Select Karein:</label>`;
             html += `<input type="file" accept="image/*" onchange="loadCustomBackground(event)" style="margin-bottom:8px;">`;
+
+            // Ticker Customization (News Patti Text & Color)
+            html += `<label>Samachar / News Patti Text:</label>`;
+            html += `<input type="text" id="customNewsInput" value="📢 Breaking News: ${storyText}" oninput="updateNewsTicker(this.value)" style="margin-bottom:8px;">`;
+
+            html += `<label>News Patti Background Color:</label>`;
+            html += `<input type="color" id="tickerColorInput" value="#0f172a" onchange="updateTickerColor(this.value)" style="margin-bottom:8px; height:35px; padding:2px; cursor:pointer;">`;
             
             html += `<div style="display:flex; justify-content:space-between; align-items:center; background:#1e293b; padding:8px; border-radius:5px; margin-bottom:8px;">`;
             html += `<span><b>🔊 Added Video Sound:</b></span>`;
             html += `<button class="rox-btn-danger" id="muteBtn" onclick="toggleVideoMute()">🔇 Mute Video Sound</button>`;
             html += `</div>`;
 
-            // Video Recording & Download Controls
-            html += `<button class="rox-btn-secondary" onclick="startRecording()">🔴 Video Record Karein</button>`;
-            html += `<button class="rox-btn" style="background:linear-gradient(90deg, #d97706, #f59e0b); display:none;" id="downloadBtn" onclick="downloadVideo()">⬇️ Video Download Karein</button>`;
+            // Manual Video Recording & Stop/Download Controls
+            html += `<div style="display:flex; gap:8px;">`;
+            html += `<button class="rox-btn-secondary" id="startRecBtn" onclick="startRecording()">🔴 Record Start</button>`;
+            html += `<button class="rox-btn-danger" id="stopRecBtn" onclick="stopRecording()" disabled>⏹️ Record Stop & Download</button>`;
+            html += `</div>`;
             html += `</div>`;
 
             html += audioTagHTML;
@@ -359,6 +380,22 @@
             reader.readAsDataURL(file);
         }
 
+        // Live News Ticker Text Update
+        function updateNewsTicker(val) {
+            const tickerText = document.getElementById('tickerTextContent');
+            if(tickerText) {
+                tickerText.innerText = val;
+            }
+        }
+
+        // Live News Ticker Background Color Update
+        function updateTickerColor(colorHex) {
+            const tickerBg = document.getElementById('tickerBg');
+            if(tickerBg) {
+                tickerBg.style.background = colorHex;
+            }
+        }
+
         // MediaPipe AI result renderer (Background Change & Cutout)
         function onResults(results) {
             const canvas = document.getElementById('outputCanvas');
@@ -368,19 +405,15 @@
             ctx.save();
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            // Agar user ne background image select ki hai toh pehle use draw karein, warna transparent/default
             if (bgImageObj) {
                 ctx.drawImage(bgImageObj, 0, 0, canvas.width, canvas.height);
             }
 
-            // Draw segment mask (AI detects person)
             ctx.save();
             ctx.globalCompositeOperation = 'destination-atop';
-            // Agar background image nahi hai toh mask ke peeche default gradient/transparent rahega
             ctx.drawImage(results.segmentationMask, 0, 0, canvas.width, canvas.height);
             ctx.restore();
 
-            // Draw the actual person over the background
             ctx.globalCompositeOperation = 'source-in';
             ctx.drawImage(results.image, 0, 0, canvas.width, canvas.height);
 
@@ -403,10 +436,10 @@
             }
         }
 
-        // Canvas Video Recording Function
+        // Manual Recording Functions
         function startRecording() {
             const canvas = document.getElementById('outputCanvas');
-            const stream = canvas.captureStream(30); // 30 FPS
+            const stream = canvas.captureStream(30);
             recordedChunks = [];
 
             try {
@@ -424,25 +457,31 @@
             mediaRecorder.onstop = function() {
                 const blob = new Blob(recordedChunks, { type: 'video/webm' });
                 const videoUrl = URL.createObjectURL(blob);
-                const downloadBtn = document.getElementById('downloadBtn');
-                downloadBtn.style.display = "block";
-                downloadBtn.onclick = function() {
-                    const a = document.createElement('a');
-                    a.style.display = 'none';
-                    a.href = videoUrl;
-                    a.download = 'rox-ai-dance-video.webm';
-                    document.body.appendChild(a);
-                    a.click();
-                    setTimeout(() => {
-                        document.body.removeChild(a);
-                        window.URL.revokeObjectURL(videoUrl);
-                    }, 100);
-                };
-                alert("Recording complete! Ab aap 'Video Download Karein' button par click karke video save kar sakte hain.");
+                const a = document.createElement('a');
+                a.style.display = 'none';
+                a.href = videoUrl;
+                a.download = 'rox-ai-dance-news-video.webm';
+                document.body.appendChild(a);
+                a.click();
+                setTimeout(() => {
+                    document.body.removeChild(a);
+                    window.URL.revokeObjectURL(videoUrl);
+                }, 100);
+                alert("Recording successful! Aapki video download ho chuki hai.");
             };
 
             mediaRecorder.start();
-            alert("Recording shuru ho chuki hai! Video play hone dein, phir jab poori ho jaye toh dobara Studio controls ya kuch seconds baad rok sakte hain (auto record ke liye video ke end hone ka wait karein ya custom stop logic use karein).");
+            document.getElementById('startRecBtn').disabled = true;
+            document.getElementById('stopRecBtn').disabled = false;
+            alert("Recording shuru ho chuki hai! Ab aap apni marzi se video chalne dein aur jab rokna ho toh 'Record Stop & Download' button dabayein.");
+        }
+
+        function stopRecording() {
+            if (mediaRecorder && mediaRecorder.state !== "inactive") {
+                mediaRecorder.stop();
+            }
+            document.getElementById('startRecBtn').disabled = false;
+            document.getElementById('stopRecBtn').disabled = true;
         }
     </script>
 </body>
